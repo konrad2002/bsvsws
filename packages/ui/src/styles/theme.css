@@ -1,0 +1,8 @@
+/*
+ * Shared design tokens (imported by apps/web after `@import "tailwindcss"`).
+ * Tokens follow the existing bsv-sws.de identity and are decided by the project
+ * owner – do not invent a new color/typography system (spec §9.5).
+ */
+@theme {
+  /* Placeholder – replace with values derived from bsv-sws.de. */
+}

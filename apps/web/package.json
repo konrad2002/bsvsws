@@ -1,0 +1,34 @@
+{
+  "name": "@bsv-sws/web",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --port 3000",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "typecheck": "next typegen && tsc --noEmit"
+  },
+  "dependencies": {
+    "@bsv-sws/directus": "workspace:*",
+    "@bsv-sws/shared": "workspace:*",
+    "@bsv-sws/ui": "workspace:*",
+    "@bsv-sws/validation": "workspace:*",
+    "next": "16.4.4",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "server-only": "^0.0.1",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@tailwindcss/turbopack": "^4",
+    "@types/node": "^24.19.2",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.4.4",
+    "sass": "^1.107.1",
+    "tailwindcss": "^4",
+    "typescript": "~6.0.3"
+  }
+}

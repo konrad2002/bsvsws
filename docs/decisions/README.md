@@ -1,0 +1,12 @@
+# Decision Log
+
+Technical decisions made within the approved architecture (spec §16.2 items need owner approval
+first). Add newest entries at the bottom. Open items from spec §19 should be recorded here once decided.
+
+| #   | Date       | Decision                                                                                                                                                  | Rationale                                                                                                                                   |
+| --- | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | 2026-11-03 | Pin TypeScript to `~6.0`.                                                                                                                                 | typescript-eslint (used by `eslint-config-next` and the api) supports only `<6.1`; TS 7 is the new native compiler. Revisit when supported. |
+| 2   | 2026-11-03 | Library packages (`shared`, `validation`, `directus`) compile with `tsc` to `dist/`; `ui` is source-only and transpiled by Next.js (`transpilePackages`). | Lets the Node api run plain JS; avoids a bundler. Turbo builds dependencies first (`^build`).                                               |
+| 3   | 2026-11-03 | Single `compose.yml` for all environments; web/api behind the `app` profile so local dev can run them on the host.                                        | Spec §14.2: shared service definitions, no separate architectures.                                                                          |
+| 4   | 2026-11-03 | PostgreSQL port is not published, not even locally.                                                                                                       | Enforces "only Directus accesses PostgreSQL"; agents use the Directus API instead.                                                          |
+| 5   | 2026-11-03 | Fixed calendar identifiers are English (`swimming`, `water_polo`, `artistic_swimming`, `masters`, `general`) with German labels in `packages/shared`.     | Spec §1.2: identifiers English, labels German.                                                                                              |

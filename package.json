@@ -1,0 +1,27 @@
+{
+  "name": "bsv-sws",
+  "private": true,
+  "description": "Website of the Bezirksschwimmverband Südwestsachsen (BSV-SWS)",
+  "packageManager": "pnpm@12.14.0",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "stack:up": "docker compose --env-file .env -f infrastructure/compose/compose.yml up -d",
+    "stack:up:app": "docker compose --env-file .env -f infrastructure/compose/compose.yml --profile app up -d --build",
+    "stack:down": "docker compose --env-file .env -f infrastructure/compose/compose.yml --profile app down",
+    "stack:logs": "docker compose --env-file .env -f infrastructure/compose/compose.yml logs -f"
+  },
+  "devDependencies": {
+    "prettier": "^3.9.10",
+    "turbo": "^2.11.10",
+    "typescript": "~6.0.3"
+  }
+}

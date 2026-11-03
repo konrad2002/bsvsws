@@ -1,0 +1,10 @@
+@import "tailwindcss";
+@import "@bsv-sws/ui/styles/theme.css";
+
+/* Include class names used by shared UI components. */
+@source "../../../../packages/ui/src";
+
+body {
+  background: #fff;
+  color: #171717;
+}

@@ -1,0 +1,103 @@
+# Shared service definitions for all environments (spec §14.2).
+# Local dev:  pnpm stack:up   → postgres + directus (web/api run on the host via `pnpm dev`)
+# Full stack: pnpm stack:up:app → additionally builds and runs the api + web images
+# Environment-specific differences belong in env files / deployment overrides, not here.
+name: bsv-sws
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    # Intentionally no published port: only Directus accesses PostgreSQL (spec §3.1).
+
+  directus:
+    build:
+      context: ../..
+      dockerfile: infrastructure/docker/directus.Dockerfile
+    image: bsv-sws/directus:local
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:${DIRECTUS_PORT:-8055}:8055"
+    environment:
+      SECRET: ${DIRECTUS_SECRET}
+      PUBLIC_URL: ${DIRECTUS_PUBLIC_URL}
+      DB_CLIENT: pg
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_DATABASE: ${POSTGRES_DB}
+      DB_USER: ${POSTGRES_USER}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      ADMIN_EMAIL: ${DIRECTUS_ADMIN_EMAIL}
+      ADMIN_PASSWORD: ${DIRECTUS_ADMIN_PASSWORD}
+      ADMIN_TOKEN: ${DIRECTUS_ADMIN_TOKEN:-}
+      WEBSOCKETS_ENABLED: "false"
+      EXTENSIONS_AUTO_RELOAD: "true"
+      EMAIL_TRANSPORT: smtp
+      EMAIL_FROM: ${EMAIL_FROM}
+      EMAIL_SMTP_HOST: ${SMTP_HOST}
+      EMAIL_SMTP_PORT: ${SMTP_PORT}
+      EMAIL_SMTP_SECURE: ${SMTP_SECURE}
+      EMAIL_SMTP_USER: ${SMTP_USER}
+      EMAIL_SMTP_PASSWORD: ${SMTP_PASSWORD}
+    volumes:
+      - directus-uploads:/directus/uploads
+      # Live-mount extensions for development; the image also contains them.
+      - ../../directus/extensions:/directus/extensions
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8055/server/ping || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+
+  api:
+    profiles: ["app"]
+    build:
+      context: ../..
+      dockerfile: infrastructure/docker/api.Dockerfile
+    image: bsv-sws/api:local
+    restart: unless-stopped
+    depends_on:
+      directus:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:${API_PORT:-4000}:4000"
+    environment:
+      NODE_ENV: production
+      API_PORT: 4000
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      DIRECTUS_URL: http://directus:8055
+      DIRECTUS_SERVICE_TOKEN: ${DIRECTUS_SERVICE_TOKEN:-}
+
+  web:
+    profiles: ["app"]
+    build:
+      context: ../..
+      dockerfile: infrastructure/docker/web.Dockerfile
+    image: bsv-sws/web:local
+    restart: unless-stopped
+    depends_on:
+      - api
+    ports:
+      - "127.0.0.1:${WEB_PORT:-3000}:3000"
+    environment:
+      DIRECTUS_URL: http://directus:8055
+      API_URL: http://api:4000
+
+volumes:
+  postgres-data:
+  directus-uploads:
