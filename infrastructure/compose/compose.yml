@@ -44,6 +44,11 @@ services:
       ADMIN_EMAIL: ${DIRECTUS_ADMIN_EMAIL}
       ADMIN_PASSWORD: ${DIRECTUS_ADMIN_PASSWORD}
       ADMIN_TOKEN: ${DIRECTUS_ADMIN_TOKEN:-}
+      # Session lifetimes – REFRESH_TOKEN_TTL must match REFRESH_MAX_AGE_SECONDS in apps/web/src/lib/auth/tokens.ts
+      ACCESS_TOKEN_TTL: 15m
+      REFRESH_TOKEN_TTL: 7d
+      # Directus licence (Open Innovation Grant). Locally the key may instead be stored via Studio.
+      LICENSE_KEY: ${DIRECTUS_LICENSE_KEY:-}
       WEBSOCKETS_ENABLED: "false"
       EXTENSIONS_AUTO_RELOAD: "true"
       EMAIL_TRANSPORT: smtp
@@ -81,7 +86,7 @@ services:
       API_PORT: 4000
       LOG_LEVEL: ${LOG_LEVEL:-info}
       DIRECTUS_URL: http://directus:8055
-      DIRECTUS_SERVICE_TOKEN: ${DIRECTUS_SERVICE_TOKEN:-}
+      DIRECTUS_SERVICE_TOKEN: ${DIRECTUS_SERVICE_TOKEN}
 
   web:
     profiles: ["app"]
@@ -97,6 +102,8 @@ services:
     environment:
       DIRECTUS_URL: http://directus:8055
       API_URL: http://api:4000
+      # Local production-like run over plain HTTP; deployed environments keep the default (secure).
+      SESSION_COOKIE_SECURE: ${SESSION_COOKIE_SECURE:-false}
 
 volumes:
   postgres-data:

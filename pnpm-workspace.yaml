@@ -1,6 +1,7 @@
 packages:
   - apps/*
   - packages/*
+  - directus/tools
 
 allowBuilds:
   sharp: true

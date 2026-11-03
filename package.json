@@ -1,7 +1,7 @@
 {
   "name": "bsv-sws",
   "private": true,
-  "description": "Website of the Bezirksschwimmverband Südwestsachsen (BSV-SWS)",
+  "description": "Website of the Bezirksschwimmverband S\u00fcdwestsachsen (BSV-SWS)",
   "packageManager": "pnpm@12.14.0",
   "engines": {
     "node": ">=24"
@@ -17,7 +17,10 @@
     "stack:up": "docker compose --env-file .env -f infrastructure/compose/compose.yml up -d",
     "stack:up:app": "docker compose --env-file .env -f infrastructure/compose/compose.yml --profile app up -d --build",
     "stack:down": "docker compose --env-file .env -f infrastructure/compose/compose.yml --profile app down",
-    "stack:logs": "docker compose --env-file .env -f infrastructure/compose/compose.yml logs -f"
+    "stack:logs": "docker compose --env-file .env -f infrastructure/compose/compose.yml logs -f",
+    "directus:apply": "pnpm --filter @bsv-sws/directus-tools apply",
+    "directus:snapshot": "pnpm --filter @bsv-sws/directus-tools snapshot",
+    "directus:seed": "pnpm --filter @bsv-sws/directus-tools seed:dev"
   },
   "devDependencies": {
     "prettier": "^3.9.10",

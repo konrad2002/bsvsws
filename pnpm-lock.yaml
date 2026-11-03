@@ -187,6 +187,9 @@ importers:
       '@bsv-sws/validation':
         specifier: workspace:*
         version: link:../../packages/validation
+      '@directus/sdk':
+        specifier: ^27.1.0
+        version: 27.1.0
       fastify:
         specifier: ^5.12.8
         version: 5.12.8
@@ -230,6 +233,9 @@ importers:
       '@bsv-sws/validation':
         specifier: workspace:*
         version: link:../../packages/validation
+      '@directus/sdk':
+        specifier: ^27.1.0
+        version: 27.1.0
       next:
         specifier: 16.4.4
         version: 16.4.4(@babel/core@7.29.7(supports-color@7.2.0))(@types/node@24.19.2)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(sass@1.107.1)
@@ -273,6 +279,46 @@ importers:
       typescript:
         specifier: ~6.0.3
         version: 6.0.3
+      vitest:
+        specifier: ^5.1.0
+        version: 5.1.0(@types/node@24.19.2)(vite@8.3.5(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.107.1)(tsx@4.23.15))
+
+  directus/tools:
+    dependencies:
+      '@bsv-sws/directus':
+        specifier: workspace:*
+        version: link:../../packages/directus
+      '@bsv-sws/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
+      '@directus/sdk':
+        specifier: ^27.1.0
+        version: 27.1.0
+      zod:
+        specifier: ^4.6.7
+        version: 4.6.7
+    devDependencies:
+      '@eslint/js':
+        specifier: ^9
+        version: 9.39.5
+      '@types/node':
+        specifier: ^24.19.2
+        version: 24.19.2
+      eslint:
+        specifier: ^9
+        version: 9.39.5(jiti@2.7.0)(supports-color@7.2.0)
+      tsx:
+        specifier: ^4.23.15
+        version: 4.23.15
+      typescript:
+        specifier: ~6.0.3
+        version: 6.0.3
+      typescript-eslint:
+        specifier: ^8.72.1
+        version: 8.72.1(eslint@9.39.5(jiti@2.7.0)(supports-color@7.2.0))(supports-color@7.2.0)(typescript@6.0.3)
+      vitest:
+        specifier: ^5.1.0
+        version: 5.1.0(@types/node@24.19.2)(vite@8.3.5(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(sass@1.107.1)(tsx@4.23.15))
 
   packages/directus:
     dependencies:

@@ -23,3 +23,7 @@ export const EVENT_CALENDAR_LABELS: Record<EventCalendar, string> = {
 /** Organizer types (spec §7.1). */
 export const ORGANIZER_TYPES = ["club", "federation", "external"] as const;
 export type OrganizerType = (typeof ORGANIZER_TYPES)[number];
+
+/** Sports offered by clubs (same set as the sport calendars, without "general"). */
+export const SPORTS = ["swimming", "water_polo", "artistic_swimming", "masters"] as const;
+export type Sport = (typeof SPORTS)[number];

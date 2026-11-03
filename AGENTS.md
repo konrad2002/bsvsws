@@ -30,14 +30,18 @@ re-derive requirements from memory — read the sections relevant to your task:
 | Open technical decisions (to be documented when decided)                      | §19          |
 | Q&A decision record                                                           | §20          |
 
-Other docs: [docs/README.md](docs/README.md) (index), [docs/09-infrastructure.md](docs/09-infrastructure.md)
-(local setup, Docker, CI), [docs/decisions/](docs/decisions/README.md) (decision log),
-[docs/DIRECTUS_API.md](docs/DIRECTUS_API.md) (agent access to local Directus).
+Implementation docs (read before touching the area): [docs/README.md](docs/README.md) (index),
+[02-architecture](docs/02-architecture.md) (auth/session design, Directus licence),
+[03-data-model](docs/03-data-model.md), [04-authorization](docs/04-authorization.md),
+[09-infrastructure](docs/09-infrastructure.md), [10-testing](docs/10-testing.md),
+[decisions](docs/decisions/README.md), [DIRECTUS_API](docs/DIRECTUS_API.md) (agent access to local Directus).
 
 ## Current status
 
-Phase 0 (repository foundation) is in place. **Next: Phase 1** — Directus schema and
-authentication foundation. Do not start later phases prematurely. Keep this section current.
+Phases 0 (foundation) and 1 (Directus schema: clubs, memberships, invitations, audit log;
+roles/policies; login/session; Fastify auth + authorization rules) are done. **Next: Phase 2** —
+clubs, invitations and memberships workflows. Do not start later phases prematurely. Keep this
+section current.
 
 ## Repository map
 
@@ -50,7 +54,9 @@ packages/shared     Framework-free constants/types (roles, statuses, calendars, 
 packages/validation Zod schemas shared by web and api.
 packages/directus   Typed Directus SDK client factories + DirectusSchema type.
 packages/ui         Reusable shadcn/ui components and design tokens (source-only, no layouts).
-directus/           extensions/ (baked into image), snapshots/ (schema), seed/ (minimal seed).
+directus/           snapshots/schema.json (schema source of truth), extensions/ (unused by decision),
+                    tools/ (@bsv-sws/directus-tools: apply schema + roles/policies/permissions
+                    from src/access.ts, snapshot export, local seed).
 infrastructure/     docker/ (Dockerfiles), compose/ (shared compose file), scripts/, deployment/.
 docs/               Specification and technical documentation.
 ```
@@ -61,6 +67,9 @@ docs/               Specification and technical documentation.
 cp .env.example .env     # first time; then set real local secrets
 pnpm install
 pnpm stack:up            # postgres + directus in Docker (Directus on http://localhost:8055)
+pnpm directus:apply      # apply settings, schema snapshot, roles/policies/permissions, service account
+pnpm directus:seed       # local test club + accounts (see docs/10-testing.md)
+pnpm directus:snapshot   # after schema changes: export snapshot, then commit it
 pnpm dev                 # web :3000 + api :4000 on the host, packages in watch mode
 pnpm lint | pnpm typecheck | pnpm test | pnpm build | pnpm format
 pnpm stack:up:app        # full stack incl. web/api images (production-like)
@@ -100,8 +109,18 @@ Run `pnpm lint && pnpm typecheck && pnpm test` before declaring work done (CI ru
 - **Next.js 16 differs from older versions** — consult `apps/web/AGENTS.md` and
   `node_modules/next/dist/docs/` before writing Next code.
 - **TypeScript is pinned to `~6.0`** because typescript-eslint does not support TS 7 yet.
-- **Directus schema** changes must be reproducible: commit snapshots to `directus/snapshots/`
-  and document the model in docs. Never change production schema by hand.
+- **Directus schema** changes must be reproducible: export with `pnpm directus:snapshot`, put
+  access changes in `directus/tools/src/access.ts`, update `packages/directus/src/schema.ts` and
+  `docs/03-data-model.md`. Never change production schema by hand. No Directus extensions
+  (owner decision) — use unique constraints and nested (transactional) writes instead.
+- **Directus licence:** custom permission rules (row/field restrictions) are licence-gated, so
+  all Directus permissions stay unrestricted (enforced by `assertNoCustomRules`); fine-grained
+  rules belong in Fastify (`docs/04-authorization.md`).
+- **Auth in Fastify:** `auth.authenticate(request.headers.authorization)` → `AuthContext`, then
+  `authorize(canX(ctx, …))` from `src/modules/auth/authorization.ts`. Club context comes from
+  `ctx.membership`, never from request input. Errors: `AppError` helpers in `src/lib/errors.ts`.
+- **Next.js data access:** server-only; call Fastify via `apiFetch()` and get the user via
+  `getCurrentUser()`/`requireUser()`. Session reads must sit inside `<Suspense>` (Cache Components).
 - **Tests:** Vitest, colocated as `*.test.ts`. Prioritise authorization boundaries, membership,
   invitations and event state transitions (spec §15). Skip trivial presentation tests.
 - **Docs:** update affected docs in the same change; record non-trivial technical decisions

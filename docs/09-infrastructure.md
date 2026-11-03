@@ -22,15 +22,33 @@ terminates TLS.
 cp .env.example .env        # replace placeholder secrets (e.g. openssl rand -hex 32)
 pnpm install
 pnpm stack:up               # postgres + directus
+pnpm directus:apply         # settings, schema, roles/policies/permissions, service account
+pnpm directus:seed          # optional: demo club + test accounts (docs/10-testing.md)
 pnpm dev                    # web + api on the host with hot reload
 ```
 
 - Directus Studio: http://localhost:8055 (login with `DIRECTUS_ADMIN_EMAIL` / `DIRECTUS_ADMIN_PASSWORD`).
+- Directus licence (Open Innovation Grant): set `DIRECTUS_LICENSE_KEY`, or enter the key once in
+  Studio (stored in the local database). The OIG allows up to 5 activations (local, test,
+  production, …). Without it the instance runs on the restricted Core tier
+  ([02-architecture.md](02-architecture.md#directus-licence)).
 - API health: http://localhost:4000/health, readiness incl. Directus: `/health/ready`.
 - The api reads the root `.env` (`tsx --env-file-if-exists`); Next.js reads `apps/web/.env.local`
   if present and otherwise uses defaults pointing at localhost.
 - `pnpm stack:up:app` builds and runs web and api images as well (production-like check).
 - Uploads and database live in named Docker volumes (`postgres-data`, `directus-uploads`).
+
+## Directus configuration tooling (`directus/tools`)
+
+| Command                  | Effect                                                                                                                                                                                                                                                                              |
+| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `pnpm directus:apply`    | Idempotently applies project settings, `directus/snapshots/schema.json`, policies + permissions, roles and the service account (token = `DIRECTUS_SERVICE_TOKEN`). Flags: `--dry-run`, `--allow-destructive` (pass via `pnpm --filter @bsv-sws/directus-tools apply -- --dry-run`). |
+| `pnpm directus:snapshot` | Exports the current schema to `directus/snapshots/schema.json`.                                                                                                                                                                                                                     |
+| `pnpm directus:seed`     | Local-only demo data and test accounts. Refuses non-localhost targets.                                                                                                                                                                                                              |
+
+Uses `DIRECTUS_URL` and `DIRECTUS_SETUP_TOKEN` (deployed environments) or `DIRECTUS_ADMIN_TOKEN`
+(local). In deployments, run `directus:apply` as an explicit, reviewed step — never automatically
+with `--allow-destructive`.
 
 ## Images
 

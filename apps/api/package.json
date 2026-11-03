@@ -16,6 +16,7 @@
     "@bsv-sws/directus": "workspace:*",
     "@bsv-sws/shared": "workspace:*",
     "@bsv-sws/validation": "workspace:*",
+    "@directus/sdk": "^27.1.0",
     "fastify": "^5.12.8",
     "zod": "^4.6.7"
   },

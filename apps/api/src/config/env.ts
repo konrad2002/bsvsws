@@ -11,11 +11,10 @@ const envSchema = z.object({
   LOG_LEVEL: z.enum(["fatal", "error", "warn", "info", "debug", "trace"]).default("info"),
   /** Internal Directus URL as reachable from the API. */
   DIRECTUS_URL: z.url(),
-  /** Static token of the restricted Fastify service account (Phase 1). */
-  DIRECTUS_SERVICE_TOKEN: z.preprocess(
-    (v) => (v === "" ? undefined : v),
-    z.string().min(1).optional(),
-  ),
+  /** Static token of the restricted Fastify service account (created by `pnpm directus:apply`). */
+  DIRECTUS_SERVICE_TOKEN: z
+    .string({ error: "DIRECTUS_SERVICE_TOKEN is required" })
+    .min(32, "DIRECTUS_SERVICE_TOKEN must be at least 32 characters"),
 });
 
 export type Env = z.infer<typeof envSchema>;
