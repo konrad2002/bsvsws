@@ -76,7 +76,21 @@ export interface Invitation {
   accepted_by: Uuid | null;
   revoked_at: Timestamp | null;
   revoked_by: Uuid | null;
+  /** Not-yet-verified account registered through this invitation. */
+  registered_user: Uuid | DirectusUserRecord | null;
+  /** HMAC of the current 6-digit verification code. */
+  verification_code_hash: string | null;
+  verification_expires_at: Timestamp | null;
+  verification_attempts: number;
+  email_sent_at: Timestamp | null;
   date_created: Timestamp | null;
+  date_updated: Timestamp | null;
+}
+
+/** Singleton: recipients of federation notification emails (spec §10.3). */
+export interface NotificationSettings {
+  id: number;
+  representative_joined_recipients: string[] | null;
   date_updated: Timestamp | null;
 }
 
@@ -98,5 +112,6 @@ export interface DirectusSchema {
   club_memberships: ClubMembership[];
   invitations: Invitation[];
   audit_logs: AuditLog[];
+  notification_settings: NotificationSettings;
   directus_users: DirectusUserRecord[];
 }

@@ -27,6 +27,59 @@ jobs:
       - run: pnpm test
       - run: pnpm build
 
+  integration:
+    name: Integration tests (real Directus)
+    runs-on: ubuntu-latest
+    needs: checks
+    # Throwaway CI credentials – not secrets, the containers only live for this job.
+    env:
+      DIRECTUS_URL: http://localhost:8055
+      DIRECTUS_ADMIN_TOKEN: ci-admin-token-0123456789abcdef0123456789
+      DIRECTUS_SERVICE_TOKEN: ci-service-token-0123456789abcdef0123456789
+      APP_SECRET: ci-app-secret-0123456789abcdef0123456789abc
+      DEV_SEED_PASSWORD: ci-seed-password
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: directus
+          POSTGRES_USER: directus
+          POSTGRES_PASSWORD: directus
+        options: >-
+          --health-cmd "pg_isready -U directus" --health-interval 5s --health-timeout 5s --health-retries 20
+      directus:
+        image: directus/directus:12.6.0
+        ports:
+          - 8055:8055
+        env:
+          SECRET: ci-directus-secret
+          PUBLIC_URL: http://localhost:8055
+          DB_CLIENT: pg
+          DB_HOST: postgres
+          DB_PORT: 5432
+          DB_DATABASE: directus
+          DB_USER: directus
+          DB_PASSWORD: directus
+          ADMIN_EMAIL: admin@example.com
+          ADMIN_PASSWORD: ci-admin-password
+          ADMIN_TOKEN: ci-admin-token-0123456789abcdef0123456789
+        options: >-
+          --health-cmd "wget -qO- http://127.0.0.1:8055/server/ping || exit 1"
+          --health-interval 10s --health-timeout 5s --health-retries 30 --health-start-period 30s
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm turbo run build --filter=@bsv-sws/api^...
+      # Unlicensed instance: also proves the setup works without the Directus licence.
+      - run: pnpm directus:apply
+      - run: pnpm directus:seed
+      - run: pnpm --filter @bsv-sws/api test:integration
+
   images:
     name: Build Docker images
     runs-on: ubuntu-latest

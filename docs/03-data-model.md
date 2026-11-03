@@ -69,12 +69,23 @@ ended memberships don't conflict. Every write that changes `status` must set/cle
 | `issued_by`                  | M2O `directus_users`, required       |                                                                             |
 | `accepted_at`, `accepted_by` |                                      |                                                                             |
 | `revoked_at`, `revoked_by`   |                                      |                                                                             |
+| `registered_user`            | M2O `directus_users`, set null       | Unverified account created during registration (Phase 2)                    |
+| `verification_code_hash`     | string, hidden                       | HMAC-SHA256 (`APP_SECRET`, invitation id) of the current 6-digit code       |
+| `verification_expires_at`    | timestamp                            | Code validity (15 min)                                                      |
+| `verification_attempts`      | integer, default 0                   | Wrong attempts for the current code (max. 5)                                |
+| `email_sent_at`              | timestamp                            | Last successful invitation email (empty = link only shared manually)        |
 
-**Atomic acceptance (Phase 2):** create the membership with a nested update of its
+**Atomic acceptance** (implemented in Phase 2, see [05-workflows.md](05-workflows.md)): create the membership with a nested update of its
 `invitation` (`{ invitation: { id, status: "accepted", … } }`) in **one** Directus request.
 Directus runs nested relational writes in a single transaction, and the unique
 `club_memberships.invitation` and `active_user` constraints make a second acceptance or a second
 active membership fail at the database level.
+
+### `notification_settings` (singleton)
+
+| Field                              | Type       | Notes                                                                                                                                                                   |
+| ---------------------------------- | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `representative_joined_recipients` | csv (tags) | Emails notified when a new representative joins (spec §5.7). Independent of permissions; edited by federation in Studio. Phase 3 adds the event review recipients here. |
 
 ### `audit_logs`
 

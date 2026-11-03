@@ -9,7 +9,7 @@
  * Idempotent: safe to run repeatedly. Flags: --dry-run, --allow-destructive
  */
 import {
-  createPermissions,
+  createPermission,
   createPolicy,
   createRole,
   createUser,
@@ -37,6 +37,7 @@ import {
   SERVICE_USER,
   SETTINGS,
   type PermissionDef,
+  type PermissionRule,
 } from "./access.js";
 import { adminClient, env, SNAPSHOT_PATH } from "./env.js";
 import { findDestructiveChanges, summarizeDiff, type SchemaDiff } from "./schema-diff.js";
@@ -73,6 +74,24 @@ async function applySchema() {
   log("Schema: applied");
 }
 
+function toPayload(policy: string, d: PermissionDef, rule: PermissionRule = d) {
+  return {
+    policy,
+    collection: d.collection,
+    action: d.action,
+    fields: rule.fields,
+    permissions: rule.permissions ?? null,
+    validation: rule.validation ?? null,
+    presets: rule.presets ?? null,
+  };
+}
+
+function isLicenceRestricted(error: unknown) {
+  return (error as { errors?: { extensions?: { code?: string } }[] })?.errors?.some(
+    (e) => e.extensions?.code === "RESOURCE_RESTRICTED",
+  );
+}
+
 async function replacePermissions(
   policy: string,
   defs: PermissionDef[],
@@ -87,22 +106,26 @@ async function replacePermissions(
   );
   const ids = existing.map((p) => p.id as unknown as string);
   if (!dryRun && ids.length > 0) await client.request(deletePermissions(ids as never));
-  if (!dryRun && defs.length > 0) {
-    await client.request(
-      createPermissions(
-        defs.map((d) => ({
-          policy,
-          collection: d.collection,
-          action: d.action,
-          fields: d.fields,
-          permissions: d.permissions ?? null,
-          validation: d.validation ?? null,
-          presets: d.presets ?? null,
-        })) as never,
-      ),
-    );
+  let hardened = 0;
+  for (const d of defs) {
+    if (dryRun) continue;
+    if (d.hardened) {
+      try {
+        await client.request(createPermission(toPayload(policy, d, d.hardened) as never));
+        hardened += 1;
+        continue;
+      } catch (error) {
+        if (!isLicenceRestricted(error)) throw error;
+        console.warn(
+          `WARNING: no Directus licence – ${d.action} on ${d.collection} installed WITHOUT hardening.`,
+        );
+      }
+    }
+    await client.request(createPermission(toPayload(policy, d) as never));
   }
-  log(`Permissions of policy ${policy}: ${ids.length} replaced by ${defs.length}`);
+  log(
+    `Permissions of policy ${policy}: ${ids.length} replaced by ${defs.length} (${hardened} hardened)`,
+  );
 }
 
 async function applyPolicies() {

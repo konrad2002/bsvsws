@@ -142,6 +142,41 @@
       "schema": {
         "name": "invitations"
       }
+    },
+    {
+      "collection": "notification_settings",
+      "meta": {
+        "accountability": "all",
+        "archive_app_filter": true,
+        "archive_field": null,
+        "archive_value": null,
+        "autosave_revision_interval": null,
+        "collapse": "open",
+        "collection": "notification_settings",
+        "color": null,
+        "display_template": null,
+        "group": null,
+        "hidden": false,
+        "icon": "notifications",
+        "item_duplication_fields": null,
+        "note": "E-Mail-Empfänger für Verbandsbenachrichtigungen. Unabhängig von Berechtigungen (spec §10.3).",
+        "preview_url": null,
+        "singleton": true,
+        "sort": null,
+        "sort_field": null,
+        "status": "active",
+        "translations": [
+          {
+            "language": "de-DE",
+            "translation": "Benachrichtigungen"
+          }
+        ],
+        "unarchive_value": null,
+        "versioning": false
+      },
+      "schema": {
+        "name": "notification_settings"
+      }
     }
   ],
   "fields": [
@@ -2798,6 +2833,370 @@
         "foreign_key_table": null,
         "foreign_key_column": null
       }
+    },
+    {
+      "collection": "invitations",
+      "field": "registered_user",
+      "type": "uuid",
+      "meta": {
+        "collection": "invitations",
+        "conditions": null,
+        "display": "related-values",
+        "display_options": {
+          "template": "{{first_name}} {{last_name}} ({{email}})"
+        },
+        "field": "registered_user",
+        "group": null,
+        "hidden": false,
+        "interface": "select-dropdown-m2o",
+        "note": "Noch unbestätigtes Konto, das über diese Einladung registriert wurde.",
+        "options": {
+          "template": "{{first_name}} {{last_name}} ({{email}})"
+        },
+        "readonly": true,
+        "required": false,
+        "searchable": true,
+        "sort": 15,
+        "special": [
+          "m2o"
+        ],
+        "translations": null,
+        "validation": null,
+        "validation_message": null,
+        "width": "half"
+      },
+      "schema": {
+        "name": "registered_user",
+        "table": "invitations",
+        "data_type": "uuid",
+        "default_value": null,
+        "max_length": null,
+        "numeric_precision": null,
+        "numeric_scale": null,
+        "is_nullable": true,
+        "is_unique": false,
+        "is_indexed": false,
+        "is_primary_key": false,
+        "is_generated": false,
+        "generation_expression": null,
+        "has_auto_increment": false,
+        "foreign_key_table": "directus_users",
+        "foreign_key_column": "id"
+      }
+    },
+    {
+      "collection": "invitations",
+      "field": "verification_code_hash",
+      "type": "string",
+      "meta": {
+        "collection": "invitations",
+        "conditions": null,
+        "display": null,
+        "display_options": null,
+        "field": "verification_code_hash",
+        "group": null,
+        "hidden": true,
+        "interface": "input",
+        "note": "HMAC des 6-stelligen Bestätigungscodes.",
+        "options": null,
+        "readonly": true,
+        "required": false,
+        "searchable": true,
+        "sort": 16,
+        "special": null,
+        "translations": null,
+        "validation": null,
+        "validation_message": null,
+        "width": "full"
+      },
+      "schema": {
+        "name": "verification_code_hash",
+        "table": "invitations",
+        "data_type": "character varying",
+        "default_value": null,
+        "max_length": 255,
+        "numeric_precision": null,
+        "numeric_scale": null,
+        "is_nullable": true,
+        "is_unique": false,
+        "is_indexed": false,
+        "is_primary_key": false,
+        "is_generated": false,
+        "generation_expression": null,
+        "has_auto_increment": false,
+        "foreign_key_table": null,
+        "foreign_key_column": null
+      }
+    },
+    {
+      "collection": "invitations",
+      "field": "verification_expires_at",
+      "type": "timestamp",
+      "meta": {
+        "collection": "invitations",
+        "conditions": null,
+        "display": null,
+        "display_options": null,
+        "field": "verification_expires_at",
+        "group": null,
+        "hidden": true,
+        "interface": "datetime",
+        "note": null,
+        "options": null,
+        "readonly": true,
+        "required": false,
+        "searchable": true,
+        "sort": 17,
+        "special": null,
+        "translations": null,
+        "validation": null,
+        "validation_message": null,
+        "width": "half"
+      },
+      "schema": {
+        "name": "verification_expires_at",
+        "table": "invitations",
+        "data_type": "timestamp with time zone",
+        "default_value": null,
+        "max_length": null,
+        "numeric_precision": null,
+        "numeric_scale": null,
+        "is_nullable": true,
+        "is_unique": false,
+        "is_indexed": false,
+        "is_primary_key": false,
+        "is_generated": false,
+        "generation_expression": null,
+        "has_auto_increment": false,
+        "foreign_key_table": null,
+        "foreign_key_column": null
+      }
+    },
+    {
+      "collection": "invitations",
+      "field": "verification_attempts",
+      "type": "integer",
+      "meta": {
+        "collection": "invitations",
+        "conditions": null,
+        "display": null,
+        "display_options": null,
+        "field": "verification_attempts",
+        "group": null,
+        "hidden": true,
+        "interface": "input",
+        "note": "Fehlversuche für den aktuellen Code",
+        "options": null,
+        "readonly": true,
+        "required": false,
+        "searchable": true,
+        "sort": 18,
+        "special": null,
+        "translations": null,
+        "validation": null,
+        "validation_message": null,
+        "width": "half"
+      },
+      "schema": {
+        "name": "verification_attempts",
+        "table": "invitations",
+        "data_type": "integer",
+        "default_value": 0,
+        "max_length": null,
+        "numeric_precision": 32,
+        "numeric_scale": 0,
+        "is_nullable": false,
+        "is_unique": false,
+        "is_indexed": false,
+        "is_primary_key": false,
+        "is_generated": false,
+        "generation_expression": null,
+        "has_auto_increment": false,
+        "foreign_key_table": null,
+        "foreign_key_column": null
+      }
+    },
+    {
+      "collection": "invitations",
+      "field": "email_sent_at",
+      "type": "timestamp",
+      "meta": {
+        "collection": "invitations",
+        "conditions": null,
+        "display": null,
+        "display_options": null,
+        "field": "email_sent_at",
+        "group": null,
+        "hidden": false,
+        "interface": "datetime",
+        "note": "Zuletzt per E-Mail versendet (leer = nur Link geteilt)",
+        "options": null,
+        "readonly": true,
+        "required": false,
+        "searchable": true,
+        "sort": 19,
+        "special": null,
+        "translations": null,
+        "validation": null,
+        "validation_message": null,
+        "width": "half"
+      },
+      "schema": {
+        "name": "email_sent_at",
+        "table": "invitations",
+        "data_type": "timestamp with time zone",
+        "default_value": null,
+        "max_length": null,
+        "numeric_precision": null,
+        "numeric_scale": null,
+        "is_nullable": true,
+        "is_unique": false,
+        "is_indexed": false,
+        "is_primary_key": false,
+        "is_generated": false,
+        "generation_expression": null,
+        "has_auto_increment": false,
+        "foreign_key_table": null,
+        "foreign_key_column": null
+      }
+    },
+    {
+      "collection": "notification_settings",
+      "field": "id",
+      "type": "integer",
+      "meta": {
+        "collection": "notification_settings",
+        "conditions": null,
+        "display": null,
+        "display_options": null,
+        "field": "id",
+        "group": null,
+        "hidden": true,
+        "interface": "input",
+        "note": null,
+        "options": null,
+        "readonly": true,
+        "required": false,
+        "searchable": true,
+        "sort": 1,
+        "special": null,
+        "translations": null,
+        "validation": null,
+        "validation_message": null,
+        "width": "full"
+      },
+      "schema": {
+        "name": "id",
+        "table": "notification_settings",
+        "data_type": "integer",
+        "default_value": "nextval('notification_settings_id_seq'::regclass)",
+        "max_length": null,
+        "numeric_precision": 32,
+        "numeric_scale": 0,
+        "is_nullable": false,
+        "is_unique": true,
+        "is_indexed": false,
+        "is_primary_key": true,
+        "is_generated": false,
+        "generation_expression": null,
+        "has_auto_increment": true,
+        "foreign_key_table": null,
+        "foreign_key_column": null
+      }
+    },
+    {
+      "collection": "notification_settings",
+      "field": "representative_joined_recipients",
+      "type": "csv",
+      "meta": {
+        "collection": "notification_settings",
+        "conditions": null,
+        "display": null,
+        "display_options": null,
+        "field": "representative_joined_recipients",
+        "group": null,
+        "hidden": false,
+        "interface": "tags",
+        "note": "Erhalten eine E-Mail, wenn ein neuer Vereinsvertreter eine Einladung annimmt.",
+        "options": {
+          "placeholder": "E-Mail-Adresse eingeben und Enter drücken"
+        },
+        "readonly": false,
+        "required": false,
+        "searchable": true,
+        "sort": 2,
+        "special": [
+          "cast-csv"
+        ],
+        "translations": null,
+        "validation": null,
+        "validation_message": null,
+        "width": "full"
+      },
+      "schema": {
+        "name": "representative_joined_recipients",
+        "table": "notification_settings",
+        "data_type": "text",
+        "default_value": null,
+        "max_length": null,
+        "numeric_precision": null,
+        "numeric_scale": null,
+        "is_nullable": true,
+        "is_unique": false,
+        "is_indexed": false,
+        "is_primary_key": false,
+        "is_generated": false,
+        "generation_expression": null,
+        "has_auto_increment": false,
+        "foreign_key_table": null,
+        "foreign_key_column": null
+      }
+    },
+    {
+      "collection": "notification_settings",
+      "field": "date_updated",
+      "type": "timestamp",
+      "meta": {
+        "collection": "notification_settings",
+        "conditions": null,
+        "display": null,
+        "display_options": null,
+        "field": "date_updated",
+        "group": null,
+        "hidden": true,
+        "interface": "datetime",
+        "note": null,
+        "options": null,
+        "readonly": true,
+        "required": false,
+        "searchable": true,
+        "sort": 3,
+        "special": [
+          "date-updated"
+        ],
+        "translations": null,
+        "validation": null,
+        "validation_message": null,
+        "width": "full"
+      },
+      "schema": {
+        "name": "date_updated",
+        "table": "notification_settings",
+        "data_type": "timestamp with time zone",
+        "default_value": null,
+        "max_length": null,
+        "numeric_precision": null,
+        "numeric_scale": null,
+        "is_nullable": true,
+        "is_unique": false,
+        "is_indexed": false,
+        "is_primary_key": false,
+        "is_generated": false,
+        "generation_expression": null,
+        "has_auto_increment": false,
+        "foreign_key_table": null,
+        "foreign_key_column": null
+      }
     }
   ],
   "systemFields": [
@@ -3183,6 +3582,31 @@
         "foreign_key_table": "directus_users",
         "foreign_key_column": "id",
         "constraint_name": "invitations_revoked_by_foreign",
+        "on_update": "NO ACTION",
+        "on_delete": "SET NULL"
+      }
+    },
+    {
+      "collection": "invitations",
+      "field": "registered_user",
+      "related_collection": "directus_users",
+      "meta": {
+        "junction_field": null,
+        "many_collection": "invitations",
+        "many_field": "registered_user",
+        "one_allowed_collections": null,
+        "one_collection": "directus_users",
+        "one_collection_field": null,
+        "one_deselect_action": "nullify",
+        "one_field": null,
+        "sort_field": null
+      },
+      "schema": {
+        "table": "invitations",
+        "column": "registered_user",
+        "foreign_key_table": "directus_users",
+        "foreign_key_column": "id",
+        "constraint_name": "invitations_registered_user_foreign",
         "on_update": "NO ACTION",
         "on_delete": "SET NULL"
       }

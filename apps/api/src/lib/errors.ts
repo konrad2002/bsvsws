@@ -20,9 +20,14 @@ export class AppError extends Error {
 
 export const unauthorized = (message = "Bitte melde dich an.") =>
   new AppError(401, "UNAUTHORIZED", message);
-export const forbidden = (message = "Dafür fehlt dir die Berechtigung.") =>
-  new AppError(403, "FORBIDDEN", message);
+export const forbidden = (message = "Dafür fehlt dir die Berechtigung.", code = "FORBIDDEN") =>
+  new AppError(403, code, message);
 export const notFound = (message = "Nicht gefunden.") => new AppError(404, "NOT_FOUND", message);
+export const conflict = (code: string, message: string, details?: unknown) =>
+  new AppError(409, code, message, details);
+export const gone = (code: string, message: string) => new AppError(410, code, message);
+export const badRequest = (code: string, message: string, details?: unknown) =>
+  new AppError(400, code, message, details);
 export const validationError = (error: z.ZodError) =>
   new AppError(400, "VALIDATION_ERROR", "Die Eingaben sind ungültig.", z.flattenError(error));
 
@@ -42,10 +47,21 @@ export function registerErrorHandler(app: FastifyInstance) {
     }
     const status = error.statusCode ?? 500;
     if (status >= 500) request.log.error(error);
+    const message =
+      status === 429
+        ? "Zu viele Anfragen. Bitte versuche es später erneut."
+        : status >= 500
+          ? "Interner Fehler."
+          : error.message;
     return reply.code(status).send({
       error: {
-        code: status >= 500 ? "INTERNAL_ERROR" : (error.code ?? "BAD_REQUEST"),
-        message: status >= 500 ? "Interner Fehler." : error.message,
+        code:
+          status === 429
+            ? "RATE_LIMITED"
+            : status >= 500
+              ? "INTERNAL_ERROR"
+              : (error.code ?? "BAD_REQUEST"),
+        message,
       },
     });
   });

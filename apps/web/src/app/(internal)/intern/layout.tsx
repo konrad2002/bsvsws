@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import { logoutAction } from "@/lib/auth/actions";
 import { requireUser } from "@/lib/auth/current-user";
+import { InternalNav } from "@/components/internal/internal-nav";
 
 /**
  * Internal area layout: public header + additional sub-navigation (spec §9.3).
@@ -21,7 +22,9 @@ export default function InternalLayout({ children }: { children: React.ReactNode
           aria-label="Interne Navigation"
           className="border-b p-4 md:w-56 md:border-r md:border-b-0"
         >
-          {/* Internal sub-navigation (role-dependent, Phase 6) */}
+          <Suspense>
+            <InternalNav />
+          </Suspense>
         </nav>
         <main className="flex-1 px-4 py-6">
           <Suspense fallback={<p>Wird geladen …</p>}>{children}</Suspense>

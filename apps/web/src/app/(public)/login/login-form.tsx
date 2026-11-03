@@ -3,7 +3,7 @@
 import { useActionState } from "react";
 import { loginAction, type LoginState } from "@/lib/auth/actions";
 
-export function LoginForm({ next }: { next: string }) {
+export function LoginForm({ next, defaultEmail }: { next: string; defaultEmail?: string }) {
   const [state, formAction, pending] = useActionState<LoginState, FormData>(loginAction, {});
 
   return (
@@ -16,7 +16,7 @@ export function LoginForm({ next }: { next: string }) {
           type="email"
           autoComplete="email"
           required
-          defaultValue={state.email}
+          defaultValue={state.email ?? defaultEmail}
           className="rounded border px-3 py-2"
         />
       </label>

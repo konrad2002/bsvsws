@@ -41,8 +41,25 @@ flowchart LR
   reverse proxy (Phase 8). Directus additionally suspends an account after 10 failed logins
   (`auth_login_attempts`).
 - Directus' own IP rate limiter stays disabled: all logins arrive from the Next.js server IP.
-- Fastify endpoints that send emails or change state get per-user limits when they are added
-  (Phase 2).
+- Fastify (`@fastify/rate-limit`, in memory, per route): invitation creation 30/h, resend 20/h,
+  public token endpoints (lookup 60, register 5, resend code 3, verify 10, accept 10 per 15 min,
+  keyed by client IP + token). Next.js forwards the browser IP as `x-client-ip`; Fastify trusts
+  it because only the Next.js server can reach Fastify. Verification codes additionally lock
+  after 5 wrong attempts.
+
+### Email
+
+Fastify sends application emails itself (`nodemailer`, `apps/api/src/lib/mailer.ts`, German
+plain-text templates in `modules/notifications/templates.ts`) via SMTP: IONOS in deployments,
+**Mailpit** locally (UI http://localhost:8025). Emails are sent only after the operation
+succeeded; see [05-workflows.md](05-workflows.md#notifications-spec-102) for failure handling.
+Directus uses the same SMTP settings for its own mails (e.g. password reset).
+
+### Files
+
+Directus files are **not** publicly readable (protected documents will live there). Club logos
+are uploaded through Fastify and served via `GET /clubs/:id/logo` → Next.js route
+`/api/clubs/:id/logo`.
 
 ### API conventions
 

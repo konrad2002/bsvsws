@@ -33,15 +33,16 @@ re-derive requirements from memory — read the sections relevant to your task:
 Implementation docs (read before touching the area): [docs/README.md](docs/README.md) (index),
 [02-architecture](docs/02-architecture.md) (auth/session design, Directus licence),
 [03-data-model](docs/03-data-model.md), [04-authorization](docs/04-authorization.md),
+[05-workflows](docs/05-workflows.md), [06-api-specification](docs/06-api-specification.md),
 [09-infrastructure](docs/09-infrastructure.md), [10-testing](docs/10-testing.md),
 [decisions](docs/decisions/README.md), [DIRECTUS_API](docs/DIRECTUS_API.md) (agent access to local Directus).
 
 ## Current status
 
-Phases 0 (foundation) and 1 (Directus schema: clubs, memberships, invitations, audit log;
-roles/policies; login/session; Fastify auth + authorization rules) are done. **Next: Phase 2** —
-clubs, invitations and memberships workflows. Do not start later phases prematurely. Keep this
-section current.
+Phases 0 (foundation), 1 (schema, roles/policies, login/session, Fastify auth) and 2 (club
+administration, invitations with 6-digit email verification, memberships, notifications, audit
+log) are done. **Next: Phase 3** — event management and approval workflow. Do not start later
+phases prematurely. Keep this section current.
 
 ## Repository map
 
@@ -75,6 +76,8 @@ pnpm lint | pnpm typecheck | pnpm test | pnpm build | pnpm format
 pnpm stack:up:app        # full stack incl. web/api images (production-like)
 pnpm stack:down
 pnpm --filter @bsv-sws/api test   # single package
+pnpm --filter @bsv-sws/api test:integration   # API vs. real local Directus (needs apply + seed)
+pnpm --filter @bsv-sws/web test:e2e           # Playwright journeys (needs pnpm dev; mails via Mailpit :8025)
 ```
 
 Run `pnpm lint && pnpm typecheck && pnpm test` before declaring work done (CI runs these plus
@@ -121,6 +124,13 @@ Run `pnpm lint && pnpm typecheck && pnpm test` before declaring work done (CI ru
   `ctx.membership`, never from request input. Errors: `AppError` helpers in `src/lib/errors.ts`.
 - **Next.js data access:** server-only; call Fastify via `apiFetch()` and get the user via
   `getCurrentUser()`/`requireUser()`. Session reads must sit inside `<Suspense>` (Cache Components).
+  Mutations are server actions returning `ActionState` (`lib/action-state.ts`) and call
+  `refresh()` from `next/cache`. Next 16 keeps visited pages mounted (hidden) – in Playwright use
+  role-based locators, not `getByLabel`.
+- **Domain modules (Fastify):** `modules/<domain>/<domain>-rules.ts` (pure, unit-tested) +
+  `<domain>-service.ts` (Directus I/O via the service client, audit, emails). Multi-step writes
+  that must be atomic use one nested Directus write; invariants are unique constraints.
+- **Emails** are German plain text in `modules/notifications/templates.ts`, sent after success.
 - **Tests:** Vitest, colocated as `*.test.ts`. Prioritise authorization boundaries, membership,
   invitations and event state transitions (spec §15). Skip trivial presentation tests.
 - **Docs:** update affected docs in the same change; record non-trivial technical decisions

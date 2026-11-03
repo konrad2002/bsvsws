@@ -4,7 +4,11 @@ import { buildApp } from "./app.js";
 import { loadEnv } from "./config/env.js";
 import type { IdentityProvider } from "./modules/auth/identity-provider.js";
 
-const env = loadEnv({ DIRECTUS_URL: "http://127.0.0.1:1", DIRECTUS_SERVICE_TOKEN: "x".repeat(32) });
+const env = loadEnv({
+  DIRECTUS_URL: "http://127.0.0.1:1",
+  DIRECTUS_SERVICE_TOKEN: "x".repeat(32),
+  APP_SECRET: "s".repeat(32),
+});
 
 const identity: IdentityProvider = {
   verifyToken: async (token) =>

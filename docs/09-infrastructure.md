@@ -4,12 +4,13 @@ Covers local development, Docker images, Compose and CI. Requirements: spec §14
 
 ## Services
 
-| Service    | Image                                                                                 | Port (local)  | Notes                              |
-| ---------- | ------------------------------------------------------------------------------------- | ------------- | ---------------------------------- |
-| `postgres` | `postgres:17-alpine`                                                                  | not published | Only Directus connects (spec §3.1) |
-| `directus` | `infrastructure/docker/directus.Dockerfile` (Directus 12.6.0 + `directus/extensions`) | 8055          | CMS, auth, files                   |
-| `api`      | `infrastructure/docker/api.Dockerfile`                                                | 4000          | Compose profile `app`              |
-| `web`      | `infrastructure/docker/web.Dockerfile` (Next.js standalone)                           | 3000          | Compose profile `app`              |
+| Service    | Image                                                                                 | Port (local)           | Notes                              |
+| ---------- | ------------------------------------------------------------------------------------- | ---------------------- | ---------------------------------- |
+| `mailpit`  | `axllent/mailpit:v1.32` (profile `dev`, local only)                                   | 8025 (UI), 1025 (SMTP) | Catches all email                  |
+| `postgres` | `postgres:17-alpine`                                                                  | not published          | Only Directus connects (spec §3.1) |
+| `directus` | `infrastructure/docker/directus.Dockerfile` (Directus 12.6.0 + `directus/extensions`) | 8055                   | CMS, auth, files                   |
+| `api`      | `infrastructure/docker/api.Dockerfile`                                                | 4000                   | Compose profile `app`              |
+| `web`      | `infrastructure/docker/web.Dockerfile` (Next.js standalone)                           | 3000                   | Compose profile `app`              |
 
 All services share one definition file, `infrastructure/compose/compose.yml`. Environment
 differences come from env files / deployment secrets, not separate architectures. Published
@@ -28,6 +29,10 @@ pnpm dev                    # web + api on the host with hot reload
 ```
 
 - Directus Studio: http://localhost:8055 (login with `DIRECTUS_ADMIN_EMAIL` / `DIRECTUS_ADMIN_PASSWORD`).
+- Mailpit (dev profile, started by `pnpm stack:up`): all outgoing email lands at
+  http://localhost:8025. The API on the host uses `SMTP_HOST=localhost:1025`; containers use
+  `DIRECTUS_SMTP_HOST=mailpit`. Deployed environments don't start the `dev` profile and set the
+  IONOS SMTP variables instead.
 - Directus licence (Open Innovation Grant): set `DIRECTUS_LICENSE_KEY`, or enter the key once in
   Studio (stored in the local database). The OIG allows up to 5 activations (local, test,
   production, …). Without it the instance runs on the restricted Core tier

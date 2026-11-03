@@ -4,9 +4,11 @@
  *
  * Licence note: field/row restrictions ("custom permission rules") need a Directus
  * licence; without it Directus rejects them on create and ignores them on read.
- * To stay licence-independent, ALL permissions here are unrestricted (all fields,
- * no filter). Directus always conceals password/token fields. Fine-grained rules
- * live in Fastify. `assertNoCustomRules` (tested) enforces this.
+ * To stay licence-independent, every BASE permission is unrestricted (all fields,
+ * no filter); `assertNoCustomRules` (tested) enforces this. Directus always
+ * conceals password/token fields. Fine-grained rules live in Fastify.
+ * Exception: `hardened` variants (security-critical writes) are installed instead
+ * of the base rule when the instance is licensed – see PermissionDef.hardened.
  *
  * Remember: Directus permissions are a second layer. Business authorization for
  * sensitive workflows is enforced in Fastify (spec §3.5).
@@ -17,15 +19,27 @@ import {
   DIRECTUS_SERVICE_USER_ID,
 } from "@bsv-sws/directus";
 
+const BENUTZER_ONLY = { role: { _eq: DIRECTUS_ROLE_IDS.user } };
+
 export type PermissionAction = "create" | "read" | "update" | "delete";
 
-export interface PermissionDef {
-  collection: string;
-  action: PermissionAction;
+export interface PermissionRule {
   fields: string[];
   permissions?: Record<string, unknown> | null;
   validation?: Record<string, unknown> | null;
   presets?: Record<string, unknown> | null;
+}
+
+export interface PermissionDef extends PermissionRule {
+  collection: string;
+  action: PermissionAction;
+  /**
+   * Stricter variant installed instead of the base rule when the instance is
+   * licensed (custom rules available). The base rule must stay unrestricted.
+   * If the licence lapses, Directus ignores the hardened rule → the action is
+   * denied (fails closed) until `directus:apply` reinstalls the base rule.
+   */
+  hardened?: PermissionRule;
 }
 
 export interface PolicyDef {
@@ -52,7 +66,9 @@ export const MANAGED_COLLECTIONS = [
   "club_memberships",
   "invitations",
   "audit_logs",
+  "notification_settings",
   "directus_users",
+  "directus_files",
 ] as const;
 
 const all = ["*"];
@@ -76,6 +92,10 @@ export const POLICIES: PolicyDef[] = [
       read("invitations"),
       read("audit_logs"),
       read("directus_users"),
+      read("directus_files"),
+      // Configuration only (no workflow data): recipients of federation emails.
+      read("notification_settings"),
+      write("notification_settings", "update"),
     ],
   },
   {
@@ -98,7 +118,29 @@ export const POLICIES: PolicyDef[] = [
       write("invitations", "update"),
       read("audit_logs"),
       write("audit_logs", "create"),
+      read("notification_settings"),
+      // Registration via invitation creates/activates accounts (role is set by Fastify).
       read("directus_users"),
+      {
+        ...write("directus_users", "create"),
+        // Licensed: may only create "Benutzer" accounts with registration fields.
+        hardened: {
+          fields: ["first_name", "last_name", "email", "password", "phone", "status", "role"],
+          validation: BENUTZER_ONLY,
+          presets: { role: DIRECTUS_ROLE_IDS.user },
+        },
+      },
+      {
+        ...write("directus_users", "update"),
+        // Licensed: never role/email, and only accounts that are "Benutzer" (no admin/federation takeover).
+        hardened: {
+          fields: ["first_name", "last_name", "password", "phone", "status"],
+          permissions: BENUTZER_ONLY,
+        },
+      },
+      // Club logo uploads.
+      read("directus_files"),
+      write("directus_files", "create"),
     ],
   },
 ];
@@ -155,7 +197,7 @@ export const SETTINGS = {
   auth_password_policy: "/^.{10,}$/",
 };
 
-/** Throws if any permission uses a licence-gated custom rule (field list or filter). */
+/** Throws if any BASE permission uses a licence-gated custom rule (hardened variants may). */
 export function assertNoCustomRules(defs: PermissionDef[]): void {
   for (const d of defs) {
     const restrictedFields = !(d.fields.length === 1 && d.fields[0] === "*");
