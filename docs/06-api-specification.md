@@ -96,3 +96,16 @@ or personal data). Rate limit per client IP.
 | `GET /public/events/:slug`                          | → `PublicEventDetail`                                                                                               | `404` for unknown/unpublished/deleted; 120/min                                   |
 | `GET /public/calendar-filters`                      | → `{ categories, clubs }` (active only)                                                                             | 120/min                                                                          |
 | `GET /public/calendar/:feed.ics`                    | `feed` = `alle` \| `schwimmen` \| `wasserball` \| `synchronschwimmen` \| `masters` \| `allgemein` → `text/calendar` | past 12 months + all future events; `cache-control: public, max-age=900`; 60/min |
+
+## Public content (no authentication, Phase 5)
+
+| Method & path                                  | Response                                                      | Notes                                                          |
+| ---------------------------------------------- | ------------------------------------------------------------- | -------------------------------------------------------------- |
+| `GET /public/navigation`                       | `{ main: NavItem[], footer: NavItem[] }`                      | visible tree for visitors                                      |
+| `GET /public/pages?path=/verband/vorstand`     | `PublicPage` (sanitized `contentHtml`, breadcrumbs, children) | `404` if missing/unpublished/not public                        |
+| `GET /public/articles?category&page&pageSize`  | `{ items, page, pageCount, total }`                           | published and due only, newest first, `pageSize ≤ 50`          |
+| `GET /public/articles/:slug`                   | `ArticleDetail`                                               | `404` for drafts, archived, scheduled                          |
+| `GET /public/article-categories`               | `{ name, slug }[]`                                            | active only                                                    |
+| `GET /public/clubs`, `GET /public/clubs/:slug` | `PublicClub[]`, `PublicClubDetail`                            | active clubs only                                              |
+| `GET /public/redirects?path&query`             | `{ to, permanent }`                                           | `404` if none                                                  |
+| `GET /public/media/:fileId?width`              | file                                                          | only files in "Öffentliche Medien"; `width` 16–2400 for images |

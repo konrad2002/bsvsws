@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import "@/styles/rich-content.scss";
 
 export const metadata: Metadata = {
   title: {

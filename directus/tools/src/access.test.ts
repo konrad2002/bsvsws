@@ -3,6 +3,7 @@ import {
   assertNoCustomRules,
   DELETABLE_CHILD_COLLECTIONS,
   POLICIES,
+  STUDIO_CONTENT_COLLECTIONS,
   PUBLIC_PERMISSIONS,
   ROLES,
 } from "./access.js";
@@ -25,13 +26,21 @@ describe("access configuration", () => {
     ).toThrow();
   });
 
-  it("only deletes child rows, and never lets anyone but the service account write workflow data", () => {
-    const studioWritable = new Set(["notification_settings", "event_categories"]);
+  it("deletes only child rows (service) or CMS content (federation), and never lets anyone but the service account write workflow data", () => {
+    const studioWritable = new Set([
+      "notification_settings",
+      "event_categories",
+      "directus_files",
+      ...STUDIO_CONTENT_COLLECTIONS,
+    ]);
     for (const policy of POLICIES) {
       for (const p of policy.permissions) {
         if (p.action === "delete") {
-          expect(policy.name).toBe("API-Servicekonto");
-          expect(DELETABLE_CHILD_COLLECTIONS).toContain(p.collection);
+          const allowed =
+            policy.name === "API-Servicekonto"
+              ? DELETABLE_CHILD_COLLECTIONS.includes(p.collection)
+              : STUDIO_CONTENT_COLLECTIONS.includes(p.collection);
+          expect(allowed, `${policy.name} delete ${p.collection}`).toBe(true);
         }
         if (p.action !== "read" && !studioWritable.has(p.collection)) {
           expect(policy.name).toBe("API-Servicekonto");

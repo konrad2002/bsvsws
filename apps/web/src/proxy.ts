@@ -6,20 +6,43 @@ import {
   REFRESH_COOKIE,
   sessionCookies,
 } from "./lib/auth/tokens";
+import { isContentPath, isDocumentRequest, resolveContentPath } from "./lib/content-resolution";
 
 /**
- * Session refresh (Next.js 16 "proxy", formerly middleware).
- * Server Components cannot set cookies, so the access token is refreshed here
- * before rendering: new cookies go to the browser (response) AND to the current
- * render (request), so the page already uses the fresh token.
+ * Next.js 16 "proxy" (formerly middleware), runs before rendering:
  *
- * Also an optimistic redirect for the internal area. Real authorization happens
- * in Fastify / the data access layer, never here.
+ * 1. Real status codes for public content: missing pages/articles/events/clubs
+ *    get HTTP 404, legacy URLs a real 307/308 (streamed pages are always 200).
+ * 2. Session refresh: Server Components cannot set cookies, so the access token
+ *    is refreshed here; new cookies go to the browser (response) AND to the
+ *    current render (request).
+ * 3. Optimistic redirect for the internal area. Real authorization happens in
+ *    Fastify / the data access layer, never here.
  */
 export async function proxy(request: NextRequest) {
+  const { pathname, search } = request.nextUrl;
+
+  if (
+    isDocumentRequest(request.headers, request.method) &&
+    isContentPath(pathname) &&
+    !request.headers.has(RENDER_404_HEADER)
+  ) {
+    const resolution = await resolveContentPath(pathname, search);
+    if (resolution.action === "redirect") {
+      return NextResponse.redirect(
+        new URL(resolution.to, request.url),
+        resolution.permanent ? 308 : 307,
+      );
+    }
+    if (resolution.action === "not_found") {
+      const notFoundPage = await renderNotFound(request);
+      if (notFoundPage) return notFoundPage;
+    }
+  }
+
   const access = request.cookies.get(ACCESS_COOKIE)?.value;
   const refreshToken = request.cookies.get(REFRESH_COOKIE)?.value;
-  const isInternal = request.nextUrl.pathname.startsWith("/intern");
+  const isInternal = pathname.startsWith("/intern");
 
   if (refreshToken && needsRefresh(access)) {
     const tokens = await directusRefresh(refreshToken);
@@ -45,6 +68,41 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(loginUrl(request));
   }
   return NextResponse.next();
+}
+
+/** Marks the internal self-request so it is not resolved again (loop guard). */
+const RENDER_404_HEADER = "x-bsv-render-404";
+
+/**
+ * Production streams a prerendered shell with status 200, so a status set here
+ * would be overridden. For confirmed 404s we therefore render the page ourselves
+ * (it shows the regular not-found UI with full layout) and return the complete
+ * HTML with a real 404 status – needed for link checkers during the migration.
+ */
+async function renderNotFound(request: NextRequest): Promise<Response | null> {
+  try {
+    const port = process.env.PORT || request.nextUrl.port || "3000";
+    const target = new URL(
+      request.nextUrl.pathname + request.nextUrl.search,
+      `http://127.0.0.1:${port}`,
+    );
+    const res = await fetch(target, {
+      headers: {
+        [RENDER_404_HEADER]: "1",
+        "accept-language": request.headers.get("accept-language") ?? "de",
+        "x-forwarded-for": request.headers.get("x-forwarded-for") ?? "",
+        "x-forwarded-host": request.headers.get("host") ?? "",
+      },
+      cache: "no-store",
+      signal: AbortSignal.timeout(5000),
+    });
+    return new Response(await res.text(), {
+      status: 404,
+      headers: { "content-type": "text/html; charset=utf-8", "cache-control": "no-store" },
+    });
+  } catch {
+    return null; // fall back to the streamed not-found page (200 + noindex)
+  }
 }
 
 function loginUrl(request: NextRequest) {

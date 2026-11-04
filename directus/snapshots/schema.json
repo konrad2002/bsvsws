@@ -4,6 +4,76 @@
   "vendor": "postgres",
   "collections": [
     {
+      "collection": "article_categories",
+      "meta": {
+        "accountability": "all",
+        "archive_app_filter": true,
+        "archive_field": "active",
+        "archive_value": "false",
+        "autosave_revision_interval": null,
+        "collapse": "open",
+        "collection": "article_categories",
+        "color": null,
+        "display_template": "{{name}}",
+        "group": null,
+        "hidden": false,
+        "icon": "category",
+        "item_duplication_fields": null,
+        "note": null,
+        "preview_url": null,
+        "singleton": false,
+        "sort": null,
+        "sort_field": "sort",
+        "status": "active",
+        "translations": [
+          {
+            "language": "de-DE",
+            "translation": "News-Kategorien"
+          }
+        ],
+        "unarchive_value": "true",
+        "versioning": false
+      },
+      "schema": {
+        "name": "article_categories"
+      }
+    },
+    {
+      "collection": "articles",
+      "meta": {
+        "accountability": "all",
+        "archive_app_filter": true,
+        "archive_field": "status",
+        "archive_value": "archived",
+        "autosave_revision_interval": null,
+        "collapse": "open",
+        "collection": "articles",
+        "color": null,
+        "display_template": "{{title}}",
+        "group": null,
+        "hidden": false,
+        "icon": "newspaper",
+        "item_duplication_fields": null,
+        "note": "News-Artikel. Öffentlich sichtbar bei Status „Veröffentlicht“ ab dem Veröffentlichungsdatum.",
+        "preview_url": null,
+        "singleton": false,
+        "sort": null,
+        "sort_field": null,
+        "status": "active",
+        "translations": [
+          {
+            "language": "de-DE",
+            "translation": "News"
+          }
+        ],
+        "unarchive_value": "draft",
+        "versioning": false
+      },
+      "schema": {
+        "name": "articles"
+      }
+    },
+    {
       "collection": "audit_logs",
       "meta": {
         "accountability": "all",
@@ -339,6 +409,41 @@
       }
     },
     {
+      "collection": "navigation_items",
+      "meta": {
+        "accountability": "all",
+        "archive_app_filter": true,
+        "archive_field": null,
+        "archive_value": null,
+        "autosave_revision_interval": null,
+        "collapse": "open",
+        "collection": "navigation_items",
+        "color": null,
+        "display_template": "{{label}}",
+        "group": null,
+        "hidden": false,
+        "icon": "menu",
+        "item_duplication_fields": null,
+        "note": "Menüeinträge. Reihenfolge per Drag & Drop, Verschachtelung über „Übergeordneter Eintrag“.",
+        "preview_url": null,
+        "singleton": false,
+        "sort": null,
+        "sort_field": "sort",
+        "status": "active",
+        "translations": [
+          {
+            "language": "de-DE",
+            "translation": "Navigation"
+          }
+        ],
+        "unarchive_value": null,
+        "versioning": false
+      },
+      "schema": {
+        "name": "navigation_items"
+      }
+    },
+    {
       "collection": "notification_settings",
       "meta": {
         "accountability": "all",
@@ -372,9 +477,983 @@
       "schema": {
         "name": "notification_settings"
       }
+    },
+    {
+      "collection": "pages",
+      "meta": {
+        "accountability": "all",
+        "archive_app_filter": true,
+        "archive_field": null,
+        "archive_value": null,
+        "autosave_revision_interval": null,
+        "collapse": "open",
+        "collection": "pages",
+        "color": null,
+        "display_template": "{{title}}",
+        "group": null,
+        "hidden": false,
+        "icon": "article",
+        "item_duplication_fields": null,
+        "note": "Allgemeine Seiten. URL = Pfad der Kürzel (z. B. /verband/vorstand).",
+        "preview_url": null,
+        "singleton": false,
+        "sort": null,
+        "sort_field": "sort",
+        "status": "active",
+        "translations": [
+          {
+            "language": "de-DE",
+            "translation": "Seiten"
+          }
+        ],
+        "unarchive_value": null,
+        "versioning": false
+      },
+      "schema": {
+        "name": "pages"
+      }
+    },
+    {
+      "collection": "redirects",
+      "meta": {
+        "accountability": "all",
+        "archive_app_filter": true,
+        "archive_field": null,
+        "archive_value": null,
+        "autosave_revision_interval": null,
+        "collapse": "open",
+        "collection": "redirects",
+        "color": null,
+        "display_template": "{{from_path}} → {{to_path}}",
+        "group": null,
+        "hidden": false,
+        "icon": "alt_route",
+        "item_duplication_fields": null,
+        "note": "Weiterleitungen alter URLs (z. B. aus Joomla). Greifen nur, wenn unter dem Pfad keine Seite existiert.",
+        "preview_url": null,
+        "singleton": false,
+        "sort": null,
+        "sort_field": null,
+        "status": "active",
+        "translations": [
+          {
+            "language": "de-DE",
+            "translation": "Weiterleitungen"
+          }
+        ],
+        "unarchive_value": null,
+        "versioning": false
+      },
+      "schema": {
+        "name": "redirects"
+      }
     }
   ],
   "fields": [
+    {
+      "collection": "article_categories",
+      "field": "id",
+      "type": "integer",
+      "meta": {
+        "collection": "article_categories",
+        "conditions": null,
+        "display": null,
+        "display_options": null,
+        "field": "id",
+        "group": null,
+        "hidden": true,
+        "interface": "input",
+        "note": null,
+        "options": null,
+        "readonly": true,
+        "required": false,
+        "searchable": true,
+        "sort": 1,
+        "special": null,
+        "translations": null,
+        "validation": null,
+        "validation_message": null,
+        "width": "full"
+      },
+      "schema": {
+        "name": "id",
+        "table": "article_categories",
+        "data_type": "integer",
+        "default_value": "nextval('article_categories_id_seq'::regclass)",
+        "max_length": null,
+        "numeric_precision": 32,
+        "numeric_scale": 0,
+        "is_nullable": false,
+        "is_unique": true,
+        "is_indexed": false,
+        "is_primary_key": true,
+        "is_generated": false,
+        "generation_expression": null,
+        "has_auto_increment": true,
+        "foreign_key_table": null,
+        "foreign_key_column": null
+      }
+    },
+    {
+      "collection": "article_categories",
+      "field": "name",
+      "type": "string",
+      "meta": {
+        "collection": "article_categories",
+        "conditions": null,
+        "display": null,
+        "display_options": null,
+        "field": "name",
+        "group": null,
+        "hidden": false,
+        "interface": "input",
+        "note": null,
+        "options": null,
+        "readonly": false,
+        "required": true,
+        "searchable": true,
+        "sort": 2,
+        "special": null,
+        "translations": null,
+        "validation": null,
+        "validation_message": null,
+        "width": "full"
+      },
+      "schema": {
+        "name": "name",
+        "table": "article_categories",
+        "data_type": "character varying",
+        "default_value": null,
+        "max_length": 255,
+        "numeric_precision": null,
+        "numeric_scale": null,
+        "is_nullable": false,
+        "is_unique": true,
+        "is_indexed": false,
+        "is_primary_key": false,
+        "is_generated": false,
+        "generation_expression": null,
+        "has_auto_increment": false,
+        "foreign_key_table": null,
+        "foreign_key_column": null
+      }
+    },
+    {
+      "collection": "article_categories",
+      "field": "slug",
+      "type": "string",
+      "meta": {
+        "collection": "article_categories",
+        "conditions": null,
+        "display": null,
+        "display_options": null,
+        "field": "slug",
+        "group": null,
+        "hidden": false,
+        "interface": "input",
+        "note": "URL: /news/kategorie/<kürzel>",
+        "options": {
+          "slug": true,
+          "trim": true
+        },
+        "readonly": false,
+        "required": true,
+        "searchable": true,
+        "sort": 3,
+        "special": null,
+        "translations": null,
+        "validation": null,
+        "validation_message": null,
+        "width": "half"
+      },
+      "schema": {
+        "name": "slug",
+        "table": "article_categories",
+        "data_type": "character varying",
+        "default_value": null,
+        "max_length": 120,
+        "numeric_precision": null,
+        "numeric_scale": null,
+        "is_nullable": false,
+        "is_unique": true,
+        "is_indexed": true,
+        "is_primary_key": false,
+        "is_generated": false,
+        "generation_expression": null,
+        "has_auto_increment": false,
+        "foreign_key_table": null,
+        "foreign_key_column": null
+      }
+    },
+    {
+      "collection": "article_categories",
+      "field": "active",
+      "type": "boolean",
+      "meta": {
+        "collection": "article_categories",
+        "conditions": null,
+        "display": null,
+        "display_options": null,
+        "field": "active",
+        "group": null,
+        "hidden": false,
+        "interface": "boolean",
+        "note": null,
+        "options": null,
+        "readonly": false,
+        "required": false,
+        "searchable": true,
+        "sort": 4,
+        "special": null,
+        "translations": null,
+        "validation": null,
+        "validation_message": null,
+        "width": "half"
+      },
+      "schema": {
+        "name": "active",
+        "table": "article_categories",
+        "data_type": "boolean",
+        "default_value": true,
+        "max_length": null,
+        "numeric_precision": null,
+        "numeric_scale": null,
+        "is_nullable": false,
+        "is_unique": false,
+        "is_indexed": false,
+        "is_primary_key": false,
+        "is_generated": false,
+        "generation_expression": null,
+        "has_auto_increment": false,
+        "foreign_key_table": null,
+        "foreign_key_column": null
+      }
+    },
+    {
+      "collection": "article_categories",
+      "field": "sort",
+      "type": "integer",
+      "meta": {
+        "collection": "article_categories",
+        "conditions": null,
+        "display": null,
+        "display_options": null,
+        "field": "sort",
+        "group": null,
+        "hidden": true,
+        "interface": "input",
+        "note": null,
+        "options": null,
+        "readonly": false,
+        "required": false,
+        "searchable": true,
+        "sort": 5,
+        "special": null,
+        "translations": null,
+        "validation": null,
+        "validation_message": null,
+        "width": "full"
+      },
+      "schema": {
+        "name": "sort",
+        "table": "article_categories",
+        "data_type": "integer",
+        "default_value": null,
+        "max_length": null,
+        "numeric_precision": 32,
+        "numeric_scale": 0,
+        "is_nullable": true,
+        "is_unique": false,
+        "is_indexed": false,
+        "is_primary_key": false,
+        "is_generated": false,
+        "generation_expression": null,
+        "has_auto_increment": false,
+        "foreign_key_table": null,
+        "foreign_key_column": null
+      }
+    },
+    {
+      "collection": "articles",
+      "field": "id",
+      "type": "uuid",
+      "meta": {
+        "collection": "articles",
+        "conditions": null,
+        "display": null,
+        "display_options": null,
+        "field": "id",
+        "group": null,
+        "hidden": true,
+        "interface": "input",
+        "note": null,
+        "options": null,
+        "readonly": true,
+        "required": false,
+        "searchable": true,
+        "sort": 1,
+        "special": [
+          "uuid"
+        ],
+        "translations": null,
+        "validation": null,
+        "validation_message": null,
+        "width": "full"
+      },
+      "schema": {
+        "name": "id",
+        "table": "articles",
+        "data_type": "uuid",
+        "default_value": null,
+        "max_length": null,
+        "numeric_precision": null,
+        "numeric_scale": null,
+        "is_nullable": false,
+        "is_unique": true,
+        "is_indexed": false,
+        "is_primary_key": true,
+        "is_generated": false,
+        "generation_expression": null,
+        "has_auto_increment": false,
+        "foreign_key_table": null,
+        "foreign_key_column": null
+      }
+    },
+    {
+      "collection": "articles",
+      "field": "status",
+      "type": "string",
+      "meta": {
+        "collection": "articles",
+        "conditions": null,
+        "display": null,
+        "display_options": null,
+        "field": "status",
+        "group": null,
+        "hidden": false,
+        "interface": "select-dropdown",
+        "note": null,
+        "options": {
+          "choices": [
+            {
+              "text": "Entwurf",
+              "value": "draft"
+            },
+            {
+              "text": "Veröffentlicht",
+              "value": "published"
+            },
+            {
+              "text": "Archiviert",
+              "value": "archived"
+            }
+          ]
+        },
+        "readonly": false,
+        "required": true,
+        "searchable": true,
+        "sort": 2,
+        "special": null,
+        "translations": null,
+        "validation": null,
+        "validation_message": null,
+        "width": "half"
+      },
+      "schema": {
+        "name": "status",
+        "table": "articles",
+        "data_type": "character varying",
+        "default_value": "draft",
+        "max_length": 255,
+        "numeric_precision": null,
+        "numeric_scale": null,
+        "is_nullable": false,
+        "is_unique": false,
+        "is_indexed": true,
+        "is_primary_key": false,
+        "is_generated": false,
+        "generation_expression": null,
+        "has_auto_increment": false,
+        "foreign_key_table": null,
+        "foreign_key_column": null
+      }
+    },
+    {
+      "collection": "articles",
+      "field": "published_at",
+      "type": "timestamp",
+      "meta": {
+        "collection": "articles",
+        "conditions": null,
+        "display": null,
+        "display_options": null,
+        "field": "published_at",
+        "group": null,
+        "hidden": false,
+        "interface": "datetime",
+        "note": "Veröffentlichungsdatum (in der Zukunft = geplant)",
+        "options": null,
+        "readonly": false,
+        "required": true,
+        "searchable": true,
+        "sort": 3,
+        "special": null,
+        "translations": null,
+        "validation": null,
+        "validation_message": null,
+        "width": "half"
+      },
+      "schema": {
+        "name": "published_at",
+        "table": "articles",
+        "data_type": "timestamp with time zone",
+        "default_value": "CURRENT_TIMESTAMP",
+        "max_length": null,
+        "numeric_precision": null,
+        "numeric_scale": null,
+        "is_nullable": false,
+        "is_unique": false,
+        "is_indexed": true,
+        "is_primary_key": false,
+        "is_generated": false,
+        "generation_expression": null,
+        "has_auto_increment": false,
+        "foreign_key_table": null,
+        "foreign_key_column": null
+      }
+    },
+    {
+      "collection": "articles",
+      "field": "title",
+      "type": "string",
+      "meta": {
+        "collection": "articles",
+        "conditions": null,
+        "display": null,
+        "display_options": null,
+        "field": "title",
+        "group": null,
+        "hidden": false,
+        "interface": "input",
+        "note": null,
+        "options": null,
+        "readonly": false,
+        "required": true,
+        "searchable": true,
+        "sort": 4,
+        "special": null,
+        "translations": null,
+        "validation": null,
+        "validation_message": null,
+        "width": "full"
+      },
+      "schema": {
+        "name": "title",
+        "table": "articles",
+        "data_type": "character varying",
+        "default_value": null,
+        "max_length": 255,
+        "numeric_precision": null,
+        "numeric_scale": null,
+        "is_nullable": false,
+        "is_unique": false,
+        "is_indexed": false,
+        "is_primary_key": false,
+        "is_generated": false,
+        "generation_expression": null,
+        "has_auto_increment": false,
+        "foreign_key_table": null,
+        "foreign_key_column": null
+      }
+    },
+    {
+      "collection": "articles",
+      "field": "slug",
+      "type": "string",
+      "meta": {
+        "collection": "articles",
+        "conditions": null,
+        "display": null,
+        "display_options": null,
+        "field": "slug",
+        "group": null,
+        "hidden": false,
+        "interface": "input",
+        "note": "URL: /news/<kürzel> (nach Veröffentlichung nicht mehr ändern)",
+        "options": {
+          "slug": true,
+          "trim": true
+        },
+        "readonly": false,
+        "required": true,
+        "searchable": true,
+        "sort": 5,
+        "special": null,
+        "translations": null,
+        "validation": null,
+        "validation_message": null,
+        "width": "half"
+      },
+      "schema": {
+        "name": "slug",
+        "table": "articles",
+        "data_type": "character varying",
+        "default_value": null,
+        "max_length": 120,
+        "numeric_precision": null,
+        "numeric_scale": null,
+        "is_nullable": false,
+        "is_unique": true,
+        "is_indexed": true,
+        "is_primary_key": false,
+        "is_generated": false,
+        "generation_expression": null,
+        "has_auto_increment": false,
+        "foreign_key_table": null,
+        "foreign_key_column": null
+      }
+    },
+    {
+      "collection": "articles",
+      "field": "category",
+      "type": "integer",
+      "meta": {
+        "collection": "articles",
+        "conditions": null,
+        "display": "related-values",
+        "display_options": {
+          "template": "{{name}}"
+        },
+        "field": "category",
+        "group": null,
+        "hidden": false,
+        "interface": "select-dropdown-m2o",
+        "note": "Genau eine Kategorie",
+        "options": {
+          "template": "{{name}}"
+        },
+        "readonly": false,
+        "required": true,
+        "searchable": true,
+        "sort": 6,
+        "special": [
+          "m2o"
+        ],
+        "translations": null,
+        "validation": null,
+        "validation_message": null,
+        "width": "half"
+      },
+      "schema": {
+        "name": "category",
+        "table": "articles",
+        "data_type": "integer",
+        "default_value": null,
+        "max_length": null,
+        "numeric_precision": 32,
+        "numeric_scale": 0,
+        "is_nullable": false,
+        "is_unique": false,
+        "is_indexed": false,
+        "is_primary_key": false,
+        "is_generated": false,
+        "generation_expression": null,
+        "has_auto_increment": false,
+        "foreign_key_table": "article_categories",
+        "foreign_key_column": "id"
+      }
+    },
+    {
+      "collection": "articles",
+      "field": "teaser",
+      "type": "text",
+      "meta": {
+        "collection": "articles",
+        "conditions": null,
+        "display": null,
+        "display_options": null,
+        "field": "teaser",
+        "group": null,
+        "hidden": false,
+        "interface": "input-multiline",
+        "note": "Kurzer Anreißer für Übersichten (optional)",
+        "options": null,
+        "readonly": false,
+        "required": false,
+        "searchable": true,
+        "sort": 7,
+        "special": null,
+        "translations": null,
+        "validation": null,
+        "validation_message": null,
+        "width": "full"
+      },
+      "schema": {
+        "name": "teaser",
+        "table": "articles",
+        "data_type": "text",
+        "default_value": null,
+        "max_length": null,
+        "numeric_precision": null,
+        "numeric_scale": null,
+        "is_nullable": true,
+        "is_unique": false,
+        "is_indexed": false,
+        "is_primary_key": false,
+        "is_generated": false,
+        "generation_expression": null,
+        "has_auto_increment": false,
+        "foreign_key_table": null,
+        "foreign_key_column": null
+      }
+    },
+    {
+      "collection": "articles",
+      "field": "content",
+      "type": "text",
+      "meta": {
+        "collection": "articles",
+        "conditions": null,
+        "display": null,
+        "display_options": null,
+        "field": "content",
+        "group": null,
+        "hidden": false,
+        "interface": "input-rich-text-html",
+        "note": "Inhalt",
+        "options": {
+          "folder": "184b9625-f7cc-49dc-9e12-3b7ab98721d5",
+          "toolbar": [
+            "blockquote",
+            "bold",
+            "italic",
+            "underline",
+            "strikethrough",
+            "h2",
+            "h3",
+            "h4",
+            "numlist",
+            "bullist",
+            "removeformat",
+            "customLink",
+            "customImage",
+            "table",
+            "hr",
+            "code",
+            "fullscreen"
+          ]
+        },
+        "readonly": false,
+        "required": false,
+        "searchable": true,
+        "sort": 8,
+        "special": null,
+        "translations": null,
+        "validation": null,
+        "validation_message": null,
+        "width": "full"
+      },
+      "schema": {
+        "name": "content",
+        "table": "articles",
+        "data_type": "text",
+        "default_value": null,
+        "max_length": null,
+        "numeric_precision": null,
+        "numeric_scale": null,
+        "is_nullable": true,
+        "is_unique": false,
+        "is_indexed": false,
+        "is_primary_key": false,
+        "is_generated": false,
+        "generation_expression": null,
+        "has_auto_increment": false,
+        "foreign_key_table": null,
+        "foreign_key_column": null
+      }
+    },
+    {
+      "collection": "articles",
+      "field": "featured_image",
+      "type": "uuid",
+      "meta": {
+        "collection": "articles",
+        "conditions": null,
+        "display": null,
+        "display_options": null,
+        "field": "featured_image",
+        "group": null,
+        "hidden": false,
+        "interface": "file-image",
+        "note": "Titelbild",
+        "options": {
+          "folder": "184b9625-f7cc-49dc-9e12-3b7ab98721d5"
+        },
+        "readonly": false,
+        "required": false,
+        "searchable": true,
+        "sort": 9,
+        "special": [
+          "file"
+        ],
+        "translations": null,
+        "validation": null,
+        "validation_message": null,
+        "width": "half"
+      },
+      "schema": {
+        "name": "featured_image",
+        "table": "articles",
+        "data_type": "uuid",
+        "default_value": null,
+        "max_length": null,
+        "numeric_precision": null,
+        "numeric_scale": null,
+        "is_nullable": true,
+        "is_unique": false,
+        "is_indexed": false,
+        "is_primary_key": false,
+        "is_generated": false,
+        "generation_expression": null,
+        "has_auto_increment": false,
+        "foreign_key_table": "directus_files",
+        "foreign_key_column": "id"
+      }
+    },
+    {
+      "collection": "articles",
+      "field": "author",
+      "type": "uuid",
+      "meta": {
+        "collection": "articles",
+        "conditions": null,
+        "display": "related-values",
+        "display_options": {
+          "template": "{{first_name}} {{last_name}}"
+        },
+        "field": "author",
+        "group": null,
+        "hidden": false,
+        "interface": "select-dropdown-m2o",
+        "note": "Autor (leer = Ersteller)",
+        "options": {
+          "template": "{{first_name}} {{last_name}}"
+        },
+        "readonly": false,
+        "required": false,
+        "searchable": true,
+        "sort": 10,
+        "special": [
+          "m2o"
+        ],
+        "translations": null,
+        "validation": null,
+        "validation_message": null,
+        "width": "half"
+      },
+      "schema": {
+        "name": "author",
+        "table": "articles",
+        "data_type": "uuid",
+        "default_value": null,
+        "max_length": null,
+        "numeric_precision": null,
+        "numeric_scale": null,
+        "is_nullable": true,
+        "is_unique": false,
+        "is_indexed": false,
+        "is_primary_key": false,
+        "is_generated": false,
+        "generation_expression": null,
+        "has_auto_increment": false,
+        "foreign_key_table": "directus_users",
+        "foreign_key_column": "id"
+      }
+    },
+    {
+      "collection": "articles",
+      "field": "author_name",
+      "type": "string",
+      "meta": {
+        "collection": "articles",
+        "conditions": null,
+        "display": null,
+        "display_options": null,
+        "field": "author_name",
+        "group": null,
+        "hidden": false,
+        "interface": "input",
+        "note": "Abweichender Autorname, z. B. Gastbeitrag (optional)",
+        "options": null,
+        "readonly": false,
+        "required": false,
+        "searchable": true,
+        "sort": 11,
+        "special": null,
+        "translations": null,
+        "validation": null,
+        "validation_message": null,
+        "width": "half"
+      },
+      "schema": {
+        "name": "author_name",
+        "table": "articles",
+        "data_type": "character varying",
+        "default_value": null,
+        "max_length": 255,
+        "numeric_precision": null,
+        "numeric_scale": null,
+        "is_nullable": true,
+        "is_unique": false,
+        "is_indexed": false,
+        "is_primary_key": false,
+        "is_generated": false,
+        "generation_expression": null,
+        "has_auto_increment": false,
+        "foreign_key_table": null,
+        "foreign_key_column": null
+      }
+    },
+    {
+      "collection": "articles",
+      "field": "user_created",
+      "type": "uuid",
+      "meta": {
+        "collection": "articles",
+        "conditions": null,
+        "display": "user",
+        "display_options": null,
+        "field": "user_created",
+        "group": null,
+        "hidden": true,
+        "interface": "select-dropdown-m2o",
+        "note": null,
+        "options": {
+          "template": "{{first_name}} {{last_name}}"
+        },
+        "readonly": true,
+        "required": false,
+        "searchable": true,
+        "sort": 12,
+        "special": [
+          "user-created"
+        ],
+        "translations": null,
+        "validation": null,
+        "validation_message": null,
+        "width": "half"
+      },
+      "schema": {
+        "name": "user_created",
+        "table": "articles",
+        "data_type": "uuid",
+        "default_value": null,
+        "max_length": null,
+        "numeric_precision": null,
+        "numeric_scale": null,
+        "is_nullable": true,
+        "is_unique": false,
+        "is_indexed": false,
+        "is_primary_key": false,
+        "is_generated": false,
+        "generation_expression": null,
+        "has_auto_increment": false,
+        "foreign_key_table": "directus_users",
+        "foreign_key_column": "id"
+      }
+    },
+    {
+      "collection": "articles",
+      "field": "date_created",
+      "type": "timestamp",
+      "meta": {
+        "collection": "articles",
+        "conditions": null,
+        "display": null,
+        "display_options": null,
+        "field": "date_created",
+        "group": null,
+        "hidden": true,
+        "interface": "datetime",
+        "note": null,
+        "options": null,
+        "readonly": true,
+        "required": false,
+        "searchable": true,
+        "sort": 13,
+        "special": [
+          "date-created"
+        ],
+        "translations": null,
+        "validation": null,
+        "validation_message": null,
+        "width": "half"
+      },
+      "schema": {
+        "name": "date_created",
+        "table": "articles",
+        "data_type": "timestamp with time zone",
+        "default_value": null,
+        "max_length": null,
+        "numeric_precision": null,
+        "numeric_scale": null,
+        "is_nullable": true,
+        "is_unique": false,
+        "is_indexed": false,
+        "is_primary_key": false,
+        "is_generated": false,
+        "generation_expression": null,
+        "has_auto_increment": false,
+        "foreign_key_table": null,
+        "foreign_key_column": null
+      }
+    },
+    {
+      "collection": "articles",
+      "field": "date_updated",
+      "type": "timestamp",
+      "meta": {
+        "collection": "articles",
+        "conditions": null,
+        "display": null,
+        "display_options": null,
+        "field": "date_updated",
+        "group": null,
+        "hidden": true,
+        "interface": "datetime",
+        "note": null,
+        "options": null,
+        "readonly": true,
+        "required": false,
+        "searchable": true,
+        "sort": 14,
+        "special": [
+          "date-updated"
+        ],
+        "translations": null,
+        "validation": null,
+        "validation_message": null,
+        "width": "half"
+      },
+      "schema": {
+        "name": "date_updated",
+        "table": "articles",
+        "data_type": "timestamp with time zone",
+        "default_value": null,
+        "max_length": null,
+        "numeric_precision": null,
+        "numeric_scale": null,
+        "is_nullable": true,
+        "is_unique": false,
+        "is_indexed": false,
+        "is_primary_key": false,
+        "is_generated": false,
+        "generation_expression": null,
+        "has_auto_increment": false,
+        "foreign_key_table": null,
+        "foreign_key_column": null
+      }
+    },
     {
       "collection": "audit_logs",
       "field": "id",
@@ -6707,6 +7786,679 @@
       }
     },
     {
+      "collection": "navigation_items",
+      "field": "id",
+      "type": "integer",
+      "meta": {
+        "collection": "navigation_items",
+        "conditions": null,
+        "display": null,
+        "display_options": null,
+        "field": "id",
+        "group": null,
+        "hidden": true,
+        "interface": "input",
+        "note": null,
+        "options": null,
+        "readonly": true,
+        "required": false,
+        "searchable": true,
+        "sort": 1,
+        "special": null,
+        "translations": null,
+        "validation": null,
+        "validation_message": null,
+        "width": "full"
+      },
+      "schema": {
+        "name": "id",
+        "table": "navigation_items",
+        "data_type": "integer",
+        "default_value": "nextval('navigation_items_id_seq'::regclass)",
+        "max_length": null,
+        "numeric_precision": 32,
+        "numeric_scale": 0,
+        "is_nullable": false,
+        "is_unique": true,
+        "is_indexed": false,
+        "is_primary_key": true,
+        "is_generated": false,
+        "generation_expression": null,
+        "has_auto_increment": true,
+        "foreign_key_table": null,
+        "foreign_key_column": null
+      }
+    },
+    {
+      "collection": "navigation_items",
+      "field": "menu",
+      "type": "string",
+      "meta": {
+        "collection": "navigation_items",
+        "conditions": null,
+        "display": null,
+        "display_options": null,
+        "field": "menu",
+        "group": null,
+        "hidden": false,
+        "interface": "select-dropdown",
+        "note": null,
+        "options": {
+          "choices": [
+            {
+              "text": "Hauptnavigation",
+              "value": "main"
+            },
+            {
+              "text": "Fußzeile",
+              "value": "footer"
+            }
+          ]
+        },
+        "readonly": false,
+        "required": true,
+        "searchable": true,
+        "sort": 2,
+        "special": null,
+        "translations": null,
+        "validation": null,
+        "validation_message": null,
+        "width": "half"
+      },
+      "schema": {
+        "name": "menu",
+        "table": "navigation_items",
+        "data_type": "character varying",
+        "default_value": "main",
+        "max_length": 255,
+        "numeric_precision": null,
+        "numeric_scale": null,
+        "is_nullable": false,
+        "is_unique": false,
+        "is_indexed": true,
+        "is_primary_key": false,
+        "is_generated": false,
+        "generation_expression": null,
+        "has_auto_increment": false,
+        "foreign_key_table": null,
+        "foreign_key_column": null
+      }
+    },
+    {
+      "collection": "navigation_items",
+      "field": "label",
+      "type": "string",
+      "meta": {
+        "collection": "navigation_items",
+        "conditions": null,
+        "display": null,
+        "display_options": null,
+        "field": "label",
+        "group": null,
+        "hidden": false,
+        "interface": "input",
+        "note": null,
+        "options": null,
+        "readonly": false,
+        "required": true,
+        "searchable": true,
+        "sort": 3,
+        "special": null,
+        "translations": null,
+        "validation": null,
+        "validation_message": null,
+        "width": "half"
+      },
+      "schema": {
+        "name": "label",
+        "table": "navigation_items",
+        "data_type": "character varying",
+        "default_value": null,
+        "max_length": 255,
+        "numeric_precision": null,
+        "numeric_scale": null,
+        "is_nullable": false,
+        "is_unique": false,
+        "is_indexed": false,
+        "is_primary_key": false,
+        "is_generated": false,
+        "generation_expression": null,
+        "has_auto_increment": false,
+        "foreign_key_table": null,
+        "foreign_key_column": null
+      }
+    },
+    {
+      "collection": "navigation_items",
+      "field": "parent",
+      "type": "integer",
+      "meta": {
+        "collection": "navigation_items",
+        "conditions": null,
+        "display": "related-values",
+        "display_options": {
+          "template": "{{label}}"
+        },
+        "field": "parent",
+        "group": null,
+        "hidden": false,
+        "interface": "select-dropdown-m2o",
+        "note": "Leer = oberste Ebene",
+        "options": {
+          "template": "{{label}}"
+        },
+        "readonly": false,
+        "required": false,
+        "searchable": true,
+        "sort": 4,
+        "special": [
+          "m2o"
+        ],
+        "translations": null,
+        "validation": null,
+        "validation_message": null,
+        "width": "half"
+      },
+      "schema": {
+        "name": "parent",
+        "table": "navigation_items",
+        "data_type": "integer",
+        "default_value": null,
+        "max_length": null,
+        "numeric_precision": 32,
+        "numeric_scale": 0,
+        "is_nullable": true,
+        "is_unique": false,
+        "is_indexed": false,
+        "is_primary_key": false,
+        "is_generated": false,
+        "generation_expression": null,
+        "has_auto_increment": false,
+        "foreign_key_table": "navigation_items",
+        "foreign_key_column": "id"
+      }
+    },
+    {
+      "collection": "navigation_items",
+      "field": "link_type",
+      "type": "string",
+      "meta": {
+        "collection": "navigation_items",
+        "conditions": null,
+        "display": null,
+        "display_options": null,
+        "field": "link_type",
+        "group": null,
+        "hidden": false,
+        "interface": "select-dropdown",
+        "note": null,
+        "options": {
+          "choices": [
+            {
+              "text": "Seite",
+              "value": "page"
+            },
+            {
+              "text": "News-Artikel",
+              "value": "article"
+            },
+            {
+              "text": "Interner Pfad",
+              "value": "route"
+            },
+            {
+              "text": "Externe URL",
+              "value": "url"
+            },
+            {
+              "text": "Kein Link (nur Gruppe)",
+              "value": "none"
+            }
+          ]
+        },
+        "readonly": false,
+        "required": true,
+        "searchable": true,
+        "sort": 5,
+        "special": null,
+        "translations": null,
+        "validation": null,
+        "validation_message": null,
+        "width": "half"
+      },
+      "schema": {
+        "name": "link_type",
+        "table": "navigation_items",
+        "data_type": "character varying",
+        "default_value": "page",
+        "max_length": 255,
+        "numeric_precision": null,
+        "numeric_scale": null,
+        "is_nullable": false,
+        "is_unique": false,
+        "is_indexed": true,
+        "is_primary_key": false,
+        "is_generated": false,
+        "generation_expression": null,
+        "has_auto_increment": false,
+        "foreign_key_table": null,
+        "foreign_key_column": null
+      }
+    },
+    {
+      "collection": "navigation_items",
+      "field": "page",
+      "type": "uuid",
+      "meta": {
+        "collection": "navigation_items",
+        "conditions": null,
+        "display": "related-values",
+        "display_options": {
+          "template": "{{title}}"
+        },
+        "field": "page",
+        "group": null,
+        "hidden": false,
+        "interface": "select-dropdown-m2o",
+        "note": "bei Linktyp „Seite“",
+        "options": {
+          "template": "{{title}}"
+        },
+        "readonly": false,
+        "required": false,
+        "searchable": true,
+        "sort": 6,
+        "special": [
+          "m2o"
+        ],
+        "translations": null,
+        "validation": null,
+        "validation_message": null,
+        "width": "half"
+      },
+      "schema": {
+        "name": "page",
+        "table": "navigation_items",
+        "data_type": "uuid",
+        "default_value": null,
+        "max_length": null,
+        "numeric_precision": null,
+        "numeric_scale": null,
+        "is_nullable": true,
+        "is_unique": false,
+        "is_indexed": false,
+        "is_primary_key": false,
+        "is_generated": false,
+        "generation_expression": null,
+        "has_auto_increment": false,
+        "foreign_key_table": "pages",
+        "foreign_key_column": "id"
+      }
+    },
+    {
+      "collection": "navigation_items",
+      "field": "article",
+      "type": "uuid",
+      "meta": {
+        "collection": "navigation_items",
+        "conditions": null,
+        "display": "related-values",
+        "display_options": {
+          "template": "{{title}}"
+        },
+        "field": "article",
+        "group": null,
+        "hidden": false,
+        "interface": "select-dropdown-m2o",
+        "note": "bei Linktyp „News-Artikel“",
+        "options": {
+          "template": "{{title}}"
+        },
+        "readonly": false,
+        "required": false,
+        "searchable": true,
+        "sort": 7,
+        "special": [
+          "m2o"
+        ],
+        "translations": null,
+        "validation": null,
+        "validation_message": null,
+        "width": "half"
+      },
+      "schema": {
+        "name": "article",
+        "table": "navigation_items",
+        "data_type": "uuid",
+        "default_value": null,
+        "max_length": null,
+        "numeric_precision": null,
+        "numeric_scale": null,
+        "is_nullable": true,
+        "is_unique": false,
+        "is_indexed": false,
+        "is_primary_key": false,
+        "is_generated": false,
+        "generation_expression": null,
+        "has_auto_increment": false,
+        "foreign_key_table": "articles",
+        "foreign_key_column": "id"
+      }
+    },
+    {
+      "collection": "navigation_items",
+      "field": "route",
+      "type": "string",
+      "meta": {
+        "collection": "navigation_items",
+        "conditions": null,
+        "display": null,
+        "display_options": null,
+        "field": "route",
+        "group": null,
+        "hidden": false,
+        "interface": "input",
+        "note": "bei „Interner Pfad“, z. B. /veranstaltungen",
+        "options": null,
+        "readonly": false,
+        "required": false,
+        "searchable": true,
+        "sort": 8,
+        "special": null,
+        "translations": null,
+        "validation": null,
+        "validation_message": null,
+        "width": "half"
+      },
+      "schema": {
+        "name": "route",
+        "table": "navigation_items",
+        "data_type": "character varying",
+        "default_value": null,
+        "max_length": 255,
+        "numeric_precision": null,
+        "numeric_scale": null,
+        "is_nullable": true,
+        "is_unique": false,
+        "is_indexed": false,
+        "is_primary_key": false,
+        "is_generated": false,
+        "generation_expression": null,
+        "has_auto_increment": false,
+        "foreign_key_table": null,
+        "foreign_key_column": null
+      }
+    },
+    {
+      "collection": "navigation_items",
+      "field": "url",
+      "type": "string",
+      "meta": {
+        "collection": "navigation_items",
+        "conditions": null,
+        "display": null,
+        "display_options": null,
+        "field": "url",
+        "group": null,
+        "hidden": false,
+        "interface": "input",
+        "note": "bei „Externe URL“, https://…",
+        "options": null,
+        "readonly": false,
+        "required": false,
+        "searchable": true,
+        "sort": 9,
+        "special": null,
+        "translations": null,
+        "validation": null,
+        "validation_message": null,
+        "width": "half"
+      },
+      "schema": {
+        "name": "url",
+        "table": "navigation_items",
+        "data_type": "character varying",
+        "default_value": null,
+        "max_length": 255,
+        "numeric_precision": null,
+        "numeric_scale": null,
+        "is_nullable": true,
+        "is_unique": false,
+        "is_indexed": false,
+        "is_primary_key": false,
+        "is_generated": false,
+        "generation_expression": null,
+        "has_auto_increment": false,
+        "foreign_key_table": null,
+        "foreign_key_column": null
+      }
+    },
+    {
+      "collection": "navigation_items",
+      "field": "visibility",
+      "type": "string",
+      "meta": {
+        "collection": "navigation_items",
+        "conditions": null,
+        "display": null,
+        "display_options": null,
+        "field": "visibility",
+        "group": null,
+        "hidden": false,
+        "interface": "select-dropdown",
+        "note": "Wer den Eintrag sieht",
+        "options": {
+          "choices": [
+            {
+              "text": "Öffentlich",
+              "value": "public"
+            },
+            {
+              "text": "Verein",
+              "value": "club"
+            },
+            {
+              "text": "Vereinsvertreter",
+              "value": "club_representative"
+            },
+            {
+              "text": "Verband",
+              "value": "federation"
+            }
+          ]
+        },
+        "readonly": false,
+        "required": true,
+        "searchable": true,
+        "sort": 10,
+        "special": null,
+        "translations": null,
+        "validation": null,
+        "validation_message": null,
+        "width": "half"
+      },
+      "schema": {
+        "name": "visibility",
+        "table": "navigation_items",
+        "data_type": "character varying",
+        "default_value": "public",
+        "max_length": 255,
+        "numeric_precision": null,
+        "numeric_scale": null,
+        "is_nullable": false,
+        "is_unique": false,
+        "is_indexed": true,
+        "is_primary_key": false,
+        "is_generated": false,
+        "generation_expression": null,
+        "has_auto_increment": false,
+        "foreign_key_table": null,
+        "foreign_key_column": null
+      }
+    },
+    {
+      "collection": "navigation_items",
+      "field": "open_in_new_tab",
+      "type": "boolean",
+      "meta": {
+        "collection": "navigation_items",
+        "conditions": null,
+        "display": null,
+        "display_options": null,
+        "field": "open_in_new_tab",
+        "group": null,
+        "hidden": false,
+        "interface": "boolean",
+        "note": null,
+        "options": null,
+        "readonly": false,
+        "required": false,
+        "searchable": true,
+        "sort": 11,
+        "special": null,
+        "translations": null,
+        "validation": null,
+        "validation_message": null,
+        "width": "half"
+      },
+      "schema": {
+        "name": "open_in_new_tab",
+        "table": "navigation_items",
+        "data_type": "boolean",
+        "default_value": false,
+        "max_length": null,
+        "numeric_precision": null,
+        "numeric_scale": null,
+        "is_nullable": false,
+        "is_unique": false,
+        "is_indexed": false,
+        "is_primary_key": false,
+        "is_generated": false,
+        "generation_expression": null,
+        "has_auto_increment": false,
+        "foreign_key_table": null,
+        "foreign_key_column": null
+      }
+    },
+    {
+      "collection": "navigation_items",
+      "field": "active",
+      "type": "boolean",
+      "meta": {
+        "collection": "navigation_items",
+        "conditions": null,
+        "display": null,
+        "display_options": null,
+        "field": "active",
+        "group": null,
+        "hidden": false,
+        "interface": "boolean",
+        "note": null,
+        "options": null,
+        "readonly": false,
+        "required": false,
+        "searchable": true,
+        "sort": 12,
+        "special": null,
+        "translations": null,
+        "validation": null,
+        "validation_message": null,
+        "width": "half"
+      },
+      "schema": {
+        "name": "active",
+        "table": "navigation_items",
+        "data_type": "boolean",
+        "default_value": true,
+        "max_length": null,
+        "numeric_precision": null,
+        "numeric_scale": null,
+        "is_nullable": false,
+        "is_unique": false,
+        "is_indexed": false,
+        "is_primary_key": false,
+        "is_generated": false,
+        "generation_expression": null,
+        "has_auto_increment": false,
+        "foreign_key_table": null,
+        "foreign_key_column": null
+      }
+    },
+    {
+      "collection": "navigation_items",
+      "field": "sort",
+      "type": "integer",
+      "meta": {
+        "collection": "navigation_items",
+        "conditions": null,
+        "display": null,
+        "display_options": null,
+        "field": "sort",
+        "group": null,
+        "hidden": true,
+        "interface": "input",
+        "note": null,
+        "options": null,
+        "readonly": false,
+        "required": false,
+        "searchable": true,
+        "sort": 13,
+        "special": null,
+        "translations": null,
+        "validation": null,
+        "validation_message": null,
+        "width": "full"
+      },
+      "schema": {
+        "name": "sort",
+        "table": "navigation_items",
+        "data_type": "integer",
+        "default_value": null,
+        "max_length": null,
+        "numeric_precision": 32,
+        "numeric_scale": 0,
+        "is_nullable": true,
+        "is_unique": false,
+        "is_indexed": false,
+        "is_primary_key": false,
+        "is_generated": false,
+        "generation_expression": null,
+        "has_auto_increment": false,
+        "foreign_key_table": null,
+        "foreign_key_column": null
+      }
+    },
+    {
+      "collection": "navigation_items",
+      "field": "children",
+      "type": "alias",
+      "meta": {
+        "collection": "navigation_items",
+        "conditions": null,
+        "display": null,
+        "display_options": null,
+        "field": "children",
+        "group": null,
+        "hidden": false,
+        "interface": "list-o2m",
+        "note": null,
+        "options": {
+          "template": "{{label}}"
+        },
+        "readonly": false,
+        "required": false,
+        "searchable": true,
+        "sort": 14,
+        "special": [
+          "o2m"
+        ],
+        "translations": null,
+        "validation": null,
+        "validation_message": null,
+        "width": "full"
+      }
+    },
+    {
       "collection": "notification_settings",
       "field": "id",
       "type": "integer",
@@ -6891,6 +8643,900 @@
         "foreign_key_table": null,
         "foreign_key_column": null
       }
+    },
+    {
+      "collection": "pages",
+      "field": "id",
+      "type": "uuid",
+      "meta": {
+        "collection": "pages",
+        "conditions": null,
+        "display": null,
+        "display_options": null,
+        "field": "id",
+        "group": null,
+        "hidden": true,
+        "interface": "input",
+        "note": null,
+        "options": null,
+        "readonly": true,
+        "required": false,
+        "searchable": true,
+        "sort": 1,
+        "special": [
+          "uuid"
+        ],
+        "translations": null,
+        "validation": null,
+        "validation_message": null,
+        "width": "full"
+      },
+      "schema": {
+        "name": "id",
+        "table": "pages",
+        "data_type": "uuid",
+        "default_value": null,
+        "max_length": null,
+        "numeric_precision": null,
+        "numeric_scale": null,
+        "is_nullable": false,
+        "is_unique": true,
+        "is_indexed": false,
+        "is_primary_key": true,
+        "is_generated": false,
+        "generation_expression": null,
+        "has_auto_increment": false,
+        "foreign_key_table": null,
+        "foreign_key_column": null
+      }
+    },
+    {
+      "collection": "pages",
+      "field": "status",
+      "type": "string",
+      "meta": {
+        "collection": "pages",
+        "conditions": null,
+        "display": null,
+        "display_options": null,
+        "field": "status",
+        "group": null,
+        "hidden": false,
+        "interface": "select-dropdown",
+        "note": null,
+        "options": {
+          "choices": [
+            {
+              "text": "Entwurf",
+              "value": "draft"
+            },
+            {
+              "text": "Veröffentlicht",
+              "value": "published"
+            }
+          ]
+        },
+        "readonly": false,
+        "required": true,
+        "searchable": true,
+        "sort": 2,
+        "special": null,
+        "translations": null,
+        "validation": null,
+        "validation_message": null,
+        "width": "half"
+      },
+      "schema": {
+        "name": "status",
+        "table": "pages",
+        "data_type": "character varying",
+        "default_value": "draft",
+        "max_length": 255,
+        "numeric_precision": null,
+        "numeric_scale": null,
+        "is_nullable": false,
+        "is_unique": false,
+        "is_indexed": true,
+        "is_primary_key": false,
+        "is_generated": false,
+        "generation_expression": null,
+        "has_auto_increment": false,
+        "foreign_key_table": null,
+        "foreign_key_column": null
+      }
+    },
+    {
+      "collection": "pages",
+      "field": "visibility",
+      "type": "string",
+      "meta": {
+        "collection": "pages",
+        "conditions": null,
+        "display": null,
+        "display_options": null,
+        "field": "visibility",
+        "group": null,
+        "hidden": false,
+        "interface": "select-dropdown",
+        "note": "Wer die Seite sehen darf (4 feste Stufen)",
+        "options": {
+          "choices": [
+            {
+              "text": "Öffentlich",
+              "value": "public"
+            },
+            {
+              "text": "Verein",
+              "value": "club"
+            },
+            {
+              "text": "Vereinsvertreter",
+              "value": "club_representative"
+            },
+            {
+              "text": "Verband",
+              "value": "federation"
+            }
+          ]
+        },
+        "readonly": false,
+        "required": true,
+        "searchable": true,
+        "sort": 3,
+        "special": null,
+        "translations": null,
+        "validation": null,
+        "validation_message": null,
+        "width": "half"
+      },
+      "schema": {
+        "name": "visibility",
+        "table": "pages",
+        "data_type": "character varying",
+        "default_value": "public",
+        "max_length": 255,
+        "numeric_precision": null,
+        "numeric_scale": null,
+        "is_nullable": false,
+        "is_unique": false,
+        "is_indexed": true,
+        "is_primary_key": false,
+        "is_generated": false,
+        "generation_expression": null,
+        "has_auto_increment": false,
+        "foreign_key_table": null,
+        "foreign_key_column": null
+      }
+    },
+    {
+      "collection": "pages",
+      "field": "title",
+      "type": "string",
+      "meta": {
+        "collection": "pages",
+        "conditions": null,
+        "display": null,
+        "display_options": null,
+        "field": "title",
+        "group": null,
+        "hidden": false,
+        "interface": "input",
+        "note": null,
+        "options": null,
+        "readonly": false,
+        "required": true,
+        "searchable": true,
+        "sort": 4,
+        "special": null,
+        "translations": null,
+        "validation": null,
+        "validation_message": null,
+        "width": "full"
+      },
+      "schema": {
+        "name": "title",
+        "table": "pages",
+        "data_type": "character varying",
+        "default_value": null,
+        "max_length": 255,
+        "numeric_precision": null,
+        "numeric_scale": null,
+        "is_nullable": false,
+        "is_unique": false,
+        "is_indexed": false,
+        "is_primary_key": false,
+        "is_generated": false,
+        "generation_expression": null,
+        "has_auto_increment": false,
+        "foreign_key_table": null,
+        "foreign_key_column": null
+      }
+    },
+    {
+      "collection": "pages",
+      "field": "slug",
+      "type": "string",
+      "meta": {
+        "collection": "pages",
+        "conditions": null,
+        "display": null,
+        "display_options": null,
+        "field": "slug",
+        "group": null,
+        "hidden": false,
+        "interface": "input",
+        "note": "Teil der URL; eindeutig unter derselben übergeordneten Seite",
+        "options": {
+          "slug": true,
+          "trim": true
+        },
+        "readonly": false,
+        "required": true,
+        "searchable": true,
+        "sort": 5,
+        "special": null,
+        "translations": null,
+        "validation": null,
+        "validation_message": null,
+        "width": "half"
+      },
+      "schema": {
+        "name": "slug",
+        "table": "pages",
+        "data_type": "character varying",
+        "default_value": null,
+        "max_length": 120,
+        "numeric_precision": null,
+        "numeric_scale": null,
+        "is_nullable": false,
+        "is_unique": false,
+        "is_indexed": true,
+        "is_primary_key": false,
+        "is_generated": false,
+        "generation_expression": null,
+        "has_auto_increment": false,
+        "foreign_key_table": null,
+        "foreign_key_column": null
+      }
+    },
+    {
+      "collection": "pages",
+      "field": "parent",
+      "type": "uuid",
+      "meta": {
+        "collection": "pages",
+        "conditions": null,
+        "display": "related-values",
+        "display_options": {
+          "template": "{{title}}"
+        },
+        "field": "parent",
+        "group": null,
+        "hidden": false,
+        "interface": "select-dropdown-m2o",
+        "note": "Übergeordnete Seite (leer = oberste Ebene)",
+        "options": {
+          "template": "{{title}}"
+        },
+        "readonly": false,
+        "required": false,
+        "searchable": true,
+        "sort": 6,
+        "special": [
+          "m2o"
+        ],
+        "translations": null,
+        "validation": null,
+        "validation_message": null,
+        "width": "half"
+      },
+      "schema": {
+        "name": "parent",
+        "table": "pages",
+        "data_type": "uuid",
+        "default_value": null,
+        "max_length": null,
+        "numeric_precision": null,
+        "numeric_scale": null,
+        "is_nullable": true,
+        "is_unique": false,
+        "is_indexed": false,
+        "is_primary_key": false,
+        "is_generated": false,
+        "generation_expression": null,
+        "has_auto_increment": false,
+        "foreign_key_table": "pages",
+        "foreign_key_column": "id"
+      }
+    },
+    {
+      "collection": "pages",
+      "field": "content",
+      "type": "text",
+      "meta": {
+        "collection": "pages",
+        "conditions": null,
+        "display": null,
+        "display_options": null,
+        "field": "content",
+        "group": null,
+        "hidden": false,
+        "interface": "input-rich-text-html",
+        "note": "Inhalt",
+        "options": {
+          "folder": "184b9625-f7cc-49dc-9e12-3b7ab98721d5",
+          "toolbar": [
+            "blockquote",
+            "bold",
+            "italic",
+            "underline",
+            "strikethrough",
+            "h2",
+            "h3",
+            "h4",
+            "numlist",
+            "bullist",
+            "removeformat",
+            "customLink",
+            "customImage",
+            "table",
+            "hr",
+            "code",
+            "fullscreen"
+          ]
+        },
+        "readonly": false,
+        "required": false,
+        "searchable": true,
+        "sort": 7,
+        "special": null,
+        "translations": null,
+        "validation": null,
+        "validation_message": null,
+        "width": "full"
+      },
+      "schema": {
+        "name": "content",
+        "table": "pages",
+        "data_type": "text",
+        "default_value": null,
+        "max_length": null,
+        "numeric_precision": null,
+        "numeric_scale": null,
+        "is_nullable": true,
+        "is_unique": false,
+        "is_indexed": false,
+        "is_primary_key": false,
+        "is_generated": false,
+        "generation_expression": null,
+        "has_auto_increment": false,
+        "foreign_key_table": null,
+        "foreign_key_column": null
+      }
+    },
+    {
+      "collection": "pages",
+      "field": "sort",
+      "type": "integer",
+      "meta": {
+        "collection": "pages",
+        "conditions": null,
+        "display": null,
+        "display_options": null,
+        "field": "sort",
+        "group": null,
+        "hidden": true,
+        "interface": "input",
+        "note": null,
+        "options": null,
+        "readonly": false,
+        "required": false,
+        "searchable": true,
+        "sort": 8,
+        "special": null,
+        "translations": null,
+        "validation": null,
+        "validation_message": null,
+        "width": "full"
+      },
+      "schema": {
+        "name": "sort",
+        "table": "pages",
+        "data_type": "integer",
+        "default_value": null,
+        "max_length": null,
+        "numeric_precision": 32,
+        "numeric_scale": 0,
+        "is_nullable": true,
+        "is_unique": false,
+        "is_indexed": false,
+        "is_primary_key": false,
+        "is_generated": false,
+        "generation_expression": null,
+        "has_auto_increment": false,
+        "foreign_key_table": null,
+        "foreign_key_column": null
+      }
+    },
+    {
+      "collection": "pages",
+      "field": "user_created",
+      "type": "uuid",
+      "meta": {
+        "collection": "pages",
+        "conditions": null,
+        "display": "user",
+        "display_options": null,
+        "field": "user_created",
+        "group": null,
+        "hidden": true,
+        "interface": "select-dropdown-m2o",
+        "note": null,
+        "options": {
+          "template": "{{first_name}} {{last_name}}"
+        },
+        "readonly": true,
+        "required": false,
+        "searchable": true,
+        "sort": 9,
+        "special": [
+          "user-created"
+        ],
+        "translations": null,
+        "validation": null,
+        "validation_message": null,
+        "width": "half"
+      },
+      "schema": {
+        "name": "user_created",
+        "table": "pages",
+        "data_type": "uuid",
+        "default_value": null,
+        "max_length": null,
+        "numeric_precision": null,
+        "numeric_scale": null,
+        "is_nullable": true,
+        "is_unique": false,
+        "is_indexed": false,
+        "is_primary_key": false,
+        "is_generated": false,
+        "generation_expression": null,
+        "has_auto_increment": false,
+        "foreign_key_table": "directus_users",
+        "foreign_key_column": "id"
+      }
+    },
+    {
+      "collection": "pages",
+      "field": "date_created",
+      "type": "timestamp",
+      "meta": {
+        "collection": "pages",
+        "conditions": null,
+        "display": null,
+        "display_options": null,
+        "field": "date_created",
+        "group": null,
+        "hidden": true,
+        "interface": "datetime",
+        "note": null,
+        "options": null,
+        "readonly": true,
+        "required": false,
+        "searchable": true,
+        "sort": 10,
+        "special": [
+          "date-created"
+        ],
+        "translations": null,
+        "validation": null,
+        "validation_message": null,
+        "width": "half"
+      },
+      "schema": {
+        "name": "date_created",
+        "table": "pages",
+        "data_type": "timestamp with time zone",
+        "default_value": null,
+        "max_length": null,
+        "numeric_precision": null,
+        "numeric_scale": null,
+        "is_nullable": true,
+        "is_unique": false,
+        "is_indexed": false,
+        "is_primary_key": false,
+        "is_generated": false,
+        "generation_expression": null,
+        "has_auto_increment": false,
+        "foreign_key_table": null,
+        "foreign_key_column": null
+      }
+    },
+    {
+      "collection": "pages",
+      "field": "date_updated",
+      "type": "timestamp",
+      "meta": {
+        "collection": "pages",
+        "conditions": null,
+        "display": null,
+        "display_options": null,
+        "field": "date_updated",
+        "group": null,
+        "hidden": true,
+        "interface": "datetime",
+        "note": null,
+        "options": null,
+        "readonly": true,
+        "required": false,
+        "searchable": true,
+        "sort": 11,
+        "special": [
+          "date-updated"
+        ],
+        "translations": null,
+        "validation": null,
+        "validation_message": null,
+        "width": "half"
+      },
+      "schema": {
+        "name": "date_updated",
+        "table": "pages",
+        "data_type": "timestamp with time zone",
+        "default_value": null,
+        "max_length": null,
+        "numeric_precision": null,
+        "numeric_scale": null,
+        "is_nullable": true,
+        "is_unique": false,
+        "is_indexed": false,
+        "is_primary_key": false,
+        "is_generated": false,
+        "generation_expression": null,
+        "has_auto_increment": false,
+        "foreign_key_table": null,
+        "foreign_key_column": null
+      }
+    },
+    {
+      "collection": "pages",
+      "field": "children",
+      "type": "alias",
+      "meta": {
+        "collection": "pages",
+        "conditions": null,
+        "display": null,
+        "display_options": null,
+        "field": "children",
+        "group": null,
+        "hidden": false,
+        "interface": "list-o2m",
+        "note": null,
+        "options": {
+          "template": "{{title}}"
+        },
+        "readonly": true,
+        "required": false,
+        "searchable": true,
+        "sort": 12,
+        "special": [
+          "o2m"
+        ],
+        "translations": null,
+        "validation": null,
+        "validation_message": null,
+        "width": "full"
+      }
+    },
+    {
+      "collection": "redirects",
+      "field": "id",
+      "type": "integer",
+      "meta": {
+        "collection": "redirects",
+        "conditions": null,
+        "display": null,
+        "display_options": null,
+        "field": "id",
+        "group": null,
+        "hidden": true,
+        "interface": "input",
+        "note": null,
+        "options": null,
+        "readonly": true,
+        "required": false,
+        "searchable": true,
+        "sort": 1,
+        "special": null,
+        "translations": null,
+        "validation": null,
+        "validation_message": null,
+        "width": "full"
+      },
+      "schema": {
+        "name": "id",
+        "table": "redirects",
+        "data_type": "integer",
+        "default_value": "nextval('redirects_id_seq'::regclass)",
+        "max_length": null,
+        "numeric_precision": 32,
+        "numeric_scale": 0,
+        "is_nullable": false,
+        "is_unique": true,
+        "is_indexed": false,
+        "is_primary_key": true,
+        "is_generated": false,
+        "generation_expression": null,
+        "has_auto_increment": true,
+        "foreign_key_table": null,
+        "foreign_key_column": null
+      }
+    },
+    {
+      "collection": "redirects",
+      "field": "from_path",
+      "type": "string",
+      "meta": {
+        "collection": "redirects",
+        "conditions": null,
+        "display": null,
+        "display_options": null,
+        "field": "from_path",
+        "group": null,
+        "hidden": false,
+        "interface": "input",
+        "note": "Alter Pfad inkl. evtl. Query, z. B. /index.php?option=com_content&id=12",
+        "options": null,
+        "readonly": false,
+        "required": true,
+        "searchable": true,
+        "sort": 2,
+        "special": null,
+        "translations": null,
+        "validation": null,
+        "validation_message": null,
+        "width": "full"
+      },
+      "schema": {
+        "name": "from_path",
+        "table": "redirects",
+        "data_type": "character varying",
+        "default_value": null,
+        "max_length": 255,
+        "numeric_precision": null,
+        "numeric_scale": null,
+        "is_nullable": false,
+        "is_unique": true,
+        "is_indexed": false,
+        "is_primary_key": false,
+        "is_generated": false,
+        "generation_expression": null,
+        "has_auto_increment": false,
+        "foreign_key_table": null,
+        "foreign_key_column": null
+      }
+    },
+    {
+      "collection": "redirects",
+      "field": "to_path",
+      "type": "string",
+      "meta": {
+        "collection": "redirects",
+        "conditions": null,
+        "display": null,
+        "display_options": null,
+        "field": "to_path",
+        "group": null,
+        "hidden": false,
+        "interface": "input",
+        "note": "Ziel, z. B. /verband/satzung oder https://…",
+        "options": null,
+        "readonly": false,
+        "required": true,
+        "searchable": true,
+        "sort": 3,
+        "special": null,
+        "translations": null,
+        "validation": null,
+        "validation_message": null,
+        "width": "full"
+      },
+      "schema": {
+        "name": "to_path",
+        "table": "redirects",
+        "data_type": "character varying",
+        "default_value": null,
+        "max_length": 255,
+        "numeric_precision": null,
+        "numeric_scale": null,
+        "is_nullable": false,
+        "is_unique": false,
+        "is_indexed": false,
+        "is_primary_key": false,
+        "is_generated": false,
+        "generation_expression": null,
+        "has_auto_increment": false,
+        "foreign_key_table": null,
+        "foreign_key_column": null
+      }
+    },
+    {
+      "collection": "redirects",
+      "field": "permanent",
+      "type": "boolean",
+      "meta": {
+        "collection": "redirects",
+        "conditions": null,
+        "display": null,
+        "display_options": null,
+        "field": "permanent",
+        "group": null,
+        "hidden": false,
+        "interface": "boolean",
+        "note": "301 (dauerhaft) statt 302",
+        "options": null,
+        "readonly": false,
+        "required": false,
+        "searchable": true,
+        "sort": 4,
+        "special": null,
+        "translations": null,
+        "validation": null,
+        "validation_message": null,
+        "width": "half"
+      },
+      "schema": {
+        "name": "permanent",
+        "table": "redirects",
+        "data_type": "boolean",
+        "default_value": true,
+        "max_length": null,
+        "numeric_precision": null,
+        "numeric_scale": null,
+        "is_nullable": false,
+        "is_unique": false,
+        "is_indexed": false,
+        "is_primary_key": false,
+        "is_generated": false,
+        "generation_expression": null,
+        "has_auto_increment": false,
+        "foreign_key_table": null,
+        "foreign_key_column": null
+      }
+    },
+    {
+      "collection": "redirects",
+      "field": "active",
+      "type": "boolean",
+      "meta": {
+        "collection": "redirects",
+        "conditions": null,
+        "display": null,
+        "display_options": null,
+        "field": "active",
+        "group": null,
+        "hidden": false,
+        "interface": "boolean",
+        "note": null,
+        "options": null,
+        "readonly": false,
+        "required": false,
+        "searchable": true,
+        "sort": 5,
+        "special": null,
+        "translations": null,
+        "validation": null,
+        "validation_message": null,
+        "width": "half"
+      },
+      "schema": {
+        "name": "active",
+        "table": "redirects",
+        "data_type": "boolean",
+        "default_value": true,
+        "max_length": null,
+        "numeric_precision": null,
+        "numeric_scale": null,
+        "is_nullable": false,
+        "is_unique": false,
+        "is_indexed": false,
+        "is_primary_key": false,
+        "is_generated": false,
+        "generation_expression": null,
+        "has_auto_increment": false,
+        "foreign_key_table": null,
+        "foreign_key_column": null
+      }
+    },
+    {
+      "collection": "redirects",
+      "field": "note",
+      "type": "text",
+      "meta": {
+        "collection": "redirects",
+        "conditions": null,
+        "display": null,
+        "display_options": null,
+        "field": "note",
+        "group": null,
+        "hidden": false,
+        "interface": "input-multiline",
+        "note": null,
+        "options": null,
+        "readonly": false,
+        "required": false,
+        "searchable": true,
+        "sort": 6,
+        "special": null,
+        "translations": null,
+        "validation": null,
+        "validation_message": null,
+        "width": "full"
+      },
+      "schema": {
+        "name": "note",
+        "table": "redirects",
+        "data_type": "text",
+        "default_value": null,
+        "max_length": null,
+        "numeric_precision": null,
+        "numeric_scale": null,
+        "is_nullable": true,
+        "is_unique": false,
+        "is_indexed": false,
+        "is_primary_key": false,
+        "is_generated": false,
+        "generation_expression": null,
+        "has_auto_increment": false,
+        "foreign_key_table": null,
+        "foreign_key_column": null
+      }
+    },
+    {
+      "collection": "redirects",
+      "field": "date_created",
+      "type": "timestamp",
+      "meta": {
+        "collection": "redirects",
+        "conditions": null,
+        "display": null,
+        "display_options": null,
+        "field": "date_created",
+        "group": null,
+        "hidden": true,
+        "interface": "datetime",
+        "note": null,
+        "options": null,
+        "readonly": true,
+        "required": false,
+        "searchable": true,
+        "sort": 7,
+        "special": [
+          "date-created"
+        ],
+        "translations": null,
+        "validation": null,
+        "validation_message": null,
+        "width": "half"
+      },
+      "schema": {
+        "name": "date_created",
+        "table": "redirects",
+        "data_type": "timestamp with time zone",
+        "default_value": null,
+        "max_length": null,
+        "numeric_precision": null,
+        "numeric_scale": null,
+        "is_nullable": true,
+        "is_unique": false,
+        "is_indexed": false,
+        "is_primary_key": false,
+        "is_generated": false,
+        "generation_expression": null,
+        "has_auto_increment": false,
+        "foreign_key_table": null,
+        "foreign_key_column": null
+      }
     }
   ],
   "systemFields": [
@@ -6980,6 +9626,106 @@
     }
   ],
   "relations": [
+    {
+      "collection": "articles",
+      "field": "category",
+      "related_collection": "article_categories",
+      "meta": {
+        "junction_field": null,
+        "many_collection": "articles",
+        "many_field": "category",
+        "one_allowed_collections": null,
+        "one_collection": "article_categories",
+        "one_collection_field": null,
+        "one_deselect_action": "nullify",
+        "one_field": null,
+        "sort_field": null
+      },
+      "schema": {
+        "table": "articles",
+        "column": "category",
+        "foreign_key_table": "article_categories",
+        "foreign_key_column": "id",
+        "constraint_name": "articles_category_foreign",
+        "on_update": "NO ACTION",
+        "on_delete": "NO ACTION"
+      }
+    },
+    {
+      "collection": "articles",
+      "field": "featured_image",
+      "related_collection": "directus_files",
+      "meta": {
+        "junction_field": null,
+        "many_collection": "articles",
+        "many_field": "featured_image",
+        "one_allowed_collections": null,
+        "one_collection": "directus_files",
+        "one_collection_field": null,
+        "one_deselect_action": "nullify",
+        "one_field": null,
+        "sort_field": null
+      },
+      "schema": {
+        "table": "articles",
+        "column": "featured_image",
+        "foreign_key_table": "directus_files",
+        "foreign_key_column": "id",
+        "constraint_name": "articles_featured_image_foreign",
+        "on_update": "NO ACTION",
+        "on_delete": "SET NULL"
+      }
+    },
+    {
+      "collection": "articles",
+      "field": "author",
+      "related_collection": "directus_users",
+      "meta": {
+        "junction_field": null,
+        "many_collection": "articles",
+        "many_field": "author",
+        "one_allowed_collections": null,
+        "one_collection": "directus_users",
+        "one_collection_field": null,
+        "one_deselect_action": "nullify",
+        "one_field": null,
+        "sort_field": null
+      },
+      "schema": {
+        "table": "articles",
+        "column": "author",
+        "foreign_key_table": "directus_users",
+        "foreign_key_column": "id",
+        "constraint_name": "articles_author_foreign",
+        "on_update": "NO ACTION",
+        "on_delete": "SET NULL"
+      }
+    },
+    {
+      "collection": "articles",
+      "field": "user_created",
+      "related_collection": "directus_users",
+      "meta": {
+        "junction_field": null,
+        "many_collection": "articles",
+        "many_field": "user_created",
+        "one_allowed_collections": null,
+        "one_collection": "directus_users",
+        "one_collection_field": null,
+        "one_deselect_action": "nullify",
+        "one_field": null,
+        "sort_field": null
+      },
+      "schema": {
+        "table": "articles",
+        "column": "user_created",
+        "foreign_key_table": "directus_users",
+        "foreign_key_column": "id",
+        "constraint_name": "articles_user_created_foreign",
+        "on_update": "NO ACTION",
+        "on_delete": "SET NULL"
+      }
+    },
     {
       "collection": "audit_logs",
       "field": "actor",
@@ -7676,6 +10422,131 @@
         "foreign_key_table": "directus_users",
         "foreign_key_column": "id",
         "constraint_name": "invitations_registered_user_foreign",
+        "on_update": "NO ACTION",
+        "on_delete": "SET NULL"
+      }
+    },
+    {
+      "collection": "navigation_items",
+      "field": "parent",
+      "related_collection": "navigation_items",
+      "meta": {
+        "junction_field": null,
+        "many_collection": "navigation_items",
+        "many_field": "parent",
+        "one_allowed_collections": null,
+        "one_collection": "navigation_items",
+        "one_collection_field": null,
+        "one_deselect_action": "nullify",
+        "one_field": "children",
+        "sort_field": "sort"
+      },
+      "schema": {
+        "table": "navigation_items",
+        "column": "parent",
+        "foreign_key_table": "navigation_items",
+        "foreign_key_column": "id",
+        "constraint_name": "navigation_items_parent_foreign",
+        "on_update": "NO ACTION",
+        "on_delete": "CASCADE"
+      }
+    },
+    {
+      "collection": "navigation_items",
+      "field": "page",
+      "related_collection": "pages",
+      "meta": {
+        "junction_field": null,
+        "many_collection": "navigation_items",
+        "many_field": "page",
+        "one_allowed_collections": null,
+        "one_collection": "pages",
+        "one_collection_field": null,
+        "one_deselect_action": "nullify",
+        "one_field": null,
+        "sort_field": null
+      },
+      "schema": {
+        "table": "navigation_items",
+        "column": "page",
+        "foreign_key_table": "pages",
+        "foreign_key_column": "id",
+        "constraint_name": "navigation_items_page_foreign",
+        "on_update": "NO ACTION",
+        "on_delete": "SET NULL"
+      }
+    },
+    {
+      "collection": "navigation_items",
+      "field": "article",
+      "related_collection": "articles",
+      "meta": {
+        "junction_field": null,
+        "many_collection": "navigation_items",
+        "many_field": "article",
+        "one_allowed_collections": null,
+        "one_collection": "articles",
+        "one_collection_field": null,
+        "one_deselect_action": "nullify",
+        "one_field": null,
+        "sort_field": null
+      },
+      "schema": {
+        "table": "navigation_items",
+        "column": "article",
+        "foreign_key_table": "articles",
+        "foreign_key_column": "id",
+        "constraint_name": "navigation_items_article_foreign",
+        "on_update": "NO ACTION",
+        "on_delete": "SET NULL"
+      }
+    },
+    {
+      "collection": "pages",
+      "field": "parent",
+      "related_collection": "pages",
+      "meta": {
+        "junction_field": null,
+        "many_collection": "pages",
+        "many_field": "parent",
+        "one_allowed_collections": null,
+        "one_collection": "pages",
+        "one_collection_field": null,
+        "one_deselect_action": "nullify",
+        "one_field": "children",
+        "sort_field": "sort"
+      },
+      "schema": {
+        "table": "pages",
+        "column": "parent",
+        "foreign_key_table": "pages",
+        "foreign_key_column": "id",
+        "constraint_name": "pages_parent_foreign",
+        "on_update": "NO ACTION",
+        "on_delete": "NO ACTION"
+      }
+    },
+    {
+      "collection": "pages",
+      "field": "user_created",
+      "related_collection": "directus_users",
+      "meta": {
+        "junction_field": null,
+        "many_collection": "pages",
+        "many_field": "user_created",
+        "one_allowed_collections": null,
+        "one_collection": "directus_users",
+        "one_collection_field": null,
+        "one_deselect_action": "nullify",
+        "one_field": null,
+        "sort_field": null
+      },
+      "schema": {
+        "table": "pages",
+        "column": "user_created",
+        "foreign_key_table": "directus_users",
+        "foreign_key_column": "id",
+        "constraint_name": "pages_user_created_foreign",
         "on_update": "NO ACTION",
         "on_delete": "SET NULL"
       }

@@ -34,16 +34,17 @@ Implementation docs (read before touching the area): [docs/README.md](docs/READM
 [02-architecture](docs/02-architecture.md) (auth/session design, Directus licence),
 [03-data-model](docs/03-data-model.md), [04-authorization](docs/04-authorization.md),
 [05-workflows](docs/05-workflows.md), [06-api-specification](docs/06-api-specification.md),
-[07-frontend-specification](docs/07-frontend-specification.md),
+[07-frontend-specification](docs/07-frontend-specification.md), [08-ui-ux](docs/08-ui-ux.md),
+[redaktion](docs/redaktion.md) (German editor guide),
 [09-infrastructure](docs/09-infrastructure.md), [10-testing](docs/10-testing.md),
 [decisions](docs/decisions/README.md), [DIRECTUS_API](docs/DIRECTUS_API.md) (agent access to local Directus).
 
 ## Current status
 
-Phases 0–4 are done: foundation; schema/roles/login/Fastify auth; clubs, invitations (6-digit
-verification), memberships; events with review workflow, removal, files, schedule, history;
-public calendar (list/month/year, filters, slug detail pages, WebCal feeds). **Next: Phase 5** —
-CMS and public content (news, pages, database-managed navigation, club pages, redirects). Do not
+Phases 0–5 are done: foundation; schema/roles/login/Fastify auth; clubs, invitations,
+memberships; events with review workflow; public calendar + WebCal; CMS (news, hierarchical pages,
+database navigation, club pages, redirects, public media). **Next: Phase 6** — internal area and
+protected content (internal layout/navigation, visibility levels for pages and files). Do not
 start later phases prematurely. Keep this section current.
 
 ## Repository map
@@ -132,6 +133,12 @@ Run `pnpm lint && pnpm typecheck && pnpm test` before declaring work done (CI ru
 - **Domain modules (Fastify):** `modules/<domain>/<domain>-rules.ts` (pure, unit-tested) +
   `<domain>-service.ts` (Directus I/O via the service client, audit, emails). Multi-step writes
   that must be atomic use one nested Directus write; invariants are unique constraints.
+- **CMS HTML** is sanitized in Fastify (`modules/content/sanitize.ts`) and rendered only via
+  `RichContent`. Public files only from the "Öffentliche Medien" folder (`/medien/<id>`).
+- **Real status codes:** production always streams a prerendered shell (HTTP 200). 404/3xx for
+  content paths are resolved in `src/proxy.ts` via `GET /public/resolve` – add new dynamic public
+  routes to `/public/resolve` and `lib/content-resolution.ts`. Verify status codes on a
+  production build (`pnpm stack:up:app`), not only in dev.
 - **Emails** are German plain text in `modules/notifications/templates.ts`, sent after success.
 - **Events:** all permission/status logic lives in `modules/events/event-rules.ts`
   (`allowedActions`); the API returns `allowedActions`/`lockedFields`, and the UI only renders

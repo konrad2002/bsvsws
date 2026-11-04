@@ -75,7 +75,7 @@ test("visitor finds the event in list, filters, month view, detail page and feed
   await page.getByRole("link", { name: published }).click();
   await expect(page.getByRole("heading", { name: published, level: 1 })).toBeVisible();
   await expect(page.getByText("Mit Grillen und Staffeln.")).toBeVisible();
-  await expect(page.getByText("BSV-SWS")).toBeVisible();
+  await expect(page.locator("dd", { hasText: "BSV-SWS" }).filter({ visible: true })).toBeVisible();
   expect(page.url()).toMatch(new RegExp(`/veranstaltungen/${date}-e2e-sommerfest-${run}$`));
 
   // feeds

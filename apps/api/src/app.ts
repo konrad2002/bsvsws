@@ -12,6 +12,7 @@ import {
   type IdentityProvider,
 } from "./modules/auth/identity-provider.js";
 import { createClubService } from "./modules/clubs/club-service.js";
+import { createPublicContentService } from "./modules/content/public-content-service.js";
 import { createEventService, EVENT_FILE_MAX_BYTES } from "./modules/events/event-service.js";
 import { createInvitationService } from "./modules/invitations/invitation-service.js";
 import { createMembershipService } from "./modules/memberships/membership-service.js";
@@ -23,6 +24,7 @@ import { invitationRoutes } from "./routes/invitations.js";
 import { meRoutes } from "./routes/me.js";
 import { membershipRoutes } from "./routes/memberships.js";
 import { publicRoutes } from "./routes/public.js";
+import { publicContentRoutes } from "./routes/public-content.js";
 
 export interface AppDeps {
   /** Overrides for tests; default to the real Directus/SMTP implementations. */
@@ -96,6 +98,12 @@ export async function buildApp(env: Env, options: FastifyServerOptions = {}, dep
   });
 
   const publicEvents = createPublicEventService({ client, webPublicUrl: env.WEB_PUBLIC_URL, now });
+  const publicContent = createPublicContentService({
+    client,
+    directusUrl: env.DIRECTUS_URL,
+    serviceToken: env.DIRECTUS_SERVICE_TOKEN,
+    now,
+  });
 
   await app.register(healthRoutes, { directusUrl: env.DIRECTUS_URL });
   await app.register(meRoutes, { auth });
@@ -104,6 +112,7 @@ export async function buildApp(env: Env, options: FastifyServerOptions = {}, dep
   await app.register(invitationRoutes, { auth, invitations });
   await app.register(eventRoutes, { auth, events });
   await app.register(publicRoutes, { events: publicEvents });
+  await app.register(publicContentRoutes, { content: publicContent });
 
   return app;
 }

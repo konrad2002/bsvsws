@@ -31,3 +31,12 @@ export function formatFileSize(bytes: number | null) {
   if (bytes < 1024 * 1024) return `${Math.max(1, Math.round(bytes / 1024))} KB`;
   return `${(bytes / 1024 / 1024).toFixed(1).replace(".", ",")} MB`;
 }
+
+const berlinDateFmt = new Intl.DateTimeFormat("de-DE", {
+  day: "2-digit",
+  month: "long",
+  year: "numeric",
+  timeZone: "Europe/Berlin",
+});
+/** Timestamp → "4. November 2026" in Europe/Berlin (news dates). */
+export const formatPublishedDate = (iso: string) => berlinDateFmt.format(new Date(iso));

@@ -62,9 +62,23 @@ people) are never part of the public API response.
 ## Rendering
 
 Public pages are **server-side rendered on every request** (no data cache), so changes to
-published events are visible immediately (spec §7.9). Request-dependent parts sit inside
-`<Suspense>` (Cache Components). If traffic ever requires it, add `use cache` with on-demand
-invalidation – not needed now.
+published events and CMS content are visible immediately (spec §7.9). Request-dependent parts sit
+inside `<Suspense>` (Cache Components). If traffic ever requires it, add `use cache` with
+on-demand invalidation – not needed now.
+
+**HTTP status codes:** a streamed response is fixed at 200, and in production the prerendered
+shell (Partial Prerendering) is always streamed – a `notFound()` in the page cannot change that.
+Therefore **Proxy** (`src/proxy.ts`) resolves content paths before rendering via the fast API
+call `GET /public/resolve` (detail routes and the CMS catch-all; only full page loads, not client
+navigations):
+
+- legacy URL in the redirect table → real **307/308**;
+- missing/unpublished content → Proxy renders the page once internally (regular not-found UI with
+  full layout; loop guard header `x-bsv-render-404`) and returns it with a real **404** – needed
+  so link checkers can find broken links during the migration;
+- API unreachable → fail open (normal rendering; 200 + `noindex` for missing content).
+
+The detail pages additionally load their data at the top level (`instant = false`) as fallback.
 
 ## Conventions
 

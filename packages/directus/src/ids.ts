@@ -22,3 +22,8 @@ export const DIRECTUS_POLICY_IDS = {
 } as const;
 
 export const DIRECTUS_SERVICE_USER_ID = "ddfc5c33-37d9-4ba7-9daf-277f3c0e9f5c";
+
+export const DIRECTUS_FOLDER_IDS = {
+  /** Only files in this folder are served publicly (CMS images/downloads). Editor uploads land here. */
+  publicMedia: "184b9625-f7cc-49dc-9e12-3b7ab98721d5",
+} as const;

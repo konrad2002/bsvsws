@@ -3,7 +3,6 @@ import type { PublicEventDetail } from "@bsv-sws/validation";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Suspense } from "react";
 import { eventTime } from "@/components/public/events/event-list-item";
 import { getPublicEvent } from "@/lib/data/public-events";
 import { formatDate, formatDateRange, formatFileSize } from "@/lib/format";
@@ -22,14 +21,6 @@ export async function generateMetadata({
   };
 }
 
-export default function PublicEventPage({ params }: PageProps<"/veranstaltungen/[slug]">) {
-  return (
-    <Suspense fallback={<p>Veranstaltung wird geladen …</p>}>
-      <EventDetail params={params} />
-    </Suspense>
-  );
-}
-
 function Info({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <>
@@ -39,7 +30,16 @@ function Info({ label, children }: { label: string; children: React.ReactNode })
   );
 }
 
-async function EventDetail({ params }: Pick<PageProps<"/veranstaltungen/[slug]">, "params">) {
+/**
+ * Real HTTP status codes (404 / 3xx) are resolved in Proxy before rendering
+ * (src/proxy.ts). Loading data at the top level here is the fallback (and gives
+ * correct codes in dev); `instant = false` allows this blocking render.
+ */
+export const instant = false;
+
+export default async function PublicEventPage({
+  params,
+}: Pick<PageProps<"/veranstaltungen/[slug]">, "params">) {
   const { slug } = await params;
   const event = validSlug(slug) ? await getPublicEvent(slug) : null;
   if (!event) notFound();

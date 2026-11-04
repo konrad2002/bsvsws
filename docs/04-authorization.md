@@ -54,8 +54,10 @@ if a licence lapses later, Directus ignores the hardened rules and registration 
 until `directus:apply` is re-run.
 
 - Federation users can **look at** workflow data in Studio, but all changes go through the
-  application so that business rules and the audit log apply. Content collections (news,
-  pages, navigation) get Studio write access in Phase 5.
+  application so that business rules and the audit log apply. CMS content (news, pages,
+  navigation, redirects, media uploads) is edited directly in Studio.
+- Public CMS reads go through Fastify, which applies status, publication date, visibility and the
+  public-media-folder rule (no Directus public permissions).
 - Nobody except administrators can update or delete audit logs, and nobody can delete
   memberships or invitations (history is kept by status changes).
 - The Benutzer role has no Directus permissions. `/users/me` still returns the user ID, which is

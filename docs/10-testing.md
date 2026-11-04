@@ -114,3 +114,18 @@ Set an address under Studio → Benachrichtigungen → _event_review_recipients_
    `/kalender/alle.ics`). Times must match (Europe/Berlin), all-day events span the right days.
 5. Unpublish the event → the page returns 404 and it disappears from the list and (after the
    client refreshes) from the subscribed calendar.
+
+## Manual test: CMS (Phase 5)
+
+Follow [redaktion.md](redaktion.md) as `verband@example.com` in Directus Studio
+(http://localhost:8055):
+
+1. Create a news article with image (lands in "Öffentliche Medien"), publish → visible on `/`,
+   `/news`, its category page and `/news/<kürzel>`. Set the date in the future → disappears.
+2. Edit the page _Verband › Vorstand & Fachwarte_ → `/verband/vorstand` shows the change
+   immediately. Set _Verband_ to draft → the whole subtree and its menu entries disappear.
+3. Reorder / nest / add navigation entries (page, internal path, external URL) → header changes.
+4. Add a redirect `/alt` → `/news`, open http://localhost:3000/alt → redirected (308).
+5. Open `/vereine` and a club page; change the club's data in the internal area → page reflects it.
+6. Try a URL that does not exist → not-found page with navigation and **HTTP 404**
+   (check with `curl -I`, ideally against the production build: `pnpm stack:up:app`).

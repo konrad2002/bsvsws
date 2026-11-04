@@ -79,6 +79,20 @@ when present (`apps/web/src/lib/asset-proxy.ts`):
 - Rendering: SSR per request without data cache (immediate visibility of changes); see
   [07-frontend-specification.md](07-frontend-specification.md).
 
+### CMS content (Phase 5)
+
+- Federation edits news, pages, navigation and redirects in Directus Studio; the website reads
+  them through Fastify `/public/*` (status, publication date, page-tree and visibility rules in
+  `modules/content/content-rules.ts`, unit-tested).
+- Rich text is HTML from the Directus WYSIWYG, **sanitized in Fastify** (`sanitize-html`
+  allowlist) before it reaches the browser; Directus asset URLs are rewritten to `/medien/<id>`.
+- Public media are restricted to one Directus folder ("Öffentliche Medien"), set as upload target
+  in the editor fields; the media proxy refuses every other file.
+- Hierarchical pages and redirects are served by a catch-all route. Real HTTP status codes (404,
+  307/308) are resolved in the Next.js **Proxy** before rendering (`GET /public/resolve`), because
+  production always streams a prerendered shell with 200 – see
+  [07-frontend-specification.md](07-frontend-specification.md#rendering).
+
 ### API conventions
 
 - Uniform error body `{ error: { code, message, details? } }` (`apiErrorSchema`); German

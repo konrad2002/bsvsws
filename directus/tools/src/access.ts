@@ -73,9 +73,24 @@ export const MANAGED_COLLECTIONS = [
   "event_schedule_entries",
   "event_files",
   "event_removal_requests",
+  "articles",
+  "article_categories",
+  "pages",
+  "navigation_items",
+  "redirects",
   "directus_users",
   "directus_files",
+  "directus_folders",
 ] as const;
+
+/** Content collections the federation edits in Studio (incl. delete). */
+export const STUDIO_CONTENT_COLLECTIONS = [
+  "articles",
+  "article_categories",
+  "pages",
+  "navigation_items",
+  "redirects",
+];
 
 /** Child collections the service account may delete rows from (replaced via nested writes). */
 export const DELETABLE_CHILD_COLLECTIONS = [
@@ -122,6 +137,11 @@ export const POLICIES: PolicyDef[] = [
       read("notification_settings"),
       write("notification_settings", "update"),
       ...crud("event_categories"),
+      // CMS (spec §3.3: articles and navigation are managed in Directus Studio).
+      ...STUDIO_CONTENT_COLLECTIONS.flatMap((c) => crud(c, true)),
+      write("directus_files", "create"),
+      write("directus_files", "update"),
+      read("directus_folders"),
     ],
   },
   {
@@ -151,6 +171,7 @@ export const POLICIES: PolicyDef[] = [
       ...crud("event_files", true),
       ...crud("event_removal_requests"),
       read("event_categories"),
+      ...STUDIO_CONTENT_COLLECTIONS.map((c) => read(c)),
       // Registration via invitation creates/activates accounts (role is set by Fastify).
       read("directus_users"),
       {
@@ -238,10 +259,3 @@ export function assertNoCustomRules(defs: PermissionDef[]): void {
     }
   }
 }
-
-/** Initial base data, inserted if missing (never overwritten – administrators may rename). */
-export const BASE_EVENT_CATEGORIES = [
-  { slug: "wettkampf", name: "Wettkampf", sort: 1 },
-  { slug: "kampfrichter", name: "Kampfrichter", sort: 2 },
-  { slug: "verband", name: "Verband", sort: 3 },
-];

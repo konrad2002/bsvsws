@@ -17,6 +17,8 @@ import {
   customEndpoint,
   deletePermissions,
   readItems,
+  readSingleton,
+  updateSingleton,
   readPermissions,
   readPolicies,
   readRoles,
@@ -32,7 +34,6 @@ import { readFile } from "node:fs/promises";
 import { DIRECTUS_POLICY_IDS } from "@bsv-sws/directus";
 import {
   assertNoCustomRules,
-  BASE_EVENT_CATEGORIES,
   MANAGED_COLLECTIONS,
   POLICIES,
   PUBLIC_PERMISSIONS,
@@ -42,6 +43,17 @@ import {
   type PermissionDef,
   type PermissionRule,
 } from "./access.js";
+import {
+  BASE_ARTICLE_CATEGORIES,
+  BASE_EVENT_CATEGORIES,
+  BASE_FOOTER_NAVIGATION,
+  BASE_MAIN_NAVIGATION,
+  BASE_PAGES,
+  placeholderContent,
+  PUBLIC_MEDIA_FOLDER,
+  type BaseNavItem,
+  type BasePage,
+} from "./base-data.js";
 import { adminClient, env, SNAPSHOT_PATH } from "./env.js";
 import { findDestructiveChanges, summarizeDiff, type SchemaDiff } from "./schema-diff.js";
 
@@ -185,18 +197,143 @@ async function applyRoles() {
   }
 }
 
-/** Inserts missing base data (matched by slug); never overwrites administrator edits. */
-async function applyBaseData() {
+/** Inserts categories missing by slug. */
+async function ensureCategories(
+  collection: string,
+  categories: { slug: string; name: string; sort: number }[],
+) {
   const existing = (await client.request(
-    readItems("event_categories", { fields: ["slug"], limit: -1 }),
+    readItems(collection as never, { fields: ["slug"], limit: -1 } as never),
   )) as { slug: string }[];
   const have = new Set(existing.map((c) => c.slug));
-  for (const category of BASE_EVENT_CATEGORIES) {
+  for (const category of categories) {
     if (have.has(category.slug)) continue;
-    log(`Base data: event category "${category.name}"`);
+    log(`Base data: ${collection} "${category.name}"`);
     if (!dryRun)
-      await client.request(createItem("event_categories", { ...category, active: true }));
+      await client.request(createItem(collection as never, { ...category, active: true } as never));
   }
+}
+
+/**
+ * Inserts missing base data; never overwrites administrator edits (owner decision:
+ * all environments). Pages / navigation are only created if the collection is empty.
+ */
+async function applyBaseData() {
+  // Directus creates a singleton's row lazily on the first update – concurrent
+  // first updates create several rows (verified). Create the one row up front.
+  const settings = (await client.request(readSingleton("notification_settings" as never))) as {
+    id?: number;
+  } | null;
+  if (!settings?.id) {
+    log("Base data: notification_settings row");
+    if (!dryRun)
+      await client.request(
+        updateSingleton(
+          "notification_settings" as never,
+          { representative_joined_recipients: null } as never,
+        ),
+      );
+  }
+
+  await ensureCategories("event_categories", BASE_EVENT_CATEGORIES);
+  await ensureCategories("article_categories", BASE_ARTICLE_CATEGORIES);
+
+  const folders = await client.request(
+    customEndpoint<{ id: string }[]>({
+      path: "/folders",
+      method: "GET",
+      params: { filter: { id: { _eq: PUBLIC_MEDIA_FOLDER.id } }, fields: ["id"] },
+    }),
+  );
+  if (folders.length === 0) {
+    log(`Base data: folder "${PUBLIC_MEDIA_FOLDER.name}"`);
+    if (!dryRun) {
+      await client.request(
+        customEndpoint({
+          path: "/folders",
+          method: "POST",
+          body: JSON.stringify(PUBLIC_MEDIA_FOLDER),
+        }),
+      );
+    }
+  }
+
+  const pageIds = new Map<string, string>(); // "verband/vorstand" → id
+  const existingPages = (await client.request(
+    readItems("pages" as never, { fields: ["id"], limit: 1 } as never),
+  )) as unknown[];
+  if (existingPages.length === 0) {
+    log(`Base data: ${BASE_PAGES.length} top-level pages with children`);
+    const createPages = async (pages: BasePage[], parent: { id: string; path: string } | null) => {
+      for (const [i, page] of pages.entries()) {
+        const path = parent ? `${parent.path}/${page.slug}` : page.slug;
+        if (dryRun) continue;
+        const created = (await client.request(
+          createItem(
+            "pages" as never,
+            {
+              status: "published",
+              visibility: "public",
+              title: page.title,
+              slug: page.slug,
+              parent: parent?.id ?? null,
+              content: placeholderContent(page.title),
+              sort: i + 1,
+            } as never,
+          ),
+        )) as { id: string };
+        pageIds.set(path, created.id);
+        if (page.children) await createPages(page.children, { id: created.id, path });
+      }
+    };
+    await createPages(BASE_PAGES, null);
+  } else {
+    const all = (await client.request(
+      readItems("pages" as never, { fields: ["id", "slug", "parent"], limit: -1 } as never),
+    )) as { id: string; slug: string; parent: string | null }[];
+    const byId = new Map(all.map((p) => [p.id, p]));
+    const pathOf = (p: { slug: string; parent: string | null }): string =>
+      p.parent && byId.get(p.parent) ? `${pathOf(byId.get(p.parent)!)}/${p.slug}` : p.slug;
+    for (const p of all) pageIds.set(pathOf(p), p.id);
+  }
+
+  const existingNav = (await client.request(
+    readItems("navigation_items" as never, { fields: ["id"], limit: 1 } as never),
+  )) as unknown[];
+  if (existingNav.length > 0) return;
+  log("Base data: main and footer navigation");
+  if (dryRun) return;
+  const createNav = async (
+    menu: "main" | "footer",
+    items: BaseNavItem[],
+    parent: number | null,
+  ) => {
+    for (const [i, item] of items.entries()) {
+      const target =
+        "route" in item
+          ? { link_type: "route", route: item.route }
+          : pageIds.get(item.pagePath)
+            ? { link_type: "page", page: pageIds.get(item.pagePath) }
+            : { link_type: "none" };
+      const created = (await client.request(
+        createItem(
+          "navigation_items" as never,
+          {
+            menu,
+            label: item.label,
+            parent,
+            sort: i + 1,
+            visibility: "public",
+            active: true,
+            ...target,
+          } as never,
+        ),
+      )) as { id: number };
+      if (item.children) await createNav(menu, item.children, created.id);
+    }
+  };
+  await createNav("main", BASE_MAIN_NAVIGATION, null);
+  await createNav("footer", BASE_FOOTER_NAVIGATION, null);
 }
 
 async function applyServiceUser() {

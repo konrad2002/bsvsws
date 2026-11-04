@@ -83,6 +83,8 @@ active membership fail at the database level.
 
 ### `notification_settings` (singleton)
 
+The single row is created by `directus:apply` (Directus would otherwise create singleton rows lazily, and concurrent first writes produce duplicates).
+
 | Field                              | Type       | Notes                                                                                                                    |
 | ---------------------------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------ |
 | `representative_joined_recipients` | csv (tags) | Emails notified when a new representative joins (spec §5.7). Independent of permissions; edited by federation in Studio. |
@@ -156,6 +158,41 @@ Event history is not a separate collection: it is read from `audit_logs`
 (`entity_type = events`) – see [05-workflows.md](05-workflows.md#event-history-spec-194).
 
 > Directus returns `bigInteger` primary keys (e.g. `audit_logs.id`) as **strings**.
+
+## Phase 5 collections (CMS)
+
+### `articles`
+
+`status` (`draft` \| `published` \| `archived`), `published_at` (required, default now; future =
+scheduled), `title`, `slug` (**unique**), `category` (M2O `article_categories`, **required** –
+exactly one), `teaser`, `content` (WYSIWYG HTML, uploads → public media folder),
+`featured_image`, `author` (M2O users, optional), `author_name` (optional override),
+`user_created`, timestamps.
+
+### `article_categories`
+
+`name` (unique), `slug` (unique), `active` (archive flag), `sort`.
+
+### `pages`
+
+`status` (`draft` \| `published`), `visibility` (`public` \| `club` \| `club_representative` \|
+`federation`), `title`, `slug` (unique per parent – enforced at read time, first by sort wins),
+`parent` (M2O self; O2M alias `children`), `content` (WYSIWYG HTML), `sort`.
+
+### `navigation_items`
+
+`menu` (`main` \| `footer`), `label`, `parent` (M2O self, cascade; alias `children`), `link_type`
+(`page` \| `article` \| `route` \| `url` \| `none`), `page`, `article`, `route`, `url`,
+`visibility`, `open_in_new_tab`, `active`, `sort`.
+
+### `redirects`
+
+`from_path` (**unique**, may include a query), `to_path`, `permanent`, `active`, `note`.
+
+### Directus folder "Öffentliche Medien"
+
+Fixed id (`DIRECTUS_FOLDER_IDS.publicMedia`), created by `directus:apply`. The only folder whose
+files are publicly served.
 
 ## Changing the schema
 
