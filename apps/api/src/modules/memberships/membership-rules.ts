@@ -31,6 +31,25 @@ export function assertCanChangeRole(
   }
 }
 
+/**
+ * Spec §19.7 / §4.4: the configurable maximum binds representatives promoting
+ * members; the federation may override representative assignments. Null = unlimited.
+ */
+export function assertWithinRepresentativeLimit(
+  ctx: AuthContext,
+  newRole: MembershipRole,
+  limit: { current: number; max: number | null },
+) {
+  if (newRole !== "representative" || isFederation(ctx) || limit.max === null) return;
+  if (limit.current >= limit.max) {
+    throw conflict(
+      "REPRESENTATIVE_LIMIT_REACHED",
+      `Ein Verein kann höchstens ${limit.max} Vereinsvertreter haben. Wende dich an den Verband, wenn ihr mehr braucht.`,
+      { max: limit.max },
+    );
+  }
+}
+
 /** Remove a user from the club (membership ends, account stays – spec §4.4). */
 export function assertCanRemove(ctx: AuthContext, target: MembershipTarget) {
   authorize(canManageMembershipsOf(ctx, target.clubId));

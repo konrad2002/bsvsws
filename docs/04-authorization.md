@@ -39,7 +39,7 @@ Defined in [`directus/tools/src/access.ts`](../directus/tools/src/access.ts); fi
 | `club_memberships`      | –          | read             | read, create, update     |
 | `invitations`           | –          | read             | read, create, update     |
 | `audit_logs`            | –          | read             | read, create             |
-| `notification_settings` | –          | read, **update** | read                     |
+| `notification_settings` | –          | read             | read, update             |
 | `directus_users`        | –          | read             | read, create\*, update\* |
 | `directus_files`        | –          | read             | read, create (logos)     |
 
@@ -98,6 +98,8 @@ user's active membership, never from request input.
 | `event-rules.ts`: `allowedActions(ctx, event)`                       | Single source for event permissions per status (submit, approve, reject, publish, unpublish, requestRemoval, decideRemoval, discard, delete, edit) – see [05-workflows.md](05-workflows.md#events-phase-3) |
 | `assertNoLockedChanges` / `assertFieldPermissions` / `assertVersion` | Locked title/dates for clubs after publication; federation-only event fields; review version check                                                                                                         |
 | `canViewEvent(ctx, event)`                                           | spec §7.11 visibility matrix; deleted events federation-only                                                                                                                                               |
+| `canAdministrate(ctx)`                                               | federation or administrator: settings, account overview, audit log (Phase 7). Being a notification recipient grants nothing (spec §10.3).                                                                  |
+| `assertWithinRepresentativeLimit`                                    | promotions by representatives respect `max_representatives_per_club`; the federation may exceed it (spec §4.4, §19.7)                                                                                      |
 | `canAccessVisibility(ctx, level)`                                    | spec §8.4 matrix via `canSeeVisibility`                                                                                                                                                                    |
 | `authorize(cond)`                                                    | throws `403 FORBIDDEN`                                                                                                                                                                                     |
 

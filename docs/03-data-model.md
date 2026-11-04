@@ -85,10 +85,14 @@ active membership fail at the database level.
 
 The single row is created by `directus:apply` (Directus would otherwise create singleton rows lazily, and concurrent first writes produce duplicates).
 
-| Field                              | Type       | Notes                                                                                                                    |
-| ---------------------------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------ |
-| `representative_joined_recipients` | csv (tags) | Emails notified when a new representative joins (spec §5.7). Independent of permissions; edited by federation in Studio. |
-| `event_review_recipients`          | csv (tags) | Emails notified about submitted events and removal requests (spec §10.3). Grants no review rights.                       |
+| Field                              | Type       | Notes                                                                                                                                 |
+| ---------------------------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `representative_joined_recipients` | csv (tags) | Emails notified when a new representative joins (spec §5.7). Independent of permissions; edited in the app (Verband → Einstellungen). |
+| `event_review_recipients`          | csv (tags) | Emails notified about submitted events and removal requests (spec §10.3). Grants no review rights.                                    |
+| `max_representatives_per_club`     | integer    | Spec §19.7; `NULL` = unlimited. Enforced in Fastify for promotions by representatives (Phase 7).                                      |
+
+Studio label "Einstellungen"; federation users can only read it there – changes go through
+`PUT /admin/settings` (validation + audit log).
 
 ### `audit_logs`
 

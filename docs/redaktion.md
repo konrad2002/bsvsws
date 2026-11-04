@@ -73,5 +73,7 @@ unter dem alten Pfad keine Seite existiert. _Dauerhaft_ (301/308) ist der Normal
 
 ## Benachrichtigungen
 
-**Benachrichtigungen**: E-Mail-Empfänger für neue Vereinsvertreter und für eingereichte
-Veranstaltungen. Die Empfänger erhalten dadurch keine zusätzlichen Rechte.
+E-Mail-Empfänger für neue Vereinsvertreter und für eingereichte Veranstaltungen sowie die
+Höchstzahl der Vereinsvertreter pro Verein stellst du **im internen Bereich unter
+„Einstellungen“** ein (in Directus nur lesbar). Die Empfänger erhalten dadurch keine zusätzlichen
+Rechte. Jede Änderung erscheint im **Protokoll**.

@@ -27,8 +27,8 @@ describe("access configuration", () => {
   });
 
   it("deletes only child rows (service) or CMS content (federation), and never lets anyone but the service account write workflow data", () => {
+    // notification_settings: only the app writes it (Phase 7 settings page, audited).
     const studioWritable = new Set([
-      "notification_settings",
       "event_categories",
       "directus_files",
       ...STUDIO_CONTENT_COLLECTIONS,

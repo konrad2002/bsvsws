@@ -5,6 +5,7 @@ import type { Env } from "./config/env.js";
 import { createServiceClient } from "./lib/directus.js";
 import { registerErrorHandler } from "./lib/errors.js";
 import { createSmtpMailer, type Mailer } from "./lib/mailer.js";
+import { createAdminService } from "./modules/admin/admin-service.js";
 import { createAuditService } from "./modules/audit/audit-service.js";
 import { createAuthService } from "./modules/auth/auth-service.js";
 import {
@@ -17,6 +18,7 @@ import { createEventService, EVENT_FILE_MAX_BYTES } from "./modules/events/event
 import { createInvitationService } from "./modules/invitations/invitation-service.js";
 import { createMembershipService } from "./modules/memberships/membership-service.js";
 import { createPublicEventService } from "./modules/public-calendar/public-event-service.js";
+import { adminRoutes } from "./routes/admin.js";
 import { clubRoutes } from "./routes/clubs.js";
 import { eventRoutes } from "./routes/events.js";
 import { healthRoutes } from "./routes/health.js";
@@ -74,7 +76,13 @@ export async function buildApp(env: Env, options: FastifyServerOptions = {}, dep
     directusUrl: env.DIRECTUS_URL,
     serviceToken: env.DIRECTUS_SERVICE_TOKEN,
   });
-  const memberships = createMembershipService({ client, audit, now });
+  const admin = createAdminService({ client, audit });
+  const memberships = createMembershipService({
+    client,
+    audit,
+    maxRepresentatives: async () => (await admin.readSettings()).maxRepresentativesPerClub,
+    now,
+  });
   const invitations = createInvitationService({
     client,
     audit,
@@ -113,6 +121,7 @@ export async function buildApp(env: Env, options: FastifyServerOptions = {}, dep
   await app.register(eventRoutes, { auth, events });
   await app.register(publicRoutes, { events: publicEvents });
   await app.register(publicContentRoutes, { content: publicContent, auth });
+  await app.register(adminRoutes, { auth, admin });
 
   return app;
 }

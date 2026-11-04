@@ -32,10 +32,10 @@ Common errors: `401 UNAUTHORIZED`, `403 FORBIDDEN`, `404 NOT_FOUND`, `400 VALIDA
 
 ## Memberships
 
-| Method & path             | Authorization                                          | Request → Response        | Errors / side effects                                                                    |
-| ------------------------- | ------------------------------------------------------ | ------------------------- | ---------------------------------------------------------------------------------------- |
-| `PATCH /memberships/:id`  | `canManageMembershipsOf`, not self (except federation) | `{ role }` → `ClubMember` | `403 SELF_CHANGE_NOT_ALLOWED`, `409 ROLE_UNCHANGED`; audit `membership.promoted/demoted` |
-| `DELETE /memberships/:id` | same                                                   | → `204`                   | membership ended, account kept; audit `membership.removed`                               |
+| Method & path             | Authorization                                          | Request → Response        | Errors / side effects                                                                                                                               |
+| ------------------------- | ------------------------------------------------------ | ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `PATCH /memberships/:id`  | `canManageMembershipsOf`, not self (except federation) | `{ role }` → `ClubMember` | `403 SELF_CHANGE_NOT_ALLOWED`, `409 ROLE_UNCHANGED`, `409 REPRESENTATIVE_LIMIT_REACHED` (representatives only); audit `membership.promoted/demoted` |
+| `DELETE /memberships/:id` | same                                                   | → `204`                   | membership ended, account kept; audit `membership.removed`                                                                                          |
 
 ## Invitations
 
@@ -121,3 +121,14 @@ or personal data). Rate limit per client IP.
 `GET /public/pages` breadcrumbs and children are `{ title, href }`; `GET /public/resolve` returns
 a `redirect` to `/intern/seiten/<path>` for protected pages. `GET /public/media/:fileId` was
 replaced by `/content/files/:fileId`.
+
+## Federation administration (Phase 7)
+
+All routes require `canAdministrate` (federation or administrator) → otherwise `403`.
+
+| Method & path                           | Request → Response                                                                                                    | Notes                                                                                                              |
+| --------------------------------------- | --------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `GET /admin/settings`                   | → `AppSettings` (`representativeJoinedRecipients`, `eventReviewRecipients`, `maxRepresentativesPerClub`, `updatedAt`) |                                                                                                                    |
+| `PUT /admin/settings`                   | all three settings → `AppSettings`                                                                                    | emails normalised + deduplicated, ≤ 50 each; limit 1–100 or `null`; audit `settings.updated`                       |
+| `GET /admin/accounts?q&filter&page`     | → `{ items: AccountSummary[], page, pageCount, total }`                                                               | `filter` = `all` \| `without_club` \| `representatives` \| `federation`; 50 per page; service account never listed |
+| `GET /admin/audit-log?action&club&page` | → `{ items: AuditLogEntry[], page, pageCount, total }`                                                                | `action` = prefix (`event`) or exact (`event.approved`); newest first; 50 per page                                 |

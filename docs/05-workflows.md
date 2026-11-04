@@ -60,7 +60,13 @@ make races fail cleanly: `club_memberships.active_user` (second active membershi
 
 - **No self-changes** (owner decision): representatives can never demote or remove themselves;
   another representative or the federation must do it. The federation can always override.
-- No maximum number of representatives yet (spec §19.7: configurable later).
+- **Maximum number of representatives** (spec §19.7, Phase 7): optional setting
+  `max_representatives_per_club` (empty = unlimited, the default). A representative's promotion
+  fails with `409 REPRESENTATIVE_LIMIT_REACHED` once the club has that many representatives. The
+  federation may exceed it (spec §4.4: federation overrides representative assignments), and
+  representative invitations come from the federation only, so they are not limited. Check and
+  write are two requests – two simultaneous promotions could exceed the limit by one (accepted for a
+  soft organisational limit).
 
 ## Clubs
 
@@ -72,12 +78,12 @@ make races fail cleanly: `club_memberships.active_user` (second active membershi
 
 ## Notifications (spec §10.2)
 
-| Trigger                                            | Recipient                                                                                       | Sent                                                                               |
-| -------------------------------------------------- | ----------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| Invitation created/resent with "per E-Mail senden" | invited address                                                                                 | after the invitation is stored; failure → link still returned (`emailSent: false`) |
-| Registration / new code                            | invited address (6-digit code)                                                                  | failure → `502 EMAIL_FAILED`, user retries                                         |
-| Member accepted                                    | active representatives of the club (except the new user)                                        | after acceptance; failure only logged                                              |
-| Representative accepted                            | `notification_settings.representative_joined_recipients` (Directus Studio → Benachrichtigungen) | after acceptance; failure only logged                                              |
+| Trigger                                            | Recipient                                                                          | Sent                                                                               |
+| -------------------------------------------------- | ---------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| Invitation created/resent with "per E-Mail senden" | invited address                                                                    | after the invitation is stored; failure → link still returned (`emailSent: false`) |
+| Registration / new code                            | invited address (6-digit code)                                                     | failure → `502 EMAIL_FAILED`, user retries                                         |
+| Member accepted                                    | active representatives of the club (except the new user)                           | after acceptance; failure only logged                                              |
+| Representative accepted                            | `notification_settings.representative_joined_recipients` (Verband → Einstellungen) | after acceptance; failure only logged                                              |
 
 Emails are plain text, German, sent via SMTP (IONOS in deployments, Mailpit locally).
 
@@ -87,12 +93,16 @@ Written by Fastify after the operation succeeded, actor = original user
 (`apps/api/src/modules/audit`). A failed audit write is retried once, then logged at error level
 with the full entry.
 
-| Action                                                                                  | Entity           |
-| --------------------------------------------------------------------------------------- | ---------------- |
-| `club.created`, `club.updated` (changed fields before/after), `club.logo_changed`       | clubs            |
-| `invitation.created`, `invitation.resent`, `invitation.revoked`, `invitation.accepted`  | invitations      |
-| `user.verified`                                                                         | directus_users   |
-| `membership.created`, `membership.promoted`, `membership.demoted`, `membership.removed` | club_memberships |
+| Action                                                                                  | Entity                |
+| --------------------------------------------------------------------------------------- | --------------------- |
+| `club.created`, `club.updated` (changed fields before/after), `club.logo_changed`       | clubs                 |
+| `invitation.created`, `invitation.resent`, `invitation.revoked`, `invitation.accepted`  | invitations           |
+| `user.verified`                                                                         | directus_users        |
+| `membership.created`, `membership.promoted`, `membership.demoted`, `membership.removed` | club_memberships      |
+| `settings.updated` (only changed settings, before/after)                                | notification_settings |
+
+German labels for the log view: `AUDIT_ACTION_LABELS` in `packages/shared/src/audit.ts` – add new
+actions there too.
 
 ## Events (Phase 3)
 
@@ -132,12 +142,12 @@ Rules (implemented in `apps/api/src/modules/events/event-rules.ts`, unit-tested)
 
 ### Event notifications
 
-| Trigger                            | Recipient                                                                                                           |
-| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| Submitted / resubmitted            | `notification_settings.event_review_recipients` (Studio → Benachrichtigungen; no review rights implied, spec §10.3) |
-| Approved / rejected (with comment) | Submitter (`submitted_by`)                                                                                          |
-| Removal requested                  | Event review recipients (owner decision)                                                                            |
-| Removal decided                    | Requester (owner decision)                                                                                          |
+| Trigger                            | Recipient                                                                                                       |
+| ---------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| Submitted / resubmitted            | `notification_settings.event_review_recipients` (Verband → Einstellungen; no review rights implied, spec §10.3) |
+| Approved / rejected (with comment) | Submitter (`submitted_by`)                                                                                      |
+| Removal requested                  | Event review recipients (owner decision)                                                                        |
+| Removal decided                    | Requester (owner decision)                                                                                      |
 
 ### Event history (spec §19.4)
 
@@ -177,3 +187,15 @@ website reads through Fastify. Editor guide (German): [redaktion.md](redaktion.m
 | Files         | A file in "Seitendokumente" is visible to whoever may see at least one published page/article referencing it; unreferenced or draft-only files are 404 for everyone. Copying the URL does not bypass this (checked on every request).                                           |
 | Internal menu | Directus menu "Interner Bereich" (`internal`), shown in the internal navigation below the fixed app links, filtered per level.                                                                                                                                                  |
 | Dashboard     | `/intern` shows actionable indicators per role (spec §10.4): federation – submitted events, removal requests, clubs without representative, active clubs; representatives – rejected/draft/pending events, open invitations, members; all club users – upcoming club events.    |
+
+## Federation administration (Phase 7)
+
+| Area                  | Where                              | Notes                                                                                                                               |
+| --------------------- | ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| Dashboard             | `/intern`                          | Review counts, clubs without representative, active clubs, links to content administration in Directus Studio                       |
+| Clubs and memberships | `/intern/verband/vereine`, `/<id>` | Create/edit clubs, invite (also representatives), promote/demote/remove – unchanged from Phase 2                                    |
+| Event review          | `/intern/verband/pruefung`         | Unchanged from Phase 3                                                                                                              |
+| Accounts              | `/intern/verband/benutzer`         | Read-only overview (owner decision): search name/email, filter (without club, representatives, federation), level, club, last login |
+| Audit log             | `/intern/verband/protokoll`        | Newest first, 50 per page, filter by area (action prefix) and club, before/after details                                            |
+| Settings              | `/intern/verband/einstellungen`    | Notification recipients and representative limit (owner decision: in the app, Studio read-only); validated, deduplicated, audited   |
+| Content               | Directus Studio                    | News, pages, navigation, redirects, event categories (spec §3.3); club users never get Studio access                                |

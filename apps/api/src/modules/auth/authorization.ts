@@ -40,6 +40,14 @@ export function canManageMembershipsOf(ctx: AuthContext, clubId: string): boolea
   return canManageClub(ctx, clubId);
 }
 
+/**
+ * Federation administration (Phase 7: settings, account overview, audit log).
+ * Receiving notification emails grants nothing (spec §10.3) – only the account role counts.
+ */
+export function canAdministrate(ctx: AuthContext): boolean {
+  return isFederation(ctx);
+}
+
 /** Read content of a visibility level (spec §8.4). */
 export function canAccessVisibility(ctx: AuthContext | null, visibility: VisibilityLevel): boolean {
   return canSeeVisibility(ctx?.level ?? "visitor", visibility);

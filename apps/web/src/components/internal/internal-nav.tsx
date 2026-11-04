@@ -36,6 +36,9 @@ export async function InternalNav() {
             label: reviewCount ? `Prüfung (${reviewCount})` : "Prüfung",
           },
           { href: "/intern/verband/vereine", label: "Vereine verwalten" },
+          { href: "/intern/verband/benutzer", label: "Benutzerkonten" },
+          { href: "/intern/verband/protokoll", label: "Protokoll" },
+          { href: "/intern/verband/einstellungen", label: "Einstellungen" },
         ]
       : []),
   ];

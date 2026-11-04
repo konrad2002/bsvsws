@@ -6,9 +6,10 @@ import { isNotFoundOrForbidden } from "../../lib/directus-errors.js";
 import { notFound } from "../../lib/errors.js";
 import type { AuditService } from "../audit/audit-service.js";
 import type { AuthContext } from "../auth/auth-service.js";
-import { authorize, canManageMembershipsOf } from "../auth/authorization.js";
+import { authorize, canManageMembershipsOf, isFederation } from "../auth/authorization.js";
 import {
   assertCanChangeRole,
+  assertWithinRepresentativeLimit,
   assertCanRemove,
   roleChangeAction,
   type MembershipTarget,
@@ -48,10 +49,13 @@ const toMember = (row: MembershipRow): ClubMember => ({
 export function createMembershipService({
   client,
   audit,
+  maxRepresentatives,
   now = () => new Date(),
 }: {
   client: ServiceClient;
   audit: AuditService;
+  /** Configured maximum per club (spec §19.7), null = unlimited. */
+  maxRepresentatives: () => Promise<number | null>;
   now?: () => Date;
 }) {
   async function loadActive(id: string): Promise<MembershipRow> {
@@ -102,6 +106,25 @@ export function createMembershipService({
     ): Promise<ClubMember> {
       const row = await loadActive(membershipId);
       assertCanChangeRole(ctx, target(row), role);
+      if (role === "representative" && !isFederation(ctx)) {
+        // Check-then-write: two simultaneous promotions could exceed the limit by one.
+        // Acceptable for a soft organisational limit (no Directus extension for a trigger).
+        const [max, reps] = await Promise.all([
+          maxRepresentatives(),
+          client.request(
+            readItems("club_memberships", {
+              filter: {
+                club: { _eq: row.club },
+                status: { _eq: "active" },
+                role: { _eq: "representative" },
+              },
+              fields: ["id"],
+              limit: -1,
+            }),
+          ),
+        ]);
+        assertWithinRepresentativeLimit(ctx, role, { current: reps.length, max });
+      }
       await client.request(updateItem("club_memberships", membershipId, { role } as never));
       await audit.record({
         actor: ctx.id,

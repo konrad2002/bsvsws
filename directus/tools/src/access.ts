@@ -132,10 +132,9 @@ export const POLICIES: PolicyDef[] = [
       read("event_schedule_entries"),
       read("event_files"),
       read("event_removal_requests"),
-      // Configuration only (no workflow data): recipients of federation emails and
-      // administrator-managed event categories (deactivate instead of delete).
+      // Settings are edited in the app (Phase 7: validation + audit), Studio only reads them.
       read("notification_settings"),
-      write("notification_settings", "update"),
+      // Administrator-managed event categories (deactivate instead of delete).
       ...crud("event_categories"),
       // CMS (spec §3.3: articles and navigation are managed in Directus Studio).
       ...STUDIO_CONTENT_COLLECTIONS.flatMap((c) => crud(c, true)),
@@ -165,6 +164,7 @@ export const POLICIES: PolicyDef[] = [
       read("audit_logs"),
       write("audit_logs", "create"),
       read("notification_settings"),
+      write("notification_settings", "update"), // Phase 7 settings page (federation only, Fastify)
       ...crud("events"),
       ...crud("events_event_categories", true),
       ...crud("event_schedule_entries", true),

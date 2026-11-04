@@ -30,6 +30,8 @@ CI runs unit tests and the integration tests (Directus as a service container, u
 | **E2E (browser)**               | `apps/web/e2e/club-onboarding.spec.ts`            | Federation creates club → invites representative by email → registration with code from Mailpit → login; representative invites member by link → member joins → promote → remove                                                                                             |
 | **Integration (Phase 6)**       | `apps/api/test/integration/phase6.int.test.ts`    | Pages per level 401/403/200/404 (403 leaks nothing), effective visibility of child pages, resolve redirects, file reference rule incl. orphan → 404 and cache headers, internal navigation per level                                                                         |
 | **E2E (Phase 6)**               | `apps/web/e2e/internal-area.spec.ts`              | Shared public link → login → protected page; member downloads document, gets real HTTP 403 on representative page; anonymous file request → login redirect; internal menu per level; dashboards                                                                              |
+| **Integration (Phase 7)**       | `apps/api/test/integration/phase7.int.test.ts`    | Settings only for federation (recipient ≠ permission), validation + audit, representative limit vs. federation override, account overview, audit log filters                                                                                                                 |
+| **E2E (Phase 7)**               | `apps/web/e2e/federation-admin.spec.ts`           | Settings form (invalid/valid), audit entry, limit message for the representative, closed admin URLs, account search → club page, Studio links                                                                                                                                |
 | Schema tooling                  | `directus/tools/src/schema-diff.test.ts`          | Destructive-change detection                                                                                                                                                                                                                                                 |
 
 Unit tests never need a running Directus (Fastify's identity lookup sits behind the
@@ -146,3 +148,19 @@ As `verband@example.com` in Directus Studio:
    representative sees it.
 5. Set the page to draft → the PDF returns 404 for everyone.
 6. Check `/intern` as federation, representative and member: task indicators per role.
+
+Integration test files run one after another (`--no-file-parallelism`): Phase 7 changes global
+settings and restores them afterwards.
+
+## Manual test: federation administration (Phase 7)
+
+As `verband@example.com`:
+
+1. _Einstellungen_: enter an invalid address → error; add your address to "Eingereichte
+   Veranstaltungen", set the limit to 1, save. In Directus Studio the settings are read-only.
+2. Submit an event as `vertreter@example.com` → email to that address in Mailpit (:8025); the
+   recipient still cannot open _Prüfung_ unless they have a Verband account.
+3. As `vertreter@example.com`, _Mitglieder_ → "Zum Vertreter machen" → limit message. As Verband
+   on the club page the same promotion works; demote again and clear the limit.
+4. _Benutzerkonten_: search, filter "Ohne Verein", follow the club link.
+5. _Protokoll_: filter by area and club; open "Details" of a settings change.

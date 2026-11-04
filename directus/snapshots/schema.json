@@ -553,9 +553,9 @@
         "display_template": null,
         "group": null,
         "hidden": false,
-        "icon": "notifications",
+        "icon": "settings",
         "item_duplication_fields": null,
-        "note": "E-Mail-Empfänger für Verbandsbenachrichtigungen. Unabhängig von Berechtigungen (spec §10.3).",
+        "note": "Anwendungseinstellungen (E-Mail-Empfänger, Höchstzahl Vereinsvertreter). Bearbeitung im internen Bereich unter Verband → Einstellungen; hier nur lesbar.",
         "preview_url": null,
         "singleton": true,
         "sort": 6,
@@ -564,7 +564,7 @@
         "translations": [
           {
             "language": "de-DE",
-            "translation": "Benachrichtigungen"
+            "translation": "Einstellungen"
           }
         ],
         "unarchive_value": null,
@@ -8733,6 +8733,53 @@
         "max_length": null,
         "numeric_precision": null,
         "numeric_scale": null,
+        "is_nullable": true,
+        "is_unique": false,
+        "is_indexed": false,
+        "is_primary_key": false,
+        "is_generated": false,
+        "generation_expression": null,
+        "has_auto_increment": false,
+        "foreign_key_table": null,
+        "foreign_key_column": null
+      }
+    },
+    {
+      "collection": "notification_settings",
+      "field": "max_representatives_per_club",
+      "type": "integer",
+      "meta": {
+        "collection": "notification_settings",
+        "conditions": null,
+        "display": null,
+        "display_options": null,
+        "field": "max_representatives_per_club",
+        "group": null,
+        "hidden": false,
+        "interface": "input",
+        "note": "Höchstzahl Vereinsvertreter pro Verein (leer = unbegrenzt). Gilt für Beförderungen durch Vereinsvertreter; der Verband kann sie überschreiten.",
+        "options": {
+          "max": 100,
+          "min": 1
+        },
+        "readonly": false,
+        "required": false,
+        "searchable": true,
+        "sort": 5,
+        "special": null,
+        "translations": null,
+        "validation": null,
+        "validation_message": null,
+        "width": "half"
+      },
+      "schema": {
+        "name": "max_representatives_per_club",
+        "table": "notification_settings",
+        "data_type": "integer",
+        "default_value": null,
+        "max_length": null,
+        "numeric_precision": 32,
+        "numeric_scale": 0,
         "is_nullable": true,
         "is_unique": false,
         "is_indexed": false,

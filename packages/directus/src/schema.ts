@@ -101,6 +101,8 @@ export interface NotificationSettings {
   id: number;
   representative_joined_recipients: string[] | null;
   event_review_recipients: string[] | null;
+  /** Spec §19.7: null = unlimited. */
+  max_representatives_per_club: number | null;
   date_updated: Timestamp | null;
 }
 

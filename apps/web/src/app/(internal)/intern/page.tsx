@@ -9,6 +9,7 @@ import { EventList } from "@/components/public/events/event-list-item";
 import { Section } from "@/components/internal/notices";
 import { requireUser } from "@/lib/auth/current-user";
 import { addDays, todayInBerlin } from "@/lib/calendar";
+import { env } from "@/lib/env";
 import { listClubs, listInvitations, listMembers } from "@/lib/data/clubs";
 import { getReviewQueue, listEvents } from "@/lib/data/events";
 import { listPublicEvents } from "@/lib/data/public-events";
@@ -48,6 +49,7 @@ export default async function InternalHomePage() {
           <FederationTasks />
         </Suspense>
       )}
+      {federation && <ContentAdministration />}
       {isRep && (
         <Suspense fallback={<p className="text-sm">Aufgaben werden geladen …</p>}>
           <RepresentativeTasks user={user} />
@@ -119,6 +121,40 @@ async function FederationTasks() {
           hint="Erstelle für diese Vereine eine Vertreter-Einladung."
         />
         <Task href="/intern/verband/vereine" label="Aktive Vereine" count={activeClubs.length} />
+      </ul>
+    </Section>
+  );
+}
+
+/** Content is edited in Directus Studio (spec §3.3); federation accounts have Studio access. */
+const STUDIO_COLLECTIONS = [
+  ["articles", "News"],
+  ["pages", "Seiten"],
+  ["navigation_items", "Navigation"],
+  ["redirects", "Weiterleitungen"],
+  ["event_categories", "Veranstaltungskategorien"],
+] as const;
+
+function ContentAdministration() {
+  const studio = env.directusPublicUrl.replace(/\/$/, "");
+  return (
+    <Section title="Inhalte verwalten">
+      <p className="text-sm text-neutral-700">
+        News, Seiten, Menüs und Kategorien bearbeitest du in Directus (öffnet in neuem Tab).
+      </p>
+      <ul className="flex flex-wrap gap-2">
+        {STUDIO_COLLECTIONS.map(([collection, label]) => (
+          <li key={collection}>
+            <a
+              href={`${studio}/admin/content/${collection}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block rounded border px-3 py-1.5 text-sm hover:bg-neutral-50"
+            >
+              {label} ↗
+            </a>
+          </li>
+        ))}
       </ul>
     </Section>
   );

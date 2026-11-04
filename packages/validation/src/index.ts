@@ -4,3 +4,4 @@ export * from "./clubs.js";
 export * from "./memberships.js";
 export * from "./events.js";
 export * from "./content.js";
+export * from "./admin.js";

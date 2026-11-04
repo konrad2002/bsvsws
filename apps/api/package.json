@@ -11,7 +11,7 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "test:integration": "INTEGRATION=1 node --env-file-if-exists=../../.env ./node_modules/vitest/vitest.mjs run test/integration"
+    "test:integration": "INTEGRATION=1 node --env-file-if-exists=../../.env ./node_modules/vitest/vitest.mjs run --no-file-parallelism test/integration"
   },
   "dependencies": {
     "@bsv-sws/directus": "workspace:*",

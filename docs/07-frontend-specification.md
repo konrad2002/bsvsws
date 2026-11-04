@@ -60,6 +60,12 @@ people) are never part of the public API response.
 | `/intern/veranstaltungen`, `/neu`, `/<id>`    | representatives (own club), federation (all, archive)                |
 | `/intern/verband/pruefung`                    | federation – review list ("Prüfung (n)" indicator in the navigation) |
 | `/intern/verband/vereine`, `/<id>`            | federation – club administration                                     |
+| `/intern/verband/benutzer`                    | federation – account overview (`?q`, `?filter`, `?seite`)            |
+| `/intern/verband/protokoll`                   | federation – audit log (`?bereich`, `?verein`, `?seite`)             |
+| `/intern/verband/einstellungen`               | federation – notification recipients, representative limit           |
+
+Studio links on the federation dashboard use `DIRECTUS_PUBLIC_URL` (browser-facing; falls back to
+`DIRECTUS_URL`).
 
 ## Rendering
 

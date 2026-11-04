@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 import type { AuthContext } from "../auth/auth-service.js";
-import { assertCanChangeRole, assertCanRemove, roleChangeAction } from "./membership-rules.js";
+import {
+  assertCanChangeRole,
+  assertCanRemove,
+  assertWithinRepresentativeLimit,
+  roleChangeAction,
+} from "./membership-rules.js";
 
 const CLUB_A = "00000000-0000-4000-8000-00000000000a";
 const CLUB_B = "00000000-0000-4000-8000-00000000000b";
@@ -87,5 +92,23 @@ describe("membership rules", () => {
   it("maps role changes to audit actions", () => {
     expect(roleChangeAction("representative")).toBe("membership.promoted");
     expect(roleChangeAction("member")).toBe("membership.demoted");
+  });
+
+  it("representative limit (spec §19.7) binds representatives, not the federation", () => {
+    const reached = { current: 2, max: 2 };
+    expect(() => assertWithinRepresentativeLimit(base, "representative", reached)).toThrow(
+      expect.objectContaining({ statusCode: 409, code: "REPRESENTATIVE_LIMIT_REACHED" }),
+    );
+    expect(() =>
+      assertWithinRepresentativeLimit(base, "representative", { current: 1, max: 2 }),
+    ).not.toThrow();
+    expect(() =>
+      assertWithinRepresentativeLimit(base, "representative", { current: 9, max: null }),
+    ).not.toThrow();
+    // demotion is always possible; federation overrides (spec §4.4)
+    expect(() => assertWithinRepresentativeLimit(base, "member", reached)).not.toThrow();
+    expect(() =>
+      assertWithinRepresentativeLimit(federation, "representative", reached),
+    ).not.toThrow();
   });
 });

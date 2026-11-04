@@ -44,7 +44,9 @@ Implementation docs (read before touching the area): [docs/README.md](docs/READM
 Phases 0–6 are done: foundation; schema/roles/login/Fastify auth; clubs, invitations,
 memberships; events with review workflow; public calendar + WebCal; CMS (news, hierarchical pages,
 database navigation, club pages, redirects, public media); internal area with role dashboard,
-protected pages (`/intern/seiten`) and files (reference rule). **Next: Phase 7** (see spec §17).
+protected pages (`/intern/seiten`) and files (reference rule); federation administration
+(settings, representative limit, account overview, audit log). **Next: Phase 8** — deployment,
+migration and launch (see spec §17).
 Do not start later phases prematurely. Keep this section current.
 
 ## Repository map
