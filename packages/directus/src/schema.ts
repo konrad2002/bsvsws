@@ -128,6 +128,8 @@ export interface EventCategoryRow {
 
 export interface EventRow {
   id: Uuid;
+  /** Public URL segment; set on first publication, then frozen. Unique. */
+  slug: string | null;
   status: EventStatus;
   title: string;
   description: string | null;

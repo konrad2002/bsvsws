@@ -78,3 +78,13 @@ export const REMOVAL_TYPE_LABELS: Record<RemovalType, string> = {
 
 export const REMOVAL_STATUSES = ["pending", "approved", "rejected"] as const;
 export type RemovalStatus = (typeof REMOVAL_STATUSES)[number];
+
+/** URL segments of the public WebCal feeds (/kalender/<slug>.ics); "alle" = complete calendar. */
+export const CALENDAR_FEED_SLUGS: Record<EventCalendar, string> = {
+  swimming: "schwimmen",
+  water_polo: "wasserball",
+  artistic_swimming: "synchronschwimmen",
+  masters: "masters",
+  general: "allgemein",
+};
+export const ALL_EVENTS_FEED_SLUG = "alle";

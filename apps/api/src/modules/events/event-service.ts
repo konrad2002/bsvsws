@@ -8,7 +8,7 @@ import {
   updateItem,
   uploadFiles,
 } from "@directus/sdk";
-import type { EventStatus } from "@bsv-sws/shared";
+import { slugify, type EventStatus } from "@bsv-sws/shared";
 import {
   eventFieldRules,
   type EventCategory,
@@ -212,6 +212,28 @@ export function createEventService(deps: EventServiceDeps) {
 
   async function setStatus(row: EventRecord, to: EventStatus, extra: Record<string, unknown> = {}) {
     await client.request(updateItem("events", row.id, { status: to, ...extra } as never));
+  }
+
+  /**
+   * Publishes and assigns the public slug on FIRST publication (owner decision:
+   * readable, then frozen). Collisions get a numeric suffix via the unique index.
+   */
+  async function publishRow(row: EventRecord, extra: Record<string, unknown>) {
+    if (row.slug) return setStatus(row, "published", extra);
+    const base = [row.start_date, slugify(row.title, 80)].filter(Boolean).join("-");
+    for (let n = 1; n <= 50; n++) {
+      const slug = n === 1 ? base : `${base}-${n}`;
+      try {
+        return await setStatus(row, "published", { ...extra, slug });
+      } catch (error) {
+        if (uniqueViolationField(error) !== "slug") throw error;
+      }
+    }
+    throw new AppError(
+      500,
+      "SLUG_EXHAUSTED",
+      "Für diese Veranstaltung konnte keine URL erzeugt werden.",
+    );
   }
 
   const auditEvent = (
@@ -454,7 +476,7 @@ export function createEventService(deps: EventServiceDeps) {
       assertAction(ctx, state, "approve");
       assertVersion(versionOf(row), version);
       const at = now();
-      await setStatus(row, TRANSITIONS.approve.to, {
+      await publishRow(row, {
         reviewed_by: ctx.id,
         reviewed_at: at,
         review_comment: null,
@@ -515,7 +537,7 @@ export function createEventService(deps: EventServiceDeps) {
       const { row, state } = await loadFor(ctx, id);
       assertAction(ctx, state, "publish");
       const at = now();
-      await setStatus(row, TRANSITIONS.publish.to, {
+      await publishRow(row, {
         reviewed_by: ctx.id,
         reviewed_at: at,
         review_comment: null,

@@ -34,16 +34,17 @@ Implementation docs (read before touching the area): [docs/README.md](docs/READM
 [02-architecture](docs/02-architecture.md) (auth/session design, Directus licence),
 [03-data-model](docs/03-data-model.md), [04-authorization](docs/04-authorization.md),
 [05-workflows](docs/05-workflows.md), [06-api-specification](docs/06-api-specification.md),
+[07-frontend-specification](docs/07-frontend-specification.md),
 [09-infrastructure](docs/09-infrastructure.md), [10-testing](docs/10-testing.md),
 [decisions](docs/decisions/README.md), [DIRECTUS_API](docs/DIRECTUS_API.md) (agent access to local Directus).
 
 ## Current status
 
-Phases 0–3 are done: foundation; schema/roles/login/Fastify auth; clubs, invitations (6-digit
-verification), memberships; events with review workflow, removal requests, files, schedule,
-history and federation review list. **Next: Phase 4** — public event calendar (detail pages,
-month/year/list views, filters, WebCal). Do not start later phases prematurely. Keep this
-section current.
+Phases 0–4 are done: foundation; schema/roles/login/Fastify auth; clubs, invitations (6-digit
+verification), memberships; events with review workflow, removal, files, schedule, history;
+public calendar (list/month/year, filters, slug detail pages, WebCal feeds). **Next: Phase 5** —
+CMS and public content (news, pages, database-managed navigation, club pages, redirects). Do not
+start later phases prematurely. Keep this section current.
 
 ## Repository map
 
@@ -144,8 +145,9 @@ Run `pnpm lint && pnpm typecheck && pnpm test` before declaring work done (CI ru
 
 ## Git workflow
 
-`master` → production, `develop` → test, feature branches (`feature/<topic>`) for work, merged
-via reviewed PRs. Commit only when asked.
+`master` → production, `develop` → test. Day-to-day development happens **directly on
+`develop`** (owner decision); feature branches only when explicitly requested. `master` is
+updated from `develop` via reviewed PRs. Commit only when asked.
 
 ## Reporting
 

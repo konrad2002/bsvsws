@@ -199,6 +199,8 @@ export type EventAction = (typeof EVENT_ACTIONS)[number];
 
 export const eventSummarySchema = z.object({
   id: uuidSchema,
+  /** Public URL segment, set on first publication. */
+  slug: z.string().nullable(),
   title: z.string(),
   status: z.enum(EVENT_STATUSES),
   startDate: z.string(),
@@ -263,3 +265,72 @@ export const reviewQueueSchema = z.object({
   ),
 });
 export type ReviewQueue = z.infer<typeof reviewQueueSchema>;
+
+// --- public calendar (Phase 4) ---------------------------------------------------------
+
+/** Query of the public event list. Range is required and bounded (calendar views). */
+export const publicEventQuerySchema = z
+  .object({
+    from: dateSchema,
+    to: dateSchema,
+    calendar: z.enum(EVENT_CALENDARS).optional(),
+    club: z
+      .string()
+      .regex(/^[a-z0-9-]{1,80}$/)
+      .optional(),
+    category: z
+      .string()
+      .regex(/^[a-z0-9-]{1,80}$/)
+      .optional(),
+  })
+  .refine((q) => q.to >= q.from, { message: "Ungültiger Zeitraum.", path: ["to"] })
+  .refine((q) => (Date.parse(q.to) - Date.parse(q.from)) / 86_400_000 <= 400, {
+    message: "Zeitraum zu groß (max. 400 Tage).",
+    path: ["to"],
+  });
+export type PublicEventQuery = z.infer<typeof publicEventQuerySchema>;
+
+/** Public view of an event: no workflow/internal fields (spec §7.11, Phase 4 "no private data"). */
+export const publicEventSummarySchema = z.object({
+  slug: z.string(),
+  title: z.string(),
+  startDate: z.string(),
+  endDate: z.string(),
+  allDay: z.boolean(),
+  startTime: z.string().nullable(),
+  endTime: z.string().nullable(),
+  calendar: z.enum(EVENT_CALENDARS),
+  categories: z.array(z.object({ name: z.string(), slug: z.string() })),
+  club: z.object({ name: z.string(), slug: z.string() }).nullable(),
+  /** Display name of the organizer (club name, "BSV-SWS" or external name). */
+  organizer: z.string(),
+  venue: z.string().nullable(),
+  city: z.string().nullable(),
+  official: z.boolean(),
+});
+export type PublicEventSummary = z.infer<typeof publicEventSummarySchema>;
+
+export const publicEventDetailSchema = publicEventSummarySchema.extend({
+  /** Needed for public file/image URLs. */
+  id: uuidSchema,
+  description: z.string().nullable(),
+  street: z.string().nullable(),
+  postalCode: z.string().nullable(),
+  website: z.string().nullable(),
+  admissionInfo: z.string().nullable(),
+  resultsService: z.string().nullable(),
+  swimresultsId: z.string().nullable(),
+  additionalInfo: z.string().nullable(),
+  hasTitleImage: z.boolean(),
+  hasLogo: z.boolean(),
+  schedule: z.array(scheduleEntrySchemaOut.omit({ id: true })),
+  files: z.array(eventFileSchema),
+  updatedAt: z.string(),
+});
+export type PublicEventDetail = z.infer<typeof publicEventDetailSchema>;
+
+export const calendarFiltersSchema = z.object({
+  categories: z.array(z.object({ name: z.string(), slug: z.string() })),
+  clubs: z.array(z.object({ name: z.string(), slug: z.string() })),
+});
+export type CalendarFilters = z.infer<typeof calendarFiltersSchema>;

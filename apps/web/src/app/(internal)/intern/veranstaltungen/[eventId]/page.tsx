@@ -88,6 +88,11 @@ export default async function EventPage({
           {formatDateRange(event.startDate, event.endDate)} · {event.club?.name ?? "Verband"}
           {event.submittedAt ? ` · eingereicht ${formatDateTime(event.submittedAt)}` : ""}
         </p>
+        {event.status === "published" && event.slug && !event.deleted && (
+          <Link href={`/veranstaltungen/${event.slug}`} className="text-sm underline">
+            Öffentliche Seite ansehen
+          </Link>
+        )}
       </div>
 
       {event.status === "rejected" && event.reviewComment && (

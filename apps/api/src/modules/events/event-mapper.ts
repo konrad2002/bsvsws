@@ -60,6 +60,7 @@ export const SUMMARY_FIELDS = [
   "date_updated",
   "published_at",
   "submitted_by",
+  "slug",
 ];
 
 export const DETAIL_FIELDS = [
@@ -119,6 +120,7 @@ export function stateOf(row: EventRecord, hasPendingRemoval: boolean): EventStat
 export function toSummary(row: EventRecord, hasPendingRemoval: boolean): EventSummary {
   return {
     id: row.id,
+    slug: row.slug,
     title: row.title,
     status: row.status,
     startDate: row.start_date,

@@ -66,6 +66,19 @@ when present (`apps/web/src/lib/asset-proxy.ts`):
 - Event attachments and images: `/api/events/:id/files/:fileId`, `/api/events/:id/images/:kind` –
   public for published events, otherwise only for users allowed to view the event.
 
+### Public calendar (Phase 4)
+
+- Public event data: Next.js server → Fastify `/public/*` (service account, field whitelist,
+  `status = published AND deleted_at IS NULL`). Not via Directus public permissions, which cannot
+  filter rows without the licence. Public fetches never send the session token.
+- WebCal (spec §19.5 – decided): Fastify renders RFC 5545 itself (`modules/public-calendar/ical.ts`,
+  no library; timed events in UTC, all-day events as `DATE` with exclusive end, folding/escaping
+  unit-tested and cross-checked with the Python `icalendar` parser). Next.js serves
+  `/kalender/<feed>.ics`; the page offers `webcal://` links. Feeds contain the past 12 months and
+  all future published events and refresh every 6 h in clients.
+- Rendering: SSR per request without data cache (immediate visibility of changes); see
+  [07-frontend-specification.md](07-frontend-specification.md).
+
 ### API conventions
 
 - Uniform error body `{ error: { code, message, details? } }` (`apiErrorSchema`); German

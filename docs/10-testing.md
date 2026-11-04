@@ -100,3 +100,17 @@ Set an address under Studio → Benachrichtigungen → _event_review_recipients_
 7. As federation: create an event without club (official) → "Direkt veröffentlichen".
 8. Log out and open a published event's file URL (`/api/events/<id>/files/<fileId>`) → downloads;
    for a draft → 404.
+
+## Manual test: public calendar (Phase 4)
+
+1. Publish an event (federation "Direkt veröffentlichen" or approve a club event). Open
+   http://localhost:3000/veranstaltungen without being logged in → it is listed; drafts and
+   pending events are not.
+2. Switch Liste / Monat / Jahr, navigate months and years, combine the filters Kalender / Verein /
+   Kategorie (the URL keeps them, also works without JavaScript). Narrow the window: the month
+   view turns into a day list.
+3. Open the event → URL `/veranstaltungen/<datum>-<titel>`; check schedule, files, images.
+4. "Kalender abonnieren" → add the `webcal://` link in a calendar app (or open
+   `/kalender/alle.ics`). Times must match (Europe/Berlin), all-day events span the right days.
+5. Unpublish the event → the page returns 404 and it disappears from the list and (after the
+   client refreshes) from the subscribed calendar.

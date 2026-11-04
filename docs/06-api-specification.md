@@ -84,3 +84,15 @@ All routes require a user unless marked public. Authorization: `event-rules.ts`
 
 Common workflow errors: `409 INVALID_STATUS` (action not possible in this status), `403` (no role
 for the action), `404` (event not visible).
+
+## Public calendar (no authentication)
+
+Only **published, non-deleted** events with a slug; response fields are a whitelist (no workflow
+or personal data). Rate limit per client IP.
+
+| Method & path                                       | Request → Response                                                                                                  | Notes                                                                            |
+| --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| `GET /public/events?from&to&calendar&club&category` | dates `YYYY-MM-DD` (range ≤ 400 days), calendar key, club slug, category slug → `PublicEventSummary[]`              | events overlapping the range, sorted by start; 120/min                           |
+| `GET /public/events/:slug`                          | → `PublicEventDetail`                                                                                               | `404` for unknown/unpublished/deleted; 120/min                                   |
+| `GET /public/calendar-filters`                      | → `{ categories, clubs }` (active only)                                                                             | 120/min                                                                          |
+| `GET /public/calendar/:feed.ics`                    | `feed` = `alle` \| `schwimmen` \| `wasserball` \| `synchronschwimmen` \| `masters` \| `allgemein` → `text/calendar` | past 12 months + all future events; `cache-control: public, max-age=900`; 60/min |

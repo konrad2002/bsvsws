@@ -15,9 +15,9 @@
 
 Planned documents (spec §18) — create each when its phase starts, instead of copying the spec:
 
-| Document                                      | Created in |
-| --------------------------------------------- | ---------- |
-| `07-frontend-specification.md`, `08-ui-ux.md` | Phase 4–5  |
+| Document      | Created in |
+| ------------- | ---------- |
+| `08-ui-ux.md` | Phase 5    |
 
 `05-workflows.md` and `06-api-specification.md` are extended with the event workflow in Phase 3.
 
