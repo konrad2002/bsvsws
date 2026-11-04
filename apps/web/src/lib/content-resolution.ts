@@ -52,3 +52,29 @@ export async function resolveContentPath(pathname: string, search: string): Prom
     return { action: "ok" };
   }
 }
+
+export type InternalResolution = Resolution | { action: "forbidden" };
+
+export const INTERNAL_PAGES_PREFIX = "/intern/seiten";
+
+/** Status for protected CMS pages (/intern/seiten/<path>), as the logged-in user. Fails open. */
+export async function resolveInternalPage(
+  pathname: string,
+  accessToken: string,
+): Promise<InternalResolution> {
+  try {
+    const path = decodeURIComponent(pathname.slice(INTERNAL_PAGES_PREFIX.length)) || "/";
+    const res = await fetch(
+      new URL(`/internal/pages/resolve?${new URLSearchParams({ path })}`, env.API_URL),
+      {
+        cache: "no-store",
+        headers: { authorization: `Bearer ${accessToken}` },
+        signal: AbortSignal.timeout(2000),
+      },
+    );
+    if (!res.ok) return { action: "ok" }; // e.g. expired token → refresh below, page decides
+    return (await res.json()) as InternalResolution;
+  } catch {
+    return { action: "ok" };
+  }
+}

@@ -41,11 +41,11 @@ Implementation docs (read before touching the area): [docs/README.md](docs/READM
 
 ## Current status
 
-Phases 0–5 are done: foundation; schema/roles/login/Fastify auth; clubs, invitations,
+Phases 0–6 are done: foundation; schema/roles/login/Fastify auth; clubs, invitations,
 memberships; events with review workflow; public calendar + WebCal; CMS (news, hierarchical pages,
-database navigation, club pages, redirects, public media). **Next: Phase 6** — internal area and
-protected content (internal layout/navigation, visibility levels for pages and files). Do not
-start later phases prematurely. Keep this section current.
+database navigation, club pages, redirects, public media); internal area with role dashboard,
+protected pages (`/intern/seiten`) and files (reference rule). **Next: Phase 7** (see spec §17).
+Do not start later phases prematurely. Keep this section current.
 
 ## Repository map
 
@@ -115,7 +115,8 @@ Run `pnpm lint && pnpm typecheck && pnpm test` before declaring work done (CI ru
 - **Next.js 16 differs from older versions** — consult `apps/web/AGENTS.md` and
   `node_modules/next/dist/docs/` before writing Next code.
 - **TypeScript is pinned to `~6.0`** because typescript-eslint does not support TS 7 yet.
-- **Directus schema** changes must be reproducible: export with `pnpm directus:snapshot`, put
+- **Directus schema** changes must be reproducible (incl. Studio folders/colours/order/
+  translations, which live in collection metadata): export with `pnpm directus:snapshot`, put
   access changes in `directus/tools/src/access.ts`, update `packages/directus/src/schema.ts` and
   `docs/03-data-model.md`. Never change production schema by hand. No Directus extensions
   (owner decision) — use unique constraints and nested (transactional) writes instead.
@@ -134,7 +135,7 @@ Run `pnpm lint && pnpm typecheck && pnpm test` before declaring work done (CI ru
   `<domain>-service.ts` (Directus I/O via the service client, audit, emails). Multi-step writes
   that must be atomic use one nested Directus write; invariants are unique constraints.
 - **CMS HTML** is sanitized in Fastify (`modules/content/sanitize.ts`) and rendered only via
-  `RichContent`. Public files only from the "Öffentliche Medien" folder (`/medien/<id>`).
+  `RichContent`. Files via `/medien/<id>` → Fastify `/content/files` ("Öffentliche Medien" public; "Seitendokumente" visible like the published pages referencing them).
 - **Real status codes:** production always streams a prerendered shell (HTTP 200). 404/3xx for
   content paths are resolved in `src/proxy.ts` via `GET /public/resolve` – add new dynamic public
   routes to `/public/resolve` and `lib/content-resolution.ts`. Verify status codes on a

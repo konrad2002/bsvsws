@@ -25,8 +25,12 @@ _verband_ → `/verband/vorstand`.
 
 - **Übergeordnete Seite** festlegen, um Seiten zu verschachteln. Unterseiten werden auf der
   übergeordneten Seite automatisch verlinkt.
-- **Sichtbarkeit**: _Öffentlich_, _Verein_, _Vereinsvertreter_, _Verband_. Nicht-öffentliche
-  Seiten sind im öffentlichen Bereich nicht erreichbar (interner Bereich folgt).
+- **Sichtbarkeit**: _Öffentlich_, _Verein_ (alle Vereinsmitglieder), _Vereinsvertreter_,
+  _Verband_. Geschützte Seiten erscheinen im internen Bereich unter `/intern/seiten/<pfad>`; wer
+  die alte öffentliche Adresse aufruft, wird zur Anmeldung geleitet. Wer angemeldet ist, aber
+  nicht die nötige Stufe hat, sieht „Dafür fehlt dir die Berechtigung.“
+- Unterseiten sind nie sichtbarer als ihre übergeordnete Seite: Eine öffentliche Unterseite einer
+  Verbandsseite ist ebenfalls nur für den Verband sichtbar.
 - Eine Seite im Status _Entwurf_ blendet auch alle ihre Unterseiten aus.
 - Die Seite **startseite** liefert den Einleitungstext der Startseite.
 - Kürzel `news`, `veranstaltungen`, `vereine`, `intern`, `login`, `einladung`, `kalender`, `medien`, `api`
@@ -34,9 +38,14 @@ _verband_ → `/verband/vorstand`.
 
 ## Bilder und Dateien
 
-Bilder und Dokumente, die im Editor oder als Titelbild hochgeladen werden, landen automatisch im
-Ordner **„Öffentliche Medien“**. **Nur Dateien aus diesem Ordner sind öffentlich abrufbar.**
-Vertrauliche Dokumente niemals in diesen Ordner legen.
+| Ordner                 | Wohin hochgeladen wird      | Wer die Datei abrufen kann                                                                      |
+| ---------------------- | --------------------------- | ----------------------------------------------------------------------------------------------- |
+| **Öffentliche Medien** | News (Editor und Titelbild) | **alle** – vertrauliche Dokumente niemals hier ablegen                                          |
+| **Seitendokumente**    | Editor von _Seiten_         | wer mindestens eine **veröffentlichte** Seite sehen darf, die die Datei verlinkt oder einbindet |
+
+Dokumente für Vereine also einfach im Editor der geschützten Seite hochladen und verlinken. Eine
+Datei, die von keiner veröffentlichten Seite mehr verwendet wird, ist für niemanden abrufbar –
+auch nicht über eine kopierte Adresse. Dateien aus anderen Ordnern werden nie ausgeliefert.
 
 ## Navigation
 
@@ -51,7 +60,9 @@ Eintrag_.
 | Externe URL   | `https://…`, optional in neuem Tab                                            |
 | Kein Link     | nur Gruppenüberschrift (wird ausgeblendet, wenn keine sichtbaren Unterpunkte) |
 
-Menü _Hauptnavigation_ = Kopfzeile, _Fußzeile_ = Links unten. Einträge mit nicht veröffentlichtem
+Menü _Hauptnavigation_ = Kopfzeile, _Fußzeile_ = Links unten, _Interner Bereich_ = Menü im
+internen Bereich (unter den festen Einträgen wie Veranstaltungen). Über _Sichtbarkeit_ am Eintrag
+und an der Zielseite lässt sich steuern, wer den Eintrag sieht. Einträge mit nicht veröffentlichtem
 Ziel werden automatisch ausgeblendet. Änderungen sind sofort sichtbar.
 
 ## Weiterleitungen

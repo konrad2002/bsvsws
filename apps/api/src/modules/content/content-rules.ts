@@ -1,7 +1,12 @@
 /**
  * Pure rules for pages and navigation (spec §8.3–8.4, §9.2, §19.6).
  */
-import { canSeeVisibility, type UserLevel, type VisibilityLevel } from "@bsv-sws/shared";
+import {
+  canSeeVisibility,
+  VISIBILITY_LEVELS,
+  type UserLevel,
+  type VisibilityLevel,
+} from "@bsv-sws/shared";
 import type { NavItem } from "@bsv-sws/validation";
 
 export interface PageNode {
@@ -14,9 +19,21 @@ export interface PageNode {
   sort: number | null;
 }
 
+/** The stricter of two visibility levels. */
+export function stricterVisibility(a: VisibilityLevel, b: VisibilityLevel): VisibilityLevel {
+  return VISIBILITY_LEVELS.indexOf(a) >= VISIBILITY_LEVELS.indexOf(b) ? a : b;
+}
+
+/** Protected pages live in the internal area (owner decision), public pages at their path. */
+export const INTERNAL_PAGES_PREFIX = "/intern/seiten";
+export function pageHref(path: string, effectiveVisibility: VisibilityLevel): string {
+  return effectiveVisibility === "public" ? `/${path}` : `${INTERNAL_PAGES_PREFIX}/${path}`;
+}
+
 /**
  * Index of pages by URL path ("verband/vorstand"). A page is reachable only if it
  * and all ancestors are published (unpublishing a parent hides the subtree).
+ * A page is never more visible than its ancestors (effective visibility).
  * Duplicate paths: the first by sort wins (editors are warned in the field note).
  */
 export function buildPageIndex(pages: PageNode[]) {
@@ -46,9 +63,28 @@ export function buildPageIndex(pages: PageNode[]) {
     if (path && !byPath.has(path)) byPath.set(path, page);
   }
 
+  const visibilityCache = new Map<string, VisibilityLevel>();
+  function effectiveVisibility(page: PageNode, depth = 0): VisibilityLevel {
+    const cached = visibilityCache.get(page.id);
+    if (cached) return cached;
+    const parent = page.parent ? byId.get(page.parent) : undefined;
+    const result =
+      parent && depth < 50
+        ? stricterVisibility(page.visibility, effectiveVisibility(parent, depth + 1))
+        : page.visibility;
+    visibilityCache.set(page.id, result);
+    return result;
+  }
+
   return {
     byPath,
     pathOf: (page: PageNode) => pathOf(page),
+    effectiveVisibility: (page: PageNode) => effectiveVisibility(page),
+    /** Public URL or internal URL depending on the effective visibility. */
+    hrefOf: (page: PageNode) => {
+      const path = pathOf(page);
+      return path ? pageHref(path, effectiveVisibility(page)) : null;
+    },
     /** Breadcrumb trail (ancestors, root first) for a reachable page. */
     ancestors(page: PageNode): PageNode[] {
       const trail: PageNode[] = [];
@@ -70,7 +106,7 @@ export function normalizePath(path: string): string {
 
 export interface NavRow {
   id: number;
-  menu: "main" | "footer";
+  menu: "main" | "footer" | "internal";
   label: string;
   parent: number | null;
   link_type: "page" | "article" | "route" | "url" | "none";
@@ -85,8 +121,8 @@ export interface NavRow {
 }
 
 export interface NavTargets {
-  /** page id → URL path (only reachable pages) and its visibility */
-  pages: Map<string, { path: string; visibility: VisibilityLevel }>;
+  /** page id → link target (only reachable pages) and its effective visibility */
+  pages: Map<string, { href: string; visibility: VisibilityLevel }>;
   /** article id → slug (only publicly published articles) */
   articles: Map<string, string>;
 }
@@ -112,7 +148,7 @@ export function buildNavigation(
       case "page": {
         const target = r.page ? targets.pages.get(r.page) : undefined;
         if (!target || !canSeeVisibility(level, target.visibility)) return undefined;
-        return { href: `/${target.path}`, external: false };
+        return { href: target.href, external: false };
       }
       case "article": {
         const slug = r.article ? targets.articles.get(r.article) : undefined;
@@ -152,4 +188,27 @@ export function buildNavigation(
           });
 
   return build(null, 0);
+}
+
+// --- protected files (spec §8.5) ------------------------------------------------
+
+export type FileAccess = "allow" | "unauthenticated" | "forbidden" | "not_found";
+
+/**
+ * A CMS file is visible exactly like the content that references it: public if it
+ * is in the public media folder or referenced by any visible public content,
+ * otherwise only for users who may see at least one referencing page.
+ * `references` = effective visibilities of published, reachable pages/articles
+ * whose content contains the file (articles are always "public").
+ */
+export function fileAccess(input: {
+  inPublicFolder: boolean;
+  references: VisibilityLevel[];
+  level: UserLevel;
+  authenticated: boolean;
+}): FileAccess {
+  if (input.inPublicFolder) return "allow";
+  if (input.references.length === 0) return "not_found";
+  if (input.references.some((v) => canSeeVisibility(input.level, v))) return "allow";
+  return input.authenticated ? "forbidden" : "unauthenticated";
 }

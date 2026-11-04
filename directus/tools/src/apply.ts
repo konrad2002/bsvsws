@@ -50,7 +50,7 @@ import {
   BASE_MAIN_NAVIGATION,
   BASE_PAGES,
   placeholderContent,
-  PUBLIC_MEDIA_FOLDER,
+  MEDIA_FOLDERS,
   type BaseNavItem,
   type BasePage,
 } from "./base-data.js";
@@ -78,7 +78,10 @@ async function applySchema() {
     log("Schema: up to date");
     return;
   }
-  for (const line of summarizeDiff(result.diff)) log(`Schema change: ${line}`);
+  const changes = summarizeDiff(result.diff);
+  // Fresh installs produce hundreds of lines – show details only for small diffs.
+  if (changes.length <= 30) for (const line of changes) log(`Schema change: ${line}`);
+  else log(`Schema changes: ${changes.length} (collections/fields/relations, e.g. fresh install)`);
   const destructive = findDestructiveChanges(result.diff);
   if (destructive.length > 0 && !allowDestructive) {
     throw new Error(
@@ -238,22 +241,19 @@ async function applyBaseData() {
   await ensureCategories("event_categories", BASE_EVENT_CATEGORIES);
   await ensureCategories("article_categories", BASE_ARTICLE_CATEGORIES);
 
-  const folders = await client.request(
-    customEndpoint<{ id: string }[]>({
-      path: "/folders",
-      method: "GET",
-      params: { filter: { id: { _eq: PUBLIC_MEDIA_FOLDER.id } }, fields: ["id"] },
-    }),
-  );
-  if (folders.length === 0) {
-    log(`Base data: folder "${PUBLIC_MEDIA_FOLDER.name}"`);
+  for (const folder of MEDIA_FOLDERS) {
+    const found = await client.request(
+      customEndpoint<{ id: string }[]>({
+        path: "/folders",
+        method: "GET",
+        params: { filter: { id: { _eq: folder.id } }, fields: ["id"] },
+      }),
+    );
+    if (found.length > 0) continue;
+    log(`Base data: folder "${folder.name}"`);
     if (!dryRun) {
       await client.request(
-        customEndpoint({
-          path: "/folders",
-          method: "POST",
-          body: JSON.stringify(PUBLIC_MEDIA_FOLDER),
-        }),
+        customEndpoint({ path: "/folders", method: "POST", body: JSON.stringify(folder) }),
       );
     }
   }

@@ -116,6 +116,7 @@ describe.skipIf(!enabled)("Phase 5 CMS and public content (real Directus)", () =
 
   it("base navigation and pages exist (spec §9.1)", async () => {
     const nav = (await get("/public/navigation")).json();
+    expect(nav.internal).toEqual([]); // internal menu is never public
     const labels = nav.main.map((n: { label: string }) => n.label);
     expect(labels).toEqual(
       expect.arrayContaining([
@@ -136,7 +137,7 @@ describe.skipIf(!enabled)("Phase 5 CMS and public content (real Directus)", () =
     expect(page).toMatchObject({
       title: "Vorstand & Fachwarte",
       path: "/verband/vorstand",
-      breadcrumbs: [{ title: "Verband", path: "/verband" }],
+      breadcrumbs: [{ title: "Verband", href: "/verband" }],
     });
     expect((await get("/public/pages?path=/verband")).json().children).toHaveLength(7);
   });
@@ -267,10 +268,10 @@ describe.skipIf(!enabled)("Phase 5 CMS and public content (real Directus)", () =
   it("media: only files in the public folder are served", async () => {
     const publicFile = await uploadAs("fed", DIRECTUS_FOLDER_IDS.publicMedia);
     const privateFile = await uploadAs("admin", null);
-    const ok = await get(`/public/media/${publicFile}?width=100`);
+    const ok = await get(`/content/files/${publicFile}?width=100`);
     expect(ok.statusCode).toBe(200);
     expect(ok.headers["content-type"]).toContain("image/");
-    expect((await get(`/public/media/${privateFile}`)).statusCode).toBe(404);
+    expect((await get(`/content/files/${privateFile}`)).statusCode).toBe(404);
   });
 
   it("clubs: generated from active club records", async () => {

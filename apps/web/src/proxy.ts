@@ -6,7 +6,13 @@ import {
   REFRESH_COOKIE,
   sessionCookies,
 } from "./lib/auth/tokens";
-import { isContentPath, isDocumentRequest, resolveContentPath } from "./lib/content-resolution";
+import {
+  INTERNAL_PAGES_PREFIX,
+  isContentPath,
+  isDocumentRequest,
+  resolveContentPath,
+  resolveInternalPage,
+} from "./lib/content-resolution";
 
 /**
  * Next.js 16 "proxy" (formerly middleware), runs before rendering:
@@ -35,8 +41,29 @@ export async function proxy(request: NextRequest) {
       );
     }
     if (resolution.action === "not_found") {
-      const notFoundPage = await renderNotFound(request);
+      const notFoundPage = await renderWithStatus(request, 404);
       if (notFoundPage) return notFoundPage;
+    }
+  }
+
+  // Protected CMS pages: real 403/404 and redirect of public pages (owner decision: 403).
+  const sessionToken = request.cookies.get(ACCESS_COOKIE)?.value;
+  if (
+    sessionToken &&
+    isDocumentRequest(request.headers, request.method) &&
+    pathname.startsWith(`${INTERNAL_PAGES_PREFIX}/`) &&
+    !request.headers.has(RENDER_404_HEADER)
+  ) {
+    const resolution = await resolveInternalPage(pathname, sessionToken);
+    if (resolution.action === "redirect") {
+      return NextResponse.redirect(
+        new URL(resolution.to, request.url),
+        resolution.permanent ? 308 : 307,
+      );
+    }
+    if (resolution.action === "forbidden" || resolution.action === "not_found") {
+      const page = await renderWithStatus(request, resolution.action === "forbidden" ? 403 : 404);
+      if (page) return page;
     }
   }
 
@@ -75,11 +102,11 @@ const RENDER_404_HEADER = "x-bsv-render-404";
 
 /**
  * Production streams a prerendered shell with status 200, so a status set here
- * would be overridden. For confirmed 404s we therefore render the page ourselves
- * (it shows the regular not-found UI with full layout) and return the complete
- * HTML with a real 404 status – needed for link checkers during the migration.
+ * would be overridden. For confirmed 404/403 we therefore render the page
+ * ourselves (it shows the regular not-found / no-access UI with full layout) and
+ * return the complete HTML with the real status – needed for link checkers.
  */
-async function renderNotFound(request: NextRequest): Promise<Response | null> {
+async function renderWithStatus(request: NextRequest, status: 403 | 404): Promise<Response | null> {
   try {
     const port = process.env.PORT || request.nextUrl.port || "3000";
     const target = new URL(
@@ -92,16 +119,18 @@ async function renderNotFound(request: NextRequest): Promise<Response | null> {
         "accept-language": request.headers.get("accept-language") ?? "de",
         "x-forwarded-for": request.headers.get("x-forwarded-for") ?? "",
         "x-forwarded-host": request.headers.get("host") ?? "",
+        // internal pages need the session to render the no-access/not-found UI
+        cookie: request.headers.get("cookie") ?? "",
       },
       cache: "no-store",
       signal: AbortSignal.timeout(5000),
     });
     return new Response(await res.text(), {
-      status: 404,
+      status,
       headers: { "content-type": "text/html; charset=utf-8", "cache-control": "no-store" },
     });
   } catch {
-    return null; // fall back to the streamed not-found page (200 + noindex)
+    return null; // fall back to the streamed page (200 + noindex)
   }
 }
 

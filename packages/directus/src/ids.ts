@@ -26,4 +26,9 @@ export const DIRECTUS_SERVICE_USER_ID = "ddfc5c33-37d9-4ba7-9daf-277f3c0e9f5c";
 export const DIRECTUS_FOLDER_IDS = {
   /** Only files in this folder are served publicly (CMS images/downloads). Editor uploads land here. */
   publicMedia: "184b9625-f7cc-49dc-9e12-3b7ab98721d5",
+  /**
+   * Upload target of page content. NOT public: a file here is visible exactly like
+   * the published pages that reference it (spec §8.5).
+   */
+  pageDocuments: "3deaf709-223c-4051-9463-e93b648490e9",
 } as const;

@@ -5,21 +5,22 @@ still a functional placeholder (spec §9.5) – structure and behaviour are bind
 
 ## Layouts
 
-| Route group         | Layout                                                                               | Notes                                             |
-| ------------------- | ------------------------------------------------------------------------------------ | ------------------------------------------------- |
-| `(public)`          | Public header + navigation (placeholder until Phase 5's database-managed navigation) | SSR, no session needed                            |
-| `(internal)/intern` | Public header + role-dependent sub-navigation (sidebar on desktop, row on mobile)    | Requires login (proxy redirect + `requireUser()`) |
+| Route group         | Layout                                                                                                                                | Notes                                             |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------- |
+| `(public)`          | Public header + navigation (placeholder until Phase 5's database-managed navigation)                                                  | SSR, no session needed                            |
+| `(internal)/intern` | Public header + role-dependent sub-navigation (fixed app links + Directus menu "Interner Bereich"; sidebar on desktop, row on mobile) | Requires login (proxy redirect + `requireUser()`) |
 
 ## Public routes
 
-| Route                                                                                  | Content                                                                                      |
-| -------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
-| `/`                                                                                    | Home (placeholder, Phase 5)                                                                  |
-| `/veranstaltungen`                                                                     | Event calendar: list (default), month and year view, filters, WebCal subscriptions           |
-| `/veranstaltungen/<slug>`                                                              | Public event detail (published events only, otherwise 404)                                   |
-| `/kalender/<feed>.ics`                                                                 | WebCal feeds: `alle`, `schwimmen`, `wasserball`, `synchronschwimmen`, `masters`, `allgemein` |
-| `/login`, `/einladung/<token>`                                                         | Login, invitation acceptance / registration                                                  |
-| `/api/clubs/:id/logo`, `/api/events/:id/files/:fileId`, `/api/events/:id/images/:kind` | Asset proxies                                                                                |
+| Route                                                                                  | Content                                                                                                            |
+| -------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `/`                                                                                    | Home (placeholder, Phase 5)                                                                                        |
+| `/veranstaltungen`                                                                     | Event calendar: list (default), month and year view, filters, WebCal subscriptions                                 |
+| `/veranstaltungen/<slug>`                                                              | Public event detail (published events only, otherwise 404)                                                         |
+| `/kalender/<feed>.ics`                                                                 | WebCal feeds: `alle`, `schwimmen`, `wasserball`, `synchronschwimmen`, `masters`, `allgemein`                       |
+| `/medien/<id>`                                                                         | File proxy (Fastify `/content/files`); forwards the session; 401 → login redirect, 403 → plain-text "Kein Zugriff" |
+| `/login`, `/einladung/<token>`                                                         | Login, invitation acceptance / registration                                                                        |
+| `/api/clubs/:id/logo`, `/api/events/:id/files/:fileId`, `/api/events/:id/images/:kind` | Asset proxies                                                                                                      |
 
 ### Event calendar URL parameters (`/veranstaltungen`)
 
@@ -53,7 +54,8 @@ people) are never part of the public API response.
 
 | Route                                         | Who                                                                  |
 | --------------------------------------------- | -------------------------------------------------------------------- |
-| `/intern`                                     | every logged-in user (overview: level, club)                         |
+| `/intern`                                     | every logged-in user – role dashboard with task indicators           |
+| `/intern/seiten/<path>`                       | protected CMS pages per visibility level (403 if insufficient)       |
 | `/intern/verein`, `/intern/verein/mitglieder` | club members / representatives                                       |
 | `/intern/veranstaltungen`, `/neu`, `/<id>`    | representatives (own club), federation (all, archive)                |
 | `/intern/verband/pruefung`                    | federation – review list ("Prüfung (n)" indicator in the navigation) |
@@ -77,6 +79,8 @@ navigations):
   full layout; loop guard header `x-bsv-render-404`) and returns it with a real **404** – needed
   so link checkers can find broken links during the migration;
 - API unreachable → fail open (normal rendering; 200 + `noindex` for missing content).
+
+The same applies to `/intern/seiten/<path>` when a session cookie exists (`GET /internal/pages/resolve`): **403** for an insufficient level, **404**, or **308** to the public URL; the self-render forwards the session cookie.
 
 The detail pages additionally load their data at the top level (`instant = false`) as fallback.
 

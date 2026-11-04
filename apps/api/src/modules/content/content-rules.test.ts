@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   buildNavigation,
   buildPageIndex,
+  fileAccess,
   normalizePath,
   type NavRow,
   type PageNode,
@@ -78,8 +79,8 @@ describe("navigation", () => {
   });
   const targets = {
     pages: new Map([
-      ["vo", { path: "verband/vorstand", visibility: "public" as const }],
-      ["i", { path: "intern-info", visibility: "club" as const }],
+      ["vo", { href: "/verband/vorstand", visibility: "public" as const }],
+      ["i", { href: "/intern/seiten/intern-info", visibility: "club" as const }],
     ]),
     articles: new Map([["a1", "neue-webseite"]]),
   };
@@ -119,5 +120,62 @@ describe("navigation", () => {
     expect(buildNavigation(rows, "footer", "visitor", targets).map((n) => n.label)).toEqual([
       "Fußzeile",
     ]);
+  });
+});
+
+describe("effective visibility and links of protected pages", () => {
+  const pages = [
+    page("k", "kampfrichter", null, { visibility: "club" }),
+    page("u", "unterlagen", "k"),
+    page("r", "vertreter", "k", { visibility: "club_representative" }),
+    page("v", "verband", null),
+  ];
+  const index = buildPageIndex(pages);
+
+  it("a page is never more visible than its ancestors", () => {
+    expect(index.effectiveVisibility(pages[1]!)).toBe("club");
+    expect(index.effectiveVisibility(pages[2]!)).toBe("club_representative");
+    expect(index.effectiveVisibility(pages[3]!)).toBe("public");
+  });
+
+  it("protected pages link into the internal area", () => {
+    expect(index.hrefOf(pages[1]!)).toBe("/intern/seiten/kampfrichter/unterlagen");
+    expect(index.hrefOf(pages[3]!)).toBe("/verband");
+  });
+});
+
+describe("fileAccess (spec §8.5: same visibility as the page)", () => {
+  const base = { inPublicFolder: false, authenticated: true };
+  it("public folder or public reference → everyone", () => {
+    expect(
+      fileAccess({
+        ...base,
+        inPublicFolder: true,
+        references: [],
+        level: "visitor",
+        authenticated: false,
+      }),
+    ).toBe("allow");
+    expect(
+      fileAccess({ ...base, references: ["public"], level: "visitor", authenticated: false }),
+    ).toBe("allow");
+  });
+  it("protected references → matching level only", () => {
+    expect(fileAccess({ ...base, references: ["club"], level: "club_member" })).toBe("allow");
+    expect(fileAccess({ ...base, references: ["club_representative"], level: "club_member" })).toBe(
+      "forbidden",
+    );
+    expect(fileAccess({ ...base, references: ["federation", "club"], level: "club_member" })).toBe(
+      "allow",
+    );
+    expect(
+      fileAccess({ ...base, references: ["club"], level: "visitor", authenticated: false }),
+    ).toBe("unauthenticated");
+    expect(fileAccess({ ...base, references: ["federation"], level: "administrator" })).toBe(
+      "allow",
+    );
+  });
+  it("unreferenced, non-public files are never served (copying the URL does not help)", () => {
+    expect(fileAccess({ ...base, references: [], level: "administrator" })).toBe("not_found");
   });
 });

@@ -112,7 +112,7 @@ export async function buildApp(env: Env, options: FastifyServerOptions = {}, dep
   await app.register(invitationRoutes, { auth, invitations });
   await app.register(eventRoutes, { auth, events });
   await app.register(publicRoutes, { events: publicEvents });
-  await app.register(publicContentRoutes, { content: publicContent });
+  await app.register(publicContentRoutes, { content: publicContent, auth });
 
   return app;
 }

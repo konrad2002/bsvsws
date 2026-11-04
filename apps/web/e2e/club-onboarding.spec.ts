@@ -60,7 +60,10 @@ test("representative invites a member by link, then promotes and removes them", 
   browser,
 }) => {
   await login(page, repEmail, password);
-  await page.getByRole("link", { name: "Mitglieder" }).click();
+  await page
+    .getByRole("navigation", { name: "Interne Navigation" })
+    .getByRole("link", { name: "Mitglieder", exact: true })
+    .click();
   await expect(page.getByRole("combobox", { name: "Rolle" }).locator("option")).toHaveCount(1); // no representative invites
   await page.getByRole("textbox", { name: "E-Mail-Adresse", exact: true }).fill(memberEmail);
   await page.getByRole("checkbox", { name: "per E-Mail senden" }).uncheck();
@@ -72,8 +75,14 @@ test("representative invites a member by link, then promotes and removes them", 
   await registerViaInvitation(invitee, link, memberEmail, password, ["Max", "E2E"]);
   await waitForMail(repEmail, /Neues Mitglied/, new Date(Date.now() - 60_000));
   await login(invitee, memberEmail, password);
-  await expect(invitee.getByText("Verein", { exact: true }).first()).toBeVisible();
-  await expect(invitee.getByRole("link", { name: "Mitglieder" })).toHaveCount(0);
+  await expect(
+    invitee.getByText(/^Verein · .*\(Mitglied\)$/).filter({ visible: true }),
+  ).toBeVisible();
+  await expect(
+    invitee
+      .getByRole("navigation", { name: "Interne Navigation" })
+      .getByRole("link", { name: "Mitglieder", exact: true }),
+  ).toHaveCount(0);
 
   await page.reload();
   const members = page.getByRole("region", { name: "Mitglieder" });
@@ -88,6 +97,8 @@ test("representative invites a member by link, then promotes and removes them", 
   await expect(members.getByRole("row", { name: new RegExp(memberEmail) })).toHaveCount(0);
 
   await invitee.goto("/intern");
-  await expect(invitee.getByText("Keine Vereinszugehörigkeit")).toBeVisible();
+  await expect(
+    invitee.getByText("Du bist keinem Verein zugeordnet.", { exact: false }),
+  ).toBeVisible();
   await logout(invitee);
 });

@@ -27,6 +27,8 @@ export interface NavItem {
 export const navigationSchema = z.object({
   main: z.array(navItemSchema),
   footer: z.array(navItemSchema),
+  /** Menu "Interner Bereich" (visible items for the user's level). */
+  internal: z.array(navItemSchema),
 });
 export type Navigation = z.infer<typeof navigationSchema>;
 
@@ -34,10 +36,13 @@ export const pageSchema = z.object({
   id: uuidSchema,
   title: z.string(),
   path: z.string(),
+  /** Public URL, or /intern/seiten/<path> for protected pages. */
+  href: z.string(),
+  /** Effective visibility (strictest along the page path). */
   visibility: z.enum(VISIBILITY_LEVELS),
   contentHtml: z.string(),
-  breadcrumbs: z.array(z.object({ title: z.string(), path: z.string() })),
-  children: z.array(z.object({ title: z.string(), path: z.string() })),
+  breadcrumbs: z.array(z.object({ title: z.string(), href: z.string() })),
+  children: z.array(z.object({ title: z.string(), href: z.string() })),
   updatedAt: z.string().nullable(),
 });
 export type PublicPage = z.infer<typeof pageSchema>;

@@ -12,11 +12,11 @@ export const BASE_EVENT_CATEGORIES = [
 
 export const BASE_ARTICLE_CATEGORIES = [{ slug: "allgemein", name: "Allgemein", sort: 1 }];
 
-/** Directus folder whose files may be served publicly (CMS images/downloads). */
-export const PUBLIC_MEDIA_FOLDER = {
-  id: DIRECTUS_FOLDER_IDS.publicMedia,
-  name: "Öffentliche Medien",
-};
+/** Media folders with fixed ids (access rules depend on them). */
+export const MEDIA_FOLDERS = [
+  { id: DIRECTUS_FOLDER_IDS.publicMedia, name: "Öffentliche Medien" },
+  { id: DIRECTUS_FOLDER_IDS.pageDocuments, name: "Seitendokumente" },
+];
 
 export interface BasePage {
   slug: string;

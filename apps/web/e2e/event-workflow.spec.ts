@@ -22,7 +22,10 @@ test.afterAll(async () => adminDeleteEvents(run));
 
 test("club creates and submits an event", async ({ page }) => {
   await login(page, "vertreter@example.com", SEED_PASSWORD);
-  await page.getByRole("link", { name: "Veranstaltungen" }).click();
+  await page
+    .getByRole("navigation", { name: "Interne Navigation" })
+    .getByRole("link", { name: "Veranstaltungen", exact: true })
+    .click();
   await page.getByRole("link", { name: "Neue Veranstaltung" }).click();
   await page.getByRole("textbox", { name: "Titel", exact: true }).fill(title);
   await page.getByRole("combobox", { name: "Kalender" }).selectOption("swimming");

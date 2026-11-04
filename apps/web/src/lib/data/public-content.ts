@@ -10,7 +10,7 @@ import {
   redirectSchema,
 } from "@bsv-sws/validation";
 import { z } from "zod";
-import { publicFetch, publicJson } from "../public-api";
+import { publicJson } from "../public-api";
 
 export async function getNavigation() {
   return navigationSchema.parse(await publicJson("/public/navigation"));
@@ -51,10 +51,4 @@ export async function getClub(slug: string) {
 export async function resolveRedirect(path: string, query: string) {
   const data = await publicJson(`/public/redirects?${new URLSearchParams({ path, query })}`);
   return data ? redirectSchema.parse(data) : null;
-}
-
-export async function fetchMedia(fileId: string, width: string | null) {
-  return publicFetch(
-    `/public/media/${encodeURIComponent(fileId)}${width ? `?width=${encodeURIComponent(width)}` : ""}`,
-  );
 }

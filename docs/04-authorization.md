@@ -56,8 +56,8 @@ until `directus:apply` is re-run.
 - Federation users can **look at** workflow data in Studio, but all changes go through the
   application so that business rules and the audit log apply. CMS content (news, pages,
   navigation, redirects, media uploads) is edited directly in Studio.
-- Public CMS reads go through Fastify, which applies status, publication date, visibility and the
-  public-media-folder rule (no Directus public permissions).
+- CMS reads (public and internal) go through Fastify, which applies status, publication date,
+  visibility and the file reference rule (no Directus public permissions).
 - Nobody except administrators can update or delete audit logs, and nobody can delete
   memberships or invitations (history is kept by status changes).
 - The Benutzer role has no Directus permissions. `/users/me` still returns the user ID, which is
@@ -100,6 +100,18 @@ user's active membership, never from request input.
 | `canViewEvent(ctx, event)`                                           | spec §7.11 visibility matrix; deleted events federation-only                                                                                                                                               |
 | `canAccessVisibility(ctx, level)`                                    | spec §8.4 matrix via `canSeeVisibility`                                                                                                                                                                    |
 | `authorize(cond)`                                                    | throws `403 FORBIDDEN`                                                                                                                                                                                     |
+
+### Protected content (Phase 6, spec §8.4–8.5)
+
+| Content                    | Rule                                                                                                                                                                                                                |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Pages                      | Effective visibility = strictest level along the path (`stricterVisibility`). Checked by Fastify on every request (`/internal/pages`), not only in navigation.                                                      |
+| Navigation                 | Items are filtered by the user's level and by the effective visibility of their target page; the `internal` menu requires login.                                                                                    |
+| Files (`/content/files/…`) | `fileAccess()`: "Öffentliche Medien" → allow; otherwise the file must be referenced by a published page/article the user may see (strictest-wins does **not** apply across pages: any visible reference is enough). |
+| Responses                  | Not logged in → 401 (web: login redirect). Insufficient level → 403 without title or content. Unpublished, orphaned or unknown → 404.                                                                               |
+
+The level comes from the authenticated user (`ctx.level`, membership role) – never from request
+input. Protected file responses are `Cache-Control: private, no-store`.
 
 Every sensitive route: `const ctx = await auth.authenticate(request.headers.authorization)`,
 then `authorize(canX(ctx, …))`, then the domain service. The frontend may use `SessionUser` to

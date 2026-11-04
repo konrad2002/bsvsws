@@ -12,7 +12,7 @@ import type {
 } from "@bsv-sws/validation";
 import type { ServiceClient } from "../../lib/directus.js";
 import { isNotFoundOrForbidden } from "../../lib/directus-errors.js";
-import { notFound } from "../../lib/errors.js";
+import { forbidden, notFound } from "../../lib/errors.js";
 import { canSeeVisibility } from "@bsv-sws/shared";
 import {
   buildNavigation,
@@ -20,6 +20,9 @@ import {
   normalizePath,
   type NavRow,
   type PageNode,
+  fileAccess,
+  INTERNAL_PAGES_PREFIX,
+  type FileAccess,
 } from "./content-rules.js";
 import { sanitizeContent } from "./sanitize.js";
 
@@ -124,6 +127,7 @@ export function createPublicContentService(deps: {
   }
 
   return {
+    /** Visible menus for a user level. Public site: "visitor"; internal area: the user's level. */
     async navigation(level: UserLevel): Promise<Navigation> {
       const [rows, index, articles] = await Promise.all([
         client.request(
@@ -157,23 +161,39 @@ export function createPublicContentService(deps: {
           ),
         ) as Promise<{ id: string; slug: string }[]>,
       ]);
-      const pages = new Map<string, { path: string; visibility: VisibilityLevel }>();
-      for (const [path, page] of index.byPath)
-        pages.set(page.id, { path, visibility: page.visibility });
+      const pages = new Map<string, { href: string; visibility: VisibilityLevel }>();
+      for (const page of index.byPath.values())
+        pages.set(page.id, {
+          href: index.hrefOf(page)!,
+          visibility: index.effectiveVisibility(page),
+        });
       const targets = { pages, articles: new Map(articles.map((a) => [a.id, a.slug])) };
       return {
         main: buildNavigation(rows, "main", level, targets),
         footer: buildNavigation(rows, "footer", level, targets),
+        internal: buildNavigation(rows, "internal", level, targets),
       };
     },
 
-    /** Page by URL path; 404 if missing, unpublished (incl. ancestors) or not visible for `level`. */
-    async page(path: string, level: UserLevel): Promise<PublicPage> {
+    /**
+     * Page by URL path (effective visibility = strictest along the path).
+     * Missing/unpublished → 404. Not visible for `level` → 404, or 403 with
+     * `forbiddenIfHidden` (internal area, owner decision).
+     */
+    async page(
+      path: string,
+      level: UserLevel,
+      opts: { forbiddenIfHidden?: boolean } = {},
+    ): Promise<PublicPage> {
       const index = await pageIndex();
       const key = normalizePath(path);
       const node = index.byPath.get(key);
-      if (!node || !canSeeVisibility(level, node.visibility))
+      if (!node) throw notFound("Seite nicht gefunden.");
+      const visibility = index.effectiveVisibility(node);
+      if (!canSeeVisibility(level, visibility)) {
+        if (opts.forbiddenIfHidden) throw forbidden();
         throw notFound("Seite nicht gefunden.");
+      }
       const full = (await client.request(
         readItem(
           "pages" as never,
@@ -185,17 +205,32 @@ export function createPublicContentService(deps: {
         id: node.id,
         title: node.title,
         path: `/${key}`,
-        visibility: node.visibility,
+        href: index.hrefOf(node)!,
+        visibility,
         contentHtml: sanitizeContent(full.content),
-        breadcrumbs: index
-          .ancestors(node)
-          .map((p) => ({ title: p.title, path: `/${index.pathOf(p)}` })),
+        breadcrumbs: index.ancestors(node).map((p) => ({ title: p.title, href: index.hrefOf(p)! })),
         children: index
           .children(node)
-          .filter((c) => canSeeVisibility(level, c.visibility))
-          .map((c) => ({ title: c.title, path: `/${index.pathOf(c)}` })),
+          .filter((c) => canSeeVisibility(level, index.effectiveVisibility(c)))
+          .map((c) => ({ title: c.title, href: index.hrefOf(c)! })),
         updatedAt: full.date_updated ?? full.date_created,
       };
+    },
+
+    /**
+     * Status for internal pages (/intern/seiten/<path>) used by the Next.js proxy:
+     * public pages live at their public URL, hidden ones are 403 (owner decision).
+     */
+    async resolveInternalPage(path: string, level: UserLevel) {
+      const index = await pageIndex();
+      const node = index.byPath.get(normalizePath(path));
+      if (!node) return { action: "not_found" as const };
+      const visibility = index.effectiveVisibility(node);
+      if (visibility === "public")
+        return { action: "redirect" as const, to: `/${normalizePath(path)}`, permanent: true };
+      return canSeeVisibility(level, visibility)
+        ? { action: "ok" as const }
+        : { action: "forbidden" as const };
     },
 
     async articles(q: { category?: string; page: number; pageSize: number }): Promise<ArticlePage> {
@@ -364,15 +399,43 @@ export function createPublicContentService(deps: {
       }
       if (found === true) return { action: "ok" };
       if (found === null) {
-        const node = (await pageIndex()).byPath.get(normalizePath(path));
-        if (node && canSeeVisibility("visitor", node.visibility)) return { action: "ok" };
+        const index = await pageIndex();
+        const node = index.byPath.get(normalizePath(path));
+        if (node) {
+          if (index.effectiveVisibility(node) === "public") return { action: "ok" };
+          // Protected pages live in the internal area (old links keep working).
+          return {
+            action: "redirect",
+            to: `${INTERNAL_PAGES_PREFIX}/${normalizePath(path)}`,
+            permanent: false,
+          };
+        }
       }
       const redirect = await findRedirect(path, query);
       return redirect ? { action: "redirect", ...redirect } : { action: "not_found" };
     },
 
-    /** Serves a file ONLY if it lives in the public media folder. Optional width transform. */
-    async media(fileId: string, width?: number) {
+    /**
+     * CMS files (/medien/<id>). Spec §8.5: a file is visible exactly like the
+     * content that references it – public folder or public content → everyone;
+     * otherwise only users who may see a referencing published page. Copying the
+     * URL does not help: unreferenced non-public files are never served.
+     */
+    async file(
+      fileId: string,
+      level: UserLevel,
+      authenticated: boolean,
+      width?: number,
+    ): Promise<
+      | { access: Exclude<FileAccess, "allow"> }
+      | {
+          access: "allow";
+          isPublic: boolean;
+          body: Buffer;
+          contentType: string;
+          contentDisposition: string | null;
+        }
+    > {
       let file: { folder: string | null; type: string | null };
       try {
         // readItem() refuses system collections – use the dedicated files command.
@@ -380,16 +443,56 @@ export function createPublicContentService(deps: {
           readFile(fileId, { fields: ["folder", "type"] }),
         )) as typeof file;
       } catch (error) {
-        if (isNotFoundOrForbidden(error)) return null;
+        if (isNotFoundOrForbidden(error)) return { access: "not_found" };
         throw error;
       }
-      if (file.folder !== DIRECTUS_FOLDER_IDS.publicMedia) return null;
+      const inPublicFolder = file.folder === DIRECTUS_FOLDER_IDS.publicMedia;
+      const references: VisibilityLevel[] = [];
+      if (!inPublicFolder) {
+        const [pages, articles, index] = await Promise.all([
+          client.request(
+            readItems(
+              "pages" as never,
+              {
+                filter: { status: { _eq: "published" }, content: { _contains: fileId } },
+                fields: ["id"],
+                limit: -1,
+              } as never,
+            ),
+          ) as Promise<{ id: string }[]>,
+          client.request(
+            readItems(
+              "articles" as never,
+              {
+                filter: {
+                  ...articleFilter(),
+                  _or: [{ content: { _contains: fileId } }, { featured_image: { _eq: fileId } }],
+                },
+                fields: ["id"],
+                limit: 1,
+              } as never,
+            ),
+          ) as Promise<unknown[]>,
+          pageIndex(),
+        ]);
+        if (articles.length) references.push("public");
+        const reachable = new Map([...index.byPath.values()].map((p) => [p.id, p]));
+        for (const { id } of pages) {
+          const node = reachable.get(id);
+          if (node) references.push(index.effectiveVisibility(node));
+        }
+      }
+      const access = fileAccess({ inPublicFolder, references, level, authenticated });
+      if (access !== "allow") return { access };
+
       const url = new URL(`/assets/${fileId}`, deps.directusUrl);
       if (width && file.type?.startsWith("image/") && file.type !== "image/svg+xml")
         url.searchParams.set("width", String(width));
       const res = await fetch(url, { headers: { authorization: `Bearer ${deps.serviceToken}` } });
-      if (!res.ok) return null;
+      if (!res.ok) return { access: "not_found" };
       return {
+        access: "allow",
+        isPublic: inPublicFolder || references.includes("public"),
         body: Buffer.from(await res.arrayBuffer()),
         contentType: res.headers.get("content-type") ?? "application/octet-stream",
         contentDisposition: res.headers.get("content-disposition"),

@@ -28,6 +28,8 @@ CI runs unit tests and the integration tests (Directus as a service container, u
 | Access config                   | `directus/tools/src/access.test.ts`               | No custom rules in base permissions, hardening, no deletes                                                                                                                                                                                                                   |
 | **Integration (real Directus)** | `apps/api/test/integration/phase2.int.test.ts`    | Club creation, invitations (email + manual link), registration + code verification, single use, one active membership, email mismatch, revoke, promote/demote/self-rule, field restrictions, logo upload/public delivery, removal keeps account + re-join, audit log entries |
 | **E2E (browser)**               | `apps/web/e2e/club-onboarding.spec.ts`            | Federation creates club → invites representative by email → registration with code from Mailpit → login; representative invites member by link → member joins → promote → remove                                                                                             |
+| **Integration (Phase 6)**       | `apps/api/test/integration/phase6.int.test.ts`    | Pages per level 401/403/200/404 (403 leaks nothing), effective visibility of child pages, resolve redirects, file reference rule incl. orphan → 404 and cache headers, internal navigation per level                                                                         |
+| **E2E (Phase 6)**               | `apps/web/e2e/internal-area.spec.ts`              | Shared public link → login → protected page; member downloads document, gets real HTTP 403 on representative page; anonymous file request → login redirect; internal menu per level; dashboards                                                                              |
 | Schema tooling                  | `directus/tools/src/schema-diff.test.ts`          | Destructive-change detection                                                                                                                                                                                                                                                 |
 
 Unit tests never need a running Directus (Fastify's identity lookup sits behind the
@@ -129,3 +131,18 @@ Follow [redaktion.md](redaktion.md) as `verband@example.com` in Directus Studio
 5. Open `/vereine` and a club page; change the club's data in the internal area → page reflects it.
 6. Try a URL that does not exist → not-found page with navigation and **HTTP 404**
    (check with `curl -I`, ideally against the production build: `pnpm stack:up:app`).
+
+## Manual test: internal area and protected content (Phase 6)
+
+As `verband@example.com` in Directus Studio:
+
+1. Create a page with visibility _Verein_, upload a PDF in its editor (lands in "Seitendokumente")
+   and link it. Add an entry in menu _Interner Bereich_ pointing to the page.
+2. Logged out, open `/<kürzel>` → login → `/intern/seiten/<kürzel>`.
+3. As `mitglied@example.com`: the menu entry appears in the internal navigation, the PDF opens.
+   Log out and open the copied `/medien/<id>` URL → login redirect.
+4. Set the page to _Vereinsvertreter_ → the member gets "Dafür fehlt dir die Berechtigung." with
+   **HTTP 403** (`curl -I` with the session cookie, ideally on `pnpm stack:up:app`), the
+   representative sees it.
+5. Set the page to draft → the PDF returns 404 for everyone.
+6. Check `/intern` as federation, representative and member: task indicators per role.

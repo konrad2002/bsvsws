@@ -99,13 +99,25 @@ or personal data). Rate limit per client IP.
 
 ## Public content (no authentication, Phase 5)
 
-| Method & path                                  | Response                                                      | Notes                                                          |
-| ---------------------------------------------- | ------------------------------------------------------------- | -------------------------------------------------------------- |
-| `GET /public/navigation`                       | `{ main: NavItem[], footer: NavItem[] }`                      | visible tree for visitors                                      |
-| `GET /public/pages?path=/verband/vorstand`     | `PublicPage` (sanitized `contentHtml`, breadcrumbs, children) | `404` if missing/unpublished/not public                        |
-| `GET /public/articles?category&page&pageSize`  | `{ items, page, pageCount, total }`                           | published and due only, newest first, `pageSize ≤ 50`          |
-| `GET /public/articles/:slug`                   | `ArticleDetail`                                               | `404` for drafts, archived, scheduled                          |
-| `GET /public/article-categories`               | `{ name, slug }[]`                                            | active only                                                    |
-| `GET /public/clubs`, `GET /public/clubs/:slug` | `PublicClub[]`, `PublicClubDetail`                            | active clubs only                                              |
-| `GET /public/redirects?path&query`             | `{ to, permanent }`                                           | `404` if none                                                  |
-| `GET /public/media/:fileId?width`              | file                                                          | only files in "Öffentliche Medien"; `width` 16–2400 for images |
+| Method & path                                  | Response                                                      | Notes                                                 |
+| ---------------------------------------------- | ------------------------------------------------------------- | ----------------------------------------------------- |
+| `GET /public/navigation`                       | `{ main: NavItem[], footer: NavItem[] }`                      | visible tree for visitors                             |
+| `GET /public/pages?path=/verband/vorstand`     | `PublicPage` (sanitized `contentHtml`, breadcrumbs, children) | `404` if missing/unpublished/not public               |
+| `GET /public/articles?category&page&pageSize`  | `{ items, page, pageCount, total }`                           | published and due only, newest first, `pageSize ≤ 50` |
+| `GET /public/articles/:slug`                   | `ArticleDetail`                                               | `404` for drafts, archived, scheduled                 |
+| `GET /public/article-categories`               | `{ name, slug }[]`                                            | active only                                           |
+| `GET /public/clubs`, `GET /public/clubs/:slug` | `PublicClub[]`, `PublicClubDetail`                            | active clubs only                                     |
+| `GET /public/redirects?path&query`             | `{ to, permanent }`                                           | `404` if none                                         |
+
+## Internal content and files (Phase 6)
+
+| Method & path                       | Auth     | Response                                                    | Notes                                                                                                                              |
+| ----------------------------------- | -------- | ----------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `GET /internal/navigation`          | required | `{ main, footer, internal }` for the user's level           | `401` without login                                                                                                                |
+| `GET /internal/pages?path=`         | required | `PublicPage` incl. `href`, effective `visibility`           | `403` (no details) if the level is insufficient, `404` if missing/unpublished                                                      |
+| `GET /internal/pages/resolve?path=` | required | `{ action: ok \| forbidden \| not_found \| redirect, to? }` | used by the web proxy for real status codes; public pages → `redirect` (permanent) to the public URL                               |
+| `GET /content/files/:fileId?width`  | optional | file                                                        | `fileAccess()` reference rule; `401`/`403`/`404`; `Cache-Control: public, max-age=3600` for public files, else `private, no-store` |
+
+`GET /public/pages` breadcrumbs and children are `{ title, href }`; `GET /public/resolve` returns
+a `redirect` to `/intern/seiten/<path>` for protected pages. `GET /public/media/:fileId` was
+replaced by `/content/files/:fileId`.

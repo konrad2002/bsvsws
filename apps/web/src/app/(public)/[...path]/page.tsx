@@ -47,8 +47,8 @@ export default async function CmsPage({ params, searchParams }: PageProps<"/[...
         <nav aria-label="Brotkrumen" className="text-sm text-neutral-600">
           <ol className="flex flex-wrap gap-1">
             {page.breadcrumbs.map((b) => (
-              <li key={b.path} className="after:ml-1 after:content-['›']">
-                <Link href={b.path} className="hover:underline">
+              <li key={b.href} className="after:ml-1 after:content-['›']">
+                <Link href={b.href} className="hover:underline">
                   {b.title}
                 </Link>
               </li>
@@ -62,8 +62,8 @@ export default async function CmsPage({ params, searchParams }: PageProps<"/[...
         <nav aria-label="Unterseiten" className="mt-4">
           <ul className="grid gap-2 sm:grid-cols-2">
             {page.children.map((c) => (
-              <li key={c.path}>
-                <Link href={c.path} className="block rounded border px-3 py-2 hover:bg-neutral-50">
+              <li key={c.href}>
+                <Link href={c.href} className="block rounded border px-3 py-2 hover:bg-neutral-50">
                   {c.title}
                 </Link>
               </li>

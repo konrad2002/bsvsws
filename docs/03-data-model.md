@@ -177,11 +177,13 @@ exactly one), `teaser`, `content` (WYSIWYG HTML, uploads → public media folder
 
 `status` (`draft` \| `published`), `visibility` (`public` \| `club` \| `club_representative` \|
 `federation`), `title`, `slug` (unique per parent – enforced at read time, first by sort wins),
-`parent` (M2O self; O2M alias `children`), `content` (WYSIWYG HTML), `sort`.
+`parent` (M2O self; O2M alias `children`), `content` (WYSIWYG HTML, uploads → folder
+"Seitendokumente"), `sort`. The **effective** visibility of a page is the strictest level along
+its path (a child is never more visible than its parent).
 
 ### `navigation_items`
 
-`menu` (`main` \| `footer`), `label`, `parent` (M2O self, cascade; alias `children`), `link_type`
+`menu` (`main` \| `footer` \| `internal`), `label`, `parent` (M2O self, cascade; alias `children`), `link_type`
 (`page` \| `article` \| `route` \| `url` \| `none`), `page`, `article`, `route`, `url`,
 `visibility`, `open_in_new_tab`, `active`, `sort`.
 
@@ -189,14 +191,30 @@ exactly one), `teaser`, `content` (WYSIWYG HTML, uploads → public media folder
 
 `from_path` (**unique**, may include a query), `to_path`, `permanent`, `active`, `note`.
 
-### Directus folder "Öffentliche Medien"
+### Directus file folders
 
-Fixed id (`DIRECTUS_FOLDER_IDS.publicMedia`), created by `directus:apply`. The only folder whose
-files are publicly served.
+Both have fixed ids (`DIRECTUS_FOLDER_IDS`) and are created by `directus:apply`.
+
+| Folder               | Id constant     | Served via `/medien/<id>`                                                                  |
+| -------------------- | --------------- | ------------------------------------------------------------------------------------------ |
+| "Öffentliche Medien" | `publicMedia`   | always public (news images, page images meant for everyone)                                |
+| "Seitendokumente"    | `pageDocuments` | Phase 6: visible exactly like the **published** pages/articles whose content references it |
+
+Files in any other folder (event files, logos, …) are never served by `/medien`.
+
+## Studio organisation
+
+Collections are grouped into Studio folders (schema-less "alias" collections): **Kalender**
+(`calendar`, events and their child collections), **Inhalte** (`content`: news, categories,
+navigation, pages, redirects) and **Vereine** (`club`: clubs, memberships, invitations);
+`audit_logs` and `notification_settings` stay at the top level. Folder membership, colours, icons,
+order and German translations are collection metadata and therefore part of
+`directus/snapshots/schema.json` – `pnpm directus:apply` reproduces them in every environment.
 
 ## Changing the schema
 
-1. Change the schema in your **local** Directus (Studio or API).
+1. Change the schema in your **local** Directus (Studio or API) – this includes Studio
+   organisation such as folders, colours, sort order and translations.
 2. `pnpm directus:snapshot` → commit `directus/snapshots/schema.json`.
 3. Update `packages/directus/src/schema.ts`, this document and permissions in
    `directus/tools/src/access.ts` if needed.
