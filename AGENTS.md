@@ -39,10 +39,11 @@ Implementation docs (read before touching the area): [docs/README.md](docs/READM
 
 ## Current status
 
-Phases 0 (foundation), 1 (schema, roles/policies, login/session, Fastify auth) and 2 (club
-administration, invitations with 6-digit email verification, memberships, notifications, audit
-log) are done. **Next: Phase 3** — event management and approval workflow. Do not start later
-phases prematurely. Keep this section current.
+Phases 0–3 are done: foundation; schema/roles/login/Fastify auth; clubs, invitations (6-digit
+verification), memberships; events with review workflow, removal requests, files, schedule,
+history and federation review list. **Next: Phase 4** — public event calendar (detail pages,
+month/year/list views, filters, WebCal). Do not start later phases prematurely. Keep this
+section current.
 
 ## Repository map
 
@@ -131,6 +132,9 @@ Run `pnpm lint && pnpm typecheck && pnpm test` before declaring work done (CI ru
   `<domain>-service.ts` (Directus I/O via the service client, audit, emails). Multi-step writes
   that must be atomic use one nested Directus write; invariants are unique constraints.
 - **Emails** are German plain text in `modules/notifications/templates.ts`, sent after success.
+- **Events:** all permission/status logic lives in `modules/events/event-rules.ts`
+  (`allowedActions`); the API returns `allowedActions`/`lockedFields`, and the UI only renders
+  what is allowed. Directus returns bigInteger ids as strings – convert before validating.
 - **Tests:** Vitest, colocated as `*.test.ts`. Prioritise authorization boundaries, membership,
   invitations and event state transitions (spec §15). Skip trivial presentation tests.
 - **Docs:** update affected docs in the same change; record non-trivial technical decisions

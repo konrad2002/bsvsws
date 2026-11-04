@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { assertNoCustomRules, POLICIES, PUBLIC_PERMISSIONS, ROLES } from "./access.js";
+import {
+  assertNoCustomRules,
+  DELETABLE_CHILD_COLLECTIONS,
+  POLICIES,
+  PUBLIC_PERMISSIONS,
+  ROLES,
+} from "./access.js";
 
 describe("access configuration", () => {
   it("uses no licence-gated custom permission rules", () => {
@@ -19,11 +25,14 @@ describe("access configuration", () => {
     ).toThrow();
   });
 
-  it("never grants delete, and never lets anyone but the service account write workflow data", () => {
-    const studioWritable = new Set(["notification_settings"]);
+  it("only deletes child rows, and never lets anyone but the service account write workflow data", () => {
+    const studioWritable = new Set(["notification_settings", "event_categories"]);
     for (const policy of POLICIES) {
       for (const p of policy.permissions) {
-        expect(p.action).not.toBe("delete");
+        if (p.action === "delete") {
+          expect(policy.name).toBe("API-Servicekonto");
+          expect(DELETABLE_CHILD_COLLECTIONS).toContain(p.collection);
+        }
         if (p.action !== "read" && !studioWritable.has(p.collection)) {
           expect(policy.name).toBe("API-Servicekonto");
         }

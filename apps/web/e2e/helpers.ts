@@ -35,12 +35,14 @@ export async function login(page: Page, email: string, password: string, next = 
   await page.getByRole("textbox", { name: "E-Mail-Adresse", exact: true }).fill(email);
   await page.locator('input[name="password"]:visible').fill(password);
   await page.getByRole("button", { name: "Anmelden" }).click();
-  await page.waitForURL((url) => url.pathname === next);
+  // Server-action redirects are client-side navigations: wait for the URL, not a "load" event.
+  await page.waitForURL((url) => url.pathname === next, { waitUntil: "commit" });
+  await expect(page.getByRole("button", { name: "Abmelden" })).toBeVisible();
 }
 
 export async function logout(page: Page) {
   await page.getByRole("button", { name: "Abmelden" }).click();
-  await page.waitForURL("/");
+  await page.waitForURL("/", { waitUntil: "commit" });
 }
 
 /** Register + verify through the invitation page; returns after the login notice. */
@@ -63,7 +65,7 @@ export async function registerViaInvitation(
   const code = /\b(\d{6})\b/.exec(mail.Subject)![1]!;
   await page.getByRole("textbox", { name: "Bestätigungscode", exact: true }).fill(code);
   await page.getByRole("button", { name: "Bestätigen" }).click();
-  await page.waitForURL(/\/login\?registriert=1/);
+  await page.waitForURL(/\/login\?registriert=1/, { waitUntil: "commit" });
   await expect(page.getByText("Dein Konto ist bestätigt")).toBeVisible();
 }
 
@@ -107,4 +109,39 @@ export async function adminCleanup(clubName: string, emails: string[]) {
     "/users",
     users.map((u) => u.id),
   );
+}
+
+/** Removes test events (and their audit/removal rows) whose title contains `marker`. */
+export async function adminDeleteEvents(marker: string) {
+  const h = { authorization: `Bearer ${ADMIN_TOKEN}`, "content-type": "application/json" };
+  const get = async (path: string) =>
+    (
+      (await (await fetch(`${DIRECTUS}${path}`, { headers: h })).json()) as {
+        data: { id: string | number }[];
+      }
+    ).data;
+  const del = (path: string, ids: (string | number)[]) =>
+    ids.length
+      ? fetch(`${DIRECTUS}${path}`, { method: "DELETE", headers: h, body: JSON.stringify(ids) })
+      : null;
+  const events = await get(
+    `/items/events?filter[title][_contains]=${encodeURIComponent(marker)}&fields=id&limit=-1`,
+  );
+  const ids = events.map((e) => e.id as string);
+  if (!ids.length) return;
+  await del(
+    "/items/event_removal_requests",
+    (
+      await get(
+        `/items/event_removal_requests?filter[event][_in]=${ids.join(",")}&fields=id&limit=-1`,
+      )
+    ).map((r) => r.id),
+  );
+  await del(
+    "/items/audit_logs",
+    (await get(`/items/audit_logs?filter[entity_id][_in]=${ids.join(",")}&fields=id&limit=-1`)).map(
+      (r) => r.id,
+    ),
+  );
+  await del("/items/events", ids);
 }

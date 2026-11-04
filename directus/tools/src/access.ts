@@ -67,15 +67,34 @@ export const MANAGED_COLLECTIONS = [
   "invitations",
   "audit_logs",
   "notification_settings",
+  "events",
+  "events_event_categories",
+  "event_categories",
+  "event_schedule_entries",
+  "event_files",
+  "event_removal_requests",
   "directus_users",
   "directus_files",
 ] as const;
+
+/** Child collections the service account may delete rows from (replaced via nested writes). */
+export const DELETABLE_CHILD_COLLECTIONS = [
+  "events_event_categories",
+  "event_schedule_entries",
+  "event_files",
+];
 
 const all = ["*"];
 const read = (collection: string) =>
   ({ collection, action: "read", fields: all }) satisfies PermissionDef;
 const write = (collection: string, action: "create" | "update") =>
   ({ collection, action, fields: all }) satisfies PermissionDef;
+const crud = (collection: string, withDelete = false): PermissionDef[] => [
+  read(collection),
+  write(collection, "create"),
+  write(collection, "update"),
+  ...(withDelete ? [{ collection, action: "delete" as const, fields: all }] : []),
+];
 
 export const POLICIES: PolicyDef[] = [
   {
@@ -93,9 +112,16 @@ export const POLICIES: PolicyDef[] = [
       read("audit_logs"),
       read("directus_users"),
       read("directus_files"),
-      // Configuration only (no workflow data): recipients of federation emails.
+      read("events"),
+      read("events_event_categories"),
+      read("event_schedule_entries"),
+      read("event_files"),
+      read("event_removal_requests"),
+      // Configuration only (no workflow data): recipients of federation emails and
+      // administrator-managed event categories (deactivate instead of delete).
       read("notification_settings"),
       write("notification_settings", "update"),
+      ...crud("event_categories"),
     ],
   },
   {
@@ -119,6 +145,12 @@ export const POLICIES: PolicyDef[] = [
       read("audit_logs"),
       write("audit_logs", "create"),
       read("notification_settings"),
+      ...crud("events"),
+      ...crud("events_event_categories", true),
+      ...crud("event_schedule_entries", true),
+      ...crud("event_files", true),
+      ...crud("event_removal_requests"),
+      read("event_categories"),
       // Registration via invitation creates/activates accounts (role is set by Fastify).
       read("directus_users"),
       {
@@ -206,3 +238,10 @@ export function assertNoCustomRules(defs: PermissionDef[]): void {
     }
   }
 }
+
+/** Initial base data, inserted if missing (never overwritten – administrators may rename). */
+export const BASE_EVENT_CATEGORIES = [
+  { slug: "wettkampf", name: "Wettkampf", sort: 1 },
+  { slug: "kampfrichter", name: "Kampfrichter", sort: 2 },
+  { slug: "verband", name: "Verband", sort: 3 },
+];

@@ -84,17 +84,20 @@ and the `*-rules.ts` files in `apps/api/src/modules/<domain>/` contain the rules
 functions. Club context **always** comes from the authenticated
 user's active membership, never from request input.
 
-| Function                                  | Rule                                                                                                               |
-| ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| `isFederation`                            | federation or administrator                                                                                        |
-| `isRepresentativeOf(ctx, club)`           | active membership in that club with role representative                                                            |
-| `canManageClub(ctx, club)`                | federation, or representative of that club                                                                         |
-| `canInvite(ctx, club, role)`              | `representative` invitations: federation only; `member`: `canManageClub`                                           |
-| `canManageMembershipsOf(ctx, club)`       | `canManageClub` (promote, demote, remove)                                                                          |
-| `assertCanUpdateClub(ctx, club, input)`   | `canManageClub`; non-federation may not send `name`, `slug`, `active` (`FIELDS_NOT_ALLOWED`)                       |
-| `assertCanChangeRole` / `assertCanRemove` | `canManageMembershipsOf`; representatives never on themselves (`SELF_CHANGE_NOT_ALLOWED`); federation unrestricted |
-| `canAccessVisibility(ctx, level)`         | spec §8.4 matrix via `canSeeVisibility`                                                                            |
-| `authorize(cond)`                         | throws `403 FORBIDDEN`                                                                                             |
+| Function                                                             | Rule                                                                                                                                                                                                       |
+| -------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `isFederation`                                                       | federation or administrator                                                                                                                                                                                |
+| `isRepresentativeOf(ctx, club)`                                      | active membership in that club with role representative                                                                                                                                                    |
+| `canManageClub(ctx, club)`                                           | federation, or representative of that club                                                                                                                                                                 |
+| `canInvite(ctx, club, role)`                                         | `representative` invitations: federation only; `member`: `canManageClub`                                                                                                                                   |
+| `canManageMembershipsOf(ctx, club)`                                  | `canManageClub` (promote, demote, remove)                                                                                                                                                                  |
+| `assertCanUpdateClub(ctx, club, input)`                              | `canManageClub`; non-federation may not send `name`, `slug`, `active` (`FIELDS_NOT_ALLOWED`)                                                                                                               |
+| `assertCanChangeRole` / `assertCanRemove`                            | `canManageMembershipsOf`; representatives never on themselves (`SELF_CHANGE_NOT_ALLOWED`); federation unrestricted                                                                                         |
+| `event-rules.ts`: `allowedActions(ctx, event)`                       | Single source for event permissions per status (submit, approve, reject, publish, unpublish, requestRemoval, decideRemoval, discard, delete, edit) – see [05-workflows.md](05-workflows.md#events-phase-3) |
+| `assertNoLockedChanges` / `assertFieldPermissions` / `assertVersion` | Locked title/dates for clubs after publication; federation-only event fields; review version check                                                                                                         |
+| `canViewEvent(ctx, event)`                                           | spec §7.11 visibility matrix; deleted events federation-only                                                                                                                                               |
+| `canAccessVisibility(ctx, level)`                                    | spec §8.4 matrix via `canSeeVisibility`                                                                                                                                                                    |
+| `authorize(cond)`                                                    | throws `403 FORBIDDEN`                                                                                                                                                                                     |
 
 Every sensitive route: `const ctx = await auth.authenticate(request.headers.authorization)`,
 then `authorize(canX(ctx, …))`, then the domain service. The frontend may use `SessionUser` to

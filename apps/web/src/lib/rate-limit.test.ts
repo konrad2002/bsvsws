@@ -1,22 +1,30 @@
 import { describe, expect, it } from "vitest";
-import { RateLimiter } from "./rate-limit";
+import { FailureLimiter } from "./rate-limit";
 
-describe("RateLimiter", () => {
-  it("allows up to the limit within a window, then blocks", () => {
+describe("FailureLimiter", () => {
+  it("blocks after the configured number of failures within the window", () => {
     let now = 0;
-    const limiter = new RateLimiter(3, 1000, () => now);
-    expect([1, 2, 3].map(() => limiter.attempt("ip"))).toEqual([true, true, true]);
-    expect(limiter.attempt("ip")).toBe(false);
+    const limiter = new FailureLimiter(3, 1000, () => now);
+    for (let i = 0; i < 3; i++) {
+      expect(limiter.isBlocked("ip")).toBe(false);
+      limiter.recordFailure("ip");
+    }
+    expect(limiter.isBlocked("ip")).toBe(true);
     now = 1000;
-    expect(limiter.attempt("ip")).toBe(true);
+    expect(limiter.isBlocked("ip")).toBe(false);
+  });
+
+  it("does not count successes (checking is free)", () => {
+    const limiter = new FailureLimiter(1, 1000, () => 0);
+    for (let i = 0; i < 100; i++) expect(limiter.isBlocked("ip")).toBe(false);
   });
 
   it("tracks keys independently and can be reset", () => {
-    const limiter = new RateLimiter(1, 1000, () => 0);
-    expect(limiter.attempt("a")).toBe(true);
-    expect(limiter.attempt("b")).toBe(true);
-    expect(limiter.attempt("a")).toBe(false);
+    const limiter = new FailureLimiter(1, 1000, () => 0);
+    limiter.recordFailure("a");
+    expect(limiter.isBlocked("a")).toBe(true);
+    expect(limiter.isBlocked("b")).toBe(false);
     limiter.reset("a");
-    expect(limiter.attempt("a")).toBe(true);
+    expect(limiter.isBlocked("a")).toBe(false);
   });
 });

@@ -83,9 +83,10 @@ active membership fail at the database level.
 
 ### `notification_settings` (singleton)
 
-| Field                              | Type       | Notes                                                                                                                                                                   |
-| ---------------------------------- | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `representative_joined_recipients` | csv (tags) | Emails notified when a new representative joins (spec §5.7). Independent of permissions; edited by federation in Studio. Phase 3 adds the event review recipients here. |
+| Field                              | Type       | Notes                                                                                                                    |
+| ---------------------------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `representative_joined_recipients` | csv (tags) | Emails notified when a new representative joins (spec §5.7). Independent of permissions; edited by federation in Studio. |
+| `event_review_recipients`          | csv (tags) | Emails notified about submitted events and removal requests (spec §10.3). Grants no review rights.                       |
 
 ### `audit_logs`
 
@@ -101,6 +102,60 @@ active membership fail at the database level.
 | `context`                  | json                              | Further context (e.g. event id)                                |
 
 Append-only: no role has update/delete permissions (administrators excepted by Directus design).
+
+## Phase 3 collections (events)
+
+### `events`
+
+| Field                                                                 | Type                                                                        | Notes                                                                             |
+| --------------------------------------------------------------------- | --------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| `status`                                                              | `draft` \| `pending` \| `published` \| `rejected` \| `unpublished`          | Changed only by Fastify workflow actions                                          |
+| `title`                                                               | string, required                                                            | Locked for clubs after publication                                                |
+| `description`, `admission_info`, `additional_info`                    | text                                                                        | Plain text (line breaks kept)                                                     |
+| `start_date`, `end_date`                                              | date, required                                                              | One record for multi-day events (spec §7.3); locked for clubs after publication   |
+| `all_day`, `start_time`, `end_time`                                   | boolean, time                                                               | Times cleared when all-day                                                        |
+| `calendar`                                                            | `swimming` \| `water_polo` \| `artistic_swimming` \| `masters` \| `general` | Exactly one fixed calendar (no collection, spec §7.4)                             |
+| `club`                                                                | M2O `clubs`, nullable                                                       | **Owning** club (who manages it); `NULL` = federation event                       |
+| `organizer_type`, `organizer_name`                                    | `club` \| `federation` \| `external`, string                                | Organizer may differ from owner (e.g. external organizer of a club-managed event) |
+| `official`                                                            | boolean                                                                     | Federation only; default true for federation events                               |
+| `venue`, `street`, `postal_code`, `city`, `website`                   | string                                                                      |                                                                                   |
+| `title_image`, `logo`                                                 | file                                                                        | Served via Fastify (published = public)                                           |
+| `results_service`, `swimresults_id`                                   | string                                                                      | SwimResults integration postponed (spec §7.2)                                     |
+| `categories`                                                          | M2M → `event_categories` (junction `events_event_categories`)               | 0..n                                                                              |
+| `schedule`                                                            | O2M → `event_schedule_entries`                                              | Replaced via nested write (`one_deselect_action = delete`)                        |
+| `files`                                                               | O2M → `event_files`                                                         |                                                                                   |
+| `removal_requests`                                                    | O2M → `event_removal_requests`                                              | Used for atomic decisions                                                         |
+| `created_by`, `submitted_by/_at`, `reviewed_by/_at`, `review_comment` |                                                                             | Review metadata; `review_comment` = last rejection reason                         |
+| `published_at`                                                        | timestamp                                                                   | **First** publication (decides whether a club may discard)                        |
+| `deleted_at`, `deleted_by`                                            |                                                                             | Soft delete (archive)                                                             |
+
+### `event_categories`
+
+`id` (int), `name` (unique), `slug` (unique), `active` (archive flag – deactivate instead of
+delete), `sort`. Base data (Wettkampf, Kampfrichter, Verband) is inserted by `directus:apply` if
+missing; existing entries are never overwritten.
+
+### `event_schedule_entries`
+
+`event`, `date` (optional, multi-day), `time`, `end_time`, `type` (`admission`, `warm_up`,
+`meeting`, `session`, `break`, `awards`, `custom` – `SCHEDULE_ENTRY_TYPES`), `title`,
+`description`, `sort`.
+
+### `event_files`
+
+`event`, `file` (M2O `directus_files`), `description` (required), `sort`. Removing an attachment
+deletes this row; the Directus file remains.
+
+### `event_removal_requests` (spec §19.3)
+
+`event`, `type` (`unpublish` \| `delete`), `reason`, `status` (`pending` \| `approved` \|
+`rejected`), `pending_event` (**unique**, = event while pending → max. one open request per event),
+`requested_by`, `decided_by/_at`, `decision_comment`. Requests are never deleted (history).
+
+Event history is not a separate collection: it is read from `audit_logs`
+(`entity_type = events`) – see [05-workflows.md](05-workflows.md#event-history-spec-194).
+
+> Directus returns `bigInteger` primary keys (e.g. `audit_logs.id`) as **strings**.
 
 ## Changing the schema
 

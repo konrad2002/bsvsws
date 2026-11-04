@@ -78,3 +78,25 @@ With `pnpm stack:up`, `pnpm directus:apply`, `pnpm directus:seed`, `pnpm dev`:
 6. Open a used or revoked link → appropriate message. Invite `mitglied@example.com` (already in
    SV Musterstadt) to another club → accepting fails with "bereits Mitglied eines anderen Vereins".
 7. Studio → Auditlog shows all actions with the acting user.
+
+## Manual test: events (Phase 3)
+
+Set an address under Studio → Benachrichtigungen → _event_review_recipients_ first.
+
+1. As `vertreter@example.com`: Veranstaltungen → Neue Veranstaltung → fill in, add schedule
+   entries (type preselects the title), save → status _Entwurf_. Add a PDF with description, a
+   title image.
+2. "Zur Freigabe einreichen" → Mailpit shows "Neue Veranstaltung zur Prüfung". Edit something
+   while it is _Eingereicht_ (allowed).
+3. As `verband@example.com`: "Prüfung (n)" → open → Freigeben. If the club edited after you
+   opened the page you get "inzwischen geändert" – reload and approve again. The representative
+   gets "Veranstaltung freigegeben".
+4. As the representative: title and dates are disabled, times editable. "Entfernung beantragen"
+   (Löschen) → event stays published; federation sees the request in "Prüfung" and decides.
+5. Reject path: submit another event, reject with a reason → club sees the reason, edits,
+   "Erneut einreichen". The "Verlauf" section lists every step with comments.
+6. Create a draft and "Verwerfen" → gone from the club list; federation finds it under
+   Veranstaltungen → Archiv.
+7. As federation: create an event without club (official) → "Direkt veröffentlichen".
+8. Log out and open a published event's file URL (`/api/events/<id>/files/<fileId>`) → downloads;
+   for a draft → 404.

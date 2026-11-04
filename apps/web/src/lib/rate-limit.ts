@@ -1,10 +1,11 @@
 /**
- * In-memory fixed-window rate limiter (per Next.js server process).
- * Sufficient for a single web container; replace with a shared store if the web
- * app is ever scaled horizontally.
+ * In-memory fixed-window limiter for FAILED attempts (per Next.js server process).
+ * Successful actions are not counted, so many legitimate logins from one shared
+ * IP (e.g. a club office) are never blocked. Sufficient for a single web
+ * container; use a shared store if the web app is ever scaled horizontally.
  */
-export class RateLimiter {
-  private readonly hits = new Map<string, { count: number; resetAt: number }>();
+export class FailureLimiter {
+  private readonly failures = new Map<string, { count: number; resetAt: number }>();
 
   constructor(
     private readonly limit: number,
@@ -12,25 +13,34 @@ export class RateLimiter {
     private readonly now: () => number = Date.now,
   ) {}
 
-  /** Records an attempt. Returns false when the key is over its limit. */
-  attempt(key: string): boolean {
-    const now = this.now();
-    const entry = this.hits.get(key);
-    if (!entry || entry.resetAt <= now) {
-      this.hits.set(key, { count: 1, resetAt: now + this.windowMs });
-      this.prune(now);
-      return true;
+  /** True when the key has reached its failure limit in the current window. */
+  isBlocked(key: string): boolean {
+    const entry = this.failures.get(key);
+    if (!entry) return false;
+    if (entry.resetAt <= this.now()) {
+      this.failures.delete(key);
+      return false;
     }
-    entry.count += 1;
-    return entry.count <= this.limit;
+    return entry.count >= this.limit;
   }
 
-  reset(key: string) {
-    this.hits.delete(key);
+  recordFailure(key: string): void {
+    const now = this.now();
+    const entry = this.failures.get(key);
+    if (!entry || entry.resetAt <= now) {
+      this.failures.set(key, { count: 1, resetAt: now + this.windowMs });
+      this.prune(now);
+      return;
+    }
+    entry.count += 1;
+  }
+
+  reset(key: string): void {
+    this.failures.delete(key);
   }
 
   private prune(now: number) {
-    if (this.hits.size < 10_000) return;
-    for (const [key, entry] of this.hits) if (entry.resetAt <= now) this.hits.delete(key);
+    if (this.failures.size < 10_000) return;
+    for (const [key, entry] of this.failures) if (entry.resetAt <= now) this.failures.delete(key);
   }
 }

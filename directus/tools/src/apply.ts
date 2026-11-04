@@ -9,12 +9,14 @@
  * Idempotent: safe to run repeatedly. Flags: --dry-run, --allow-destructive
  */
 import {
+  createItem,
   createPermission,
   createPolicy,
   createRole,
   createUser,
   customEndpoint,
   deletePermissions,
+  readItems,
   readPermissions,
   readPolicies,
   readRoles,
@@ -30,6 +32,7 @@ import { readFile } from "node:fs/promises";
 import { DIRECTUS_POLICY_IDS } from "@bsv-sws/directus";
 import {
   assertNoCustomRules,
+  BASE_EVENT_CATEGORIES,
   MANAGED_COLLECTIONS,
   POLICIES,
   PUBLIC_PERMISSIONS,
@@ -182,6 +185,20 @@ async function applyRoles() {
   }
 }
 
+/** Inserts missing base data (matched by slug); never overwrites administrator edits. */
+async function applyBaseData() {
+  const existing = (await client.request(
+    readItems("event_categories", { fields: ["slug"], limit: -1 }),
+  )) as { slug: string }[];
+  const have = new Set(existing.map((c) => c.slug));
+  for (const category of BASE_EVENT_CATEGORIES) {
+    if (have.has(category.slug)) continue;
+    log(`Base data: event category "${category.name}"`);
+    if (!dryRun)
+      await client.request(createItem("event_categories", { ...category, active: true }));
+  }
+}
+
 async function applyServiceUser() {
   const token = env.DIRECTUS_SERVICE_TOKEN;
   if (!token || token.length < 32) {
@@ -204,5 +221,6 @@ await applySettings();
 await applySchema();
 await applyPolicies();
 await applyRoles();
+await applyBaseData();
 await applyServiceUser();
 log("Directus configuration applied.");

@@ -1,4 +1,13 @@
-import type { MembershipRole, Sport } from "@bsv-sws/shared";
+import type {
+  EventCalendar,
+  EventStatus,
+  MembershipRole,
+  OrganizerType,
+  RemovalStatus,
+  RemovalType,
+  ScheduleEntryType,
+  Sport,
+} from "@bsv-sws/shared";
 
 /**
  * TypeScript view of the Directus collections, used to type the SDK client.
@@ -91,11 +100,13 @@ export interface Invitation {
 export interface NotificationSettings {
   id: number;
   representative_joined_recipients: string[] | null;
+  event_review_recipients: string[] | null;
   date_updated: Timestamp | null;
 }
 
 export interface AuditLog {
-  id: number;
+  /** bigInteger: Directus returns it as a string. */
+  id: number | string;
   timestamp: Timestamp | null;
   actor: Uuid | null;
   action: string;
@@ -107,11 +118,98 @@ export interface AuditLog {
   context: Record<string, unknown> | null;
 }
 
+export interface EventCategoryRow {
+  id: number;
+  name: string;
+  slug: string;
+  active: boolean;
+  sort: number | null;
+}
+
+export interface EventRow {
+  id: Uuid;
+  status: EventStatus;
+  title: string;
+  description: string | null;
+  start_date: string;
+  end_date: string;
+  all_day: boolean;
+  start_time: string | null;
+  end_time: string | null;
+  calendar: EventCalendar;
+  club: Uuid | Club | null;
+  organizer_type: OrganizerType;
+  organizer_name: string | null;
+  official: boolean;
+  venue: string | null;
+  street: string | null;
+  postal_code: string | null;
+  city: string | null;
+  website: string | null;
+  title_image: Uuid | null;
+  logo: Uuid | null;
+  admission_info: string | null;
+  results_service: string | null;
+  swimresults_id: string | null;
+  additional_info: string | null;
+  created_by: Uuid | null;
+  submitted_by: Uuid | null;
+  submitted_at: Timestamp | null;
+  reviewed_by: Uuid | null;
+  reviewed_at: Timestamp | null;
+  review_comment: string | null;
+  published_at: Timestamp | null;
+  deleted_at: Timestamp | null;
+  deleted_by: Uuid | null;
+  date_created: Timestamp | null;
+  date_updated: Timestamp | null;
+}
+
+export interface EventScheduleEntryRow {
+  id: Uuid;
+  event: Uuid;
+  date: string | null;
+  time: string | null;
+  end_time: string | null;
+  type: ScheduleEntryType;
+  title: string;
+  description: string | null;
+  sort: number | null;
+}
+
+export interface EventFileRow {
+  id: Uuid;
+  event: Uuid;
+  file: Uuid;
+  description: string;
+  sort: number | null;
+}
+
+export interface EventRemovalRequestRow {
+  id: Uuid;
+  event: Uuid;
+  type: RemovalType;
+  reason: string | null;
+  status: RemovalStatus;
+  /** = event while pending, otherwise null. Unique → max. one open request per event. */
+  pending_event: Uuid | null;
+  requested_by: Uuid;
+  decided_by: Uuid | null;
+  decided_at: Timestamp | null;
+  decision_comment: string | null;
+  date_created: Timestamp | null;
+}
+
 export interface DirectusSchema {
   clubs: Club[];
   club_memberships: ClubMembership[];
   invitations: Invitation[];
   audit_logs: AuditLog[];
   notification_settings: NotificationSettings;
+  events: EventRow[];
+  event_categories: EventCategoryRow[];
+  event_schedule_entries: EventScheduleEntryRow[];
+  event_files: EventFileRow[];
+  event_removal_requests: EventRemovalRequestRow[];
   directus_users: DirectusUserRecord[];
 }

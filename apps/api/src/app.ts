@@ -11,10 +11,12 @@ import {
   createDirectusIdentityProvider,
   type IdentityProvider,
 } from "./modules/auth/identity-provider.js";
-import { createClubService, LOGO_MAX_BYTES } from "./modules/clubs/club-service.js";
+import { createClubService } from "./modules/clubs/club-service.js";
+import { createEventService, EVENT_FILE_MAX_BYTES } from "./modules/events/event-service.js";
 import { createInvitationService } from "./modules/invitations/invitation-service.js";
 import { createMembershipService } from "./modules/memberships/membership-service.js";
 import { clubRoutes } from "./routes/clubs.js";
+import { eventRoutes } from "./routes/events.js";
 import { healthRoutes } from "./routes/health.js";
 import { invitationRoutes } from "./routes/invitations.js";
 import { meRoutes } from "./routes/me.js";
@@ -49,7 +51,10 @@ export async function buildApp(env: Env, options: FastifyServerOptions = {}, dep
     global: false,
     keyGenerator: (req) => (req.headers["x-client-ip"] as string | undefined) ?? req.ip,
   });
-  await app.register(multipart, { limits: { fileSize: LOGO_MAX_BYTES, files: 1, fields: 5 } });
+  // Global upper bound; routes set tighter per-file limits (logos 2 MB, images 5 MB).
+  await app.register(multipart, {
+    limits: { fileSize: EVENT_FILE_MAX_BYTES, files: 1, fields: 5 },
+  });
 
   const client = createServiceClient(env.DIRECTUS_URL, env.DIRECTUS_SERVICE_TOKEN);
   const identity =
@@ -77,11 +82,23 @@ export async function buildApp(env: Env, options: FastifyServerOptions = {}, dep
     now,
   });
 
+  const events = createEventService({
+    client,
+    audit,
+    mailer,
+    log: app.log,
+    webPublicUrl: env.WEB_PUBLIC_URL,
+    directusUrl: env.DIRECTUS_URL,
+    serviceToken: env.DIRECTUS_SERVICE_TOKEN,
+    now,
+  });
+
   await app.register(healthRoutes, { directusUrl: env.DIRECTUS_URL });
   await app.register(meRoutes, { auth });
   await app.register(clubRoutes, { auth, clubs, memberships, invitations });
   await app.register(membershipRoutes, { auth, memberships });
   await app.register(invitationRoutes, { auth, invitations });
+  await app.register(eventRoutes, { auth, events });
 
   return app;
 }

@@ -93,3 +93,59 @@ with the full entry.
 | `invitation.created`, `invitation.resent`, `invitation.revoked`, `invitation.accepted`  | invitations      |
 | `user.verified`                                                                         | directus_users   |
 | `membership.created`, `membership.promoted`, `membership.demoted`, `membership.removed` | club_memberships |
+
+## Events (Phase 3)
+
+```mermaid
+stateDiagram-v2
+    [*] --> draft: create (club / federation)
+    draft --> pending: submit
+    rejected --> pending: resubmit
+    unpublished --> pending: resubmit
+    pending --> published: approve (federation, version check)
+    pending --> rejected: reject (federation, comment required)
+    draft --> published: publish (federation, no review)
+    rejected --> published: publish (federation)
+    unpublished --> published: publish (federation)
+    published --> unpublished: unpublish (federation) / approved removal "unpublish"
+    published --> [*]: approved removal "delete" / federation delete (soft)
+    draft --> [*]: discard (club, never published) / delete (federation)
+```
+
+Rules (implemented in `apps/api/src/modules/events/event-rules.ts`, unit-tested):
+
+| Topic                    | Rule                                                                                                                                                                                                                                                                                                                            |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Create                   | Representatives for their own club (organizer: own club or external organisation); federation for any club or the federation itself (`clubId = null`, official by default). Members cannot create events.                                                                                                                       |
+| Edit                     | Owning club's representatives and the federation, in **every status incl. pending** (owner decision). Federation may change everything.                                                                                                                                                                                         |
+| Locked after publication | For representatives: `title`, `startDate`, `endDate` (spec §7.9). Times and all other fields stay editable; edits are visible immediately. Federation may override.                                                                                                                                                             |
+| Federation-only fields   | `official`, `clubId` (owning club), organizer "BSV-SWS".                                                                                                                                                                                                                                                                        |
+| Review                   | Approve/reject require the `version` (`updatedAt`) the reviewer saw → `409 EVENT_CHANGED` if the club edited meanwhile (safeguard for editable pending events). Rejection needs a comment; the last comment stays on the event (`review_comment`) and in the history.                                                           |
+| Direct publish           | Federation publishes its own events and events created on behalf of clubs without review (spec §7.8).                                                                                                                                                                                                                           |
+| Removal                  | Representatives request **unpublish** or **delete** for published events (owner decision) with a reason. The event stays **published and editable** until the federation decides (spec §7.10). One open request per event (unique `pending_event`). Approval and the event change are one nested write. "Delete" = soft delete. |
+| Discard                  | Representatives soft-delete their own never-published drafts and rejected events (owner decision).                                                                                                                                                                                                                              |
+| Delete                   | Federation soft-deletes any event; deleted events are hidden everywhere except the federation archive (`/intern/veranstaltungen?archiv=1`). Nothing is physically deleted.                                                                                                                                                      |
+| Visibility               | spec §7.11: published → everyone; draft/pending/rejected/unpublished → owning club's representatives + federation. Others get `404`.                                                                                                                                                                                            |
+| Files                    | Attachments (file + description, PDF/Office/text/ZIP/images ≤ 20 MB) and title image/logo (PNG/JPEG/WebP ≤ 5 MB). Downloads are public for published events, otherwise only for users who may view the event.                                                                                                                   |
+| Schedule                 | Ordered entries with optional day (multi-day), start/end time, predefined type (Einlass, Einschwimmen, Sitzung, Wettkampfabschnitt, Pause, Siegerehrung) or "Sonstiges", free title and note. Replaced as a whole on save (nested write).                                                                                       |
+| Categories               | Administrator-managed in Studio (federation can add/rename/deactivate); only active categories can be assigned. Initial: Wettkampf, Kampfrichter, Verband.                                                                                                                                                                      |
+
+### Event notifications
+
+| Trigger                            | Recipient                                                                                                           |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| Submitted / resubmitted            | `notification_settings.event_review_recipients` (Studio → Benachrichtigungen; no review rights implied, spec §10.3) |
+| Approved / rejected (with comment) | Submitter (`submitted_by`)                                                                                          |
+| Removal requested                  | Event review recipients (owner decision)                                                                            |
+| Removal decided                    | Requester (owner decision)                                                                                          |
+
+### Event history (spec §19.4)
+
+The audit log is the single source: every action below is recorded with actor, comment and
+(for edits) the changed fields before/after. `GET /events/:id/history` shows it to the owning
+club and the federation.
+
+`event.created`, `event.updated`, `event.submitted`, `event.resubmitted`, `event.approved`,
+`event.rejected`, `event.published`, `event.unpublished`, `event.removal_requested`,
+`event.removal_approved`, `event.removal_rejected`, `event.deleted`, `event.discarded`,
+`event.file_added`, `event.file_removed`, `event.image_changed`.

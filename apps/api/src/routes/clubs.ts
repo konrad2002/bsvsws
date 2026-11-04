@@ -8,7 +8,7 @@ import type { FastifyPluginAsync } from "fastify";
 import { z } from "zod";
 import { badRequest, notFound, parseInput } from "../lib/errors.js";
 import type { AuthService } from "../modules/auth/auth-service.js";
-import type { ClubService } from "../modules/clubs/club-service.js";
+import { LOGO_MAX_BYTES, type ClubService } from "../modules/clubs/club-service.js";
 import type { InvitationService } from "../modules/invitations/invitation-service.js";
 import type { MembershipService } from "../modules/memberships/membership-service.js";
 
@@ -43,7 +43,7 @@ export const clubRoutes: FastifyPluginAsync<{
   app.put("/clubs/:clubId/logo", async (req) => {
     const ctx = await ctxOf(req.headers);
     const { clubId } = parseInput(clubParams, req.params);
-    const file = await req.file();
+    const file = await req.file({ limits: { fileSize: LOGO_MAX_BYTES } });
     if (!file) throw badRequest("FILE_REQUIRED", "Bitte eine Datei auswählen.");
     const data = await file.toBuffer(); // throws 413 above the configured limit
     return clubs.setLogo(ctx, clubId, { filename: file.filename, mimetype: file.mimetype, data });

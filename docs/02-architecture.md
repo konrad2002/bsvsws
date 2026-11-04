@@ -36,8 +36,9 @@ flowchart LR
 
 ### Rate limiting (spec §11.3)
 
-- Login: per client IP (20 / 15 min) and per email (5 / 15 min), in memory in the Next.js
-  process (`RateLimiter`). Client IP comes from `X-Forwarded-For`, which must be set by our
+- Login: **failed** attempts per client IP (20 / 15 min) and per email (5 / 15 min), in memory
+  in the Next.js process (`FailureLimiter`); successful logins are not counted, so a shared IP
+  (club office) is never blocked by legitimate use. Client IP comes from `X-Forwarded-For`, which must be set by our
   reverse proxy (Phase 8). Directus additionally suspends an account after 10 failed logins
   (`auth_login_attempts`).
 - Directus' own IP rate limiter stays disabled: all logins arrive from the Next.js server IP.
@@ -57,9 +58,13 @@ Directus uses the same SMTP settings for its own mails (e.g. password reset).
 
 ### Files
 
-Directus files are **not** publicly readable (protected documents will live there). Club logos
-are uploaded through Fastify and served via `GET /clubs/:id/logo` → Next.js route
-`/api/clubs/:id/logo`.
+Directus files are **not** publicly readable (protected documents will live there). Uploads go
+through Fastify; delivery through Fastify + Next.js proxy routes, which forward the session token
+when present (`apps/web/src/lib/asset-proxy.ts`):
+
+- Club logos: `/api/clubs/:id/logo` (public).
+- Event attachments and images: `/api/events/:id/files/:fileId`, `/api/events/:id/images/:kind` –
+  public for published events, otherwise only for users allowed to view the event.
 
 ### API conventions
 

@@ -3,7 +3,7 @@
 import { loginSchema } from "@bsv-sws/validation";
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { RateLimiter } from "../rate-limit";
+import { FailureLimiter } from "../rate-limit";
 import { safeRedirectPath } from "../safe-redirect";
 import {
   ACCESS_COOKIE,
@@ -18,9 +18,10 @@ export interface LoginState {
   email?: string;
 }
 
-// Directus additionally suspends an account after repeated failures (settings.auth_login_attempts).
-const ipLimiter = new RateLimiter(20, 15 * 60_000);
-const emailLimiter = new RateLimiter(5, 15 * 60_000);
+// Failed logins only. Directus additionally suspends an account after repeated
+// failures (settings.auth_login_attempts).
+const ipLimiter = new FailureLimiter(20, 15 * 60_000);
+const emailLimiter = new FailureLimiter(5, 15 * 60_000);
 
 /** Client IP as forwarded by the reverse proxy (only trustworthy behind our own proxy). */
 async function clientIp() {
@@ -37,7 +38,9 @@ export async function loginAction(_prev: LoginState, formData: FormData): Promis
   if (!parsed.success) return { error: "Bitte E-Mail-Adresse und Passwort eingeben.", email };
 
   const ip = await clientIp();
-  if (!ipLimiter.attempt(`ip:${ip}`) || !emailLimiter.attempt(`email:${parsed.data.email}`)) {
+  const ipKey = `ip:${ip}`;
+  const emailKey = `email:${parsed.data.email}`;
+  if (ipLimiter.isBlocked(ipKey) || emailLimiter.isBlocked(emailKey)) {
     return { error: "Zu viele Anmeldeversuche. Bitte versuche es in 15 Minuten erneut.", email };
   }
 
@@ -45,10 +48,12 @@ export async function loginAction(_prev: LoginState, formData: FormData): Promis
   try {
     tokens = await directusLogin(parsed.data.email, parsed.data.password);
   } catch {
+    ipLimiter.recordFailure(ipKey);
+    emailLimiter.recordFailure(emailKey);
     // Deliberately generic: do not reveal whether the account exists or is suspended.
     return { error: "Anmeldung fehlgeschlagen. Bitte E-Mail-Adresse und Passwort prüfen.", email };
   }
-  emailLimiter.reset(`email:${parsed.data.email}`);
+  emailLimiter.reset(emailKey);
 
   const store = await cookies();
   for (const c of sessionCookies(tokens)) store.set(c.name, c.value, c.options);

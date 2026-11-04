@@ -90,3 +90,95 @@ export function representativeJoinedEmail(input: {
       SIGNATURE,
   };
 }
+
+const eventLink = (webPublicUrl: string, eventId: string) =>
+  new URL(`/intern/veranstaltungen/${eventId}`, webPublicUrl).toString();
+
+export function eventSubmittedEmail(input: {
+  to: string[];
+  title: string;
+  clubName: string | null;
+  eventId: string;
+  webPublicUrl: string;
+  resubmitted: boolean;
+}): EmailMessage {
+  return {
+    to: input.to,
+    subject: `${input.resubmitted ? "Erneut eingereicht" : "Neue Veranstaltung zur Prüfung"}: ${input.title}`,
+    text:
+      `Hallo,\n\n` +
+      `${input.clubName ? `der Verein „${input.clubName}“` : "Es"} hat die Veranstaltung „${input.title}“ ` +
+      `${input.resubmitted ? "erneut " : ""}zur Freigabe eingereicht.\n\n` +
+      `Prüfen: ${eventLink(input.webPublicUrl, input.eventId)}` +
+      SIGNATURE,
+  };
+}
+
+export function eventDecisionEmail(input: {
+  to: string;
+  title: string;
+  approved: boolean;
+  comment: string | null;
+  eventId: string;
+  webPublicUrl: string;
+}): EmailMessage {
+  return {
+    to: input.to,
+    subject: input.approved
+      ? `Veranstaltung freigegeben: ${input.title}`
+      : `Veranstaltung abgelehnt: ${input.title}`,
+    text:
+      `Hallo,\n\n` +
+      (input.approved
+        ? `die Veranstaltung „${input.title}“ wurde vom Verband freigegeben und ist jetzt öffentlich sichtbar.`
+        : `die Veranstaltung „${input.title}“ wurde vom Verband abgelehnt.\n\nBegründung:\n${input.comment ?? "–"}\n\n` +
+          `Du kannst die Veranstaltung überarbeiten und erneut einreichen.`) +
+      (input.approved && input.comment ? `\n\nKommentar:\n${input.comment}` : "") +
+      `\n\n${eventLink(input.webPublicUrl, input.eventId)}` +
+      SIGNATURE,
+  };
+}
+
+export function removalRequestedEmail(input: {
+  to: string[];
+  title: string;
+  type: "unpublish" | "delete";
+  reason: string;
+  eventId: string;
+  webPublicUrl: string;
+}): EmailMessage {
+  const what = input.type === "delete" ? "Löschung" : "Depublizierung";
+  return {
+    to: input.to,
+    subject: `Antrag auf ${what}: ${input.title}`,
+    text:
+      `Hallo,\n\n` +
+      `für die veröffentlichte Veranstaltung „${input.title}“ wurde die ${what} beantragt. ` +
+      `Die Veranstaltung bleibt bis zur Entscheidung öffentlich sichtbar.\n\n` +
+      `Begründung:\n${input.reason}\n\n` +
+      `Entscheiden: ${eventLink(input.webPublicUrl, input.eventId)}` +
+      SIGNATURE,
+  };
+}
+
+export function removalDecidedEmail(input: {
+  to: string;
+  title: string;
+  type: "unpublish" | "delete";
+  approved: boolean;
+  comment: string | null;
+  eventId: string;
+  webPublicUrl: string;
+}): EmailMessage {
+  const what = input.type === "delete" ? "Löschung" : "Depublizierung";
+  return {
+    to: input.to,
+    subject: `Antrag auf ${what} ${input.approved ? "genehmigt" : "abgelehnt"}: ${input.title}`,
+    text:
+      `Hallo,\n\n` +
+      `dein Antrag auf ${what} der Veranstaltung „${input.title}“ wurde ${input.approved ? "genehmigt" : "abgelehnt"}.` +
+      (input.comment ? `\n\nKommentar:\n${input.comment}` : "") +
+      `\n\n${eventLink(input.webPublicUrl, input.eventId)}` +
+      SIGNATURE,
+  };
+}
