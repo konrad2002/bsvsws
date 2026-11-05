@@ -40,6 +40,10 @@ services:
     logging: *logging
     # Only reachable inside the Compose network (web → api).
     ports: !reset []
+    environment:
+      # Fail at `compose up` with a clear message instead of a crashing container.
+      APP_SECRET: ${APP_SECRET:?set APP_SECRET in .env (openssl rand -hex 32)}
+      DIRECTUS_SERVICE_TOKEN: ${DIRECTUS_SERVICE_TOKEN:?set DIRECTUS_SERVICE_TOKEN in .env (openssl rand -hex 32)}
 
   web:
     build: !reset null
@@ -61,6 +65,6 @@ services:
     environment:
       DIRECTUS_URL: http://directus:8055
       DIRECTUS_SETUP_TOKEN: ${DIRECTUS_SETUP_TOKEN:?set DIRECTUS_SETUP_TOKEN}
-      DIRECTUS_SERVICE_TOKEN: ${DIRECTUS_SERVICE_TOKEN}
+      DIRECTUS_SERVICE_TOKEN: ${DIRECTUS_SERVICE_TOKEN:?set DIRECTUS_SERVICE_TOKEN in .env (openssl rand -hex 32)}
       JOOMLA_URL: ${JOOMLA_URL:-https://bsv-sws.de}
     logging: *logging

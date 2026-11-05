@@ -39,13 +39,30 @@ jobs:
         env:
           KEY: ${{ secrets.VPS_SSH_KEY }}
           KNOWN_HOSTS: ${{ secrets.VPS_KNOWN_HOSTS }}
+          HOST: ${{ secrets.VPS_HOST }}
+          USER_NAME: ${{ secrets.VPS_USER }}
+          PORT: ${{ vars.VPS_PORT || '22' }}
+        # Host keys are never accepted blindly: VPS_KNOWN_HOSTS = output of
+        # `ssh-keyscan [-p <port>] <VPS_HOST>` (docs/09-infrastructure.md).
         run: |
+          for v in KEY KNOWN_HOSTS HOST USER_NAME; do
+            [ -n "${!v}" ] || { echo "::error::Secret/variable for $v missing in this GitHub Environment"; exit 1; }
+          done
           install -m 700 -d ~/.ssh
           printf '%s\n' "$KEY" > ~/.ssh/id_deploy && chmod 600 ~/.ssh/id_deploy
           printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts
+          cat > ~/.ssh/config <<EOF
+          Host deploy-target
+            HostName $HOST
+            User $USER_NAME
+            Port $PORT
+            IdentityFile ~/.ssh/id_deploy
+            IdentitiesOnly yes
+            StrictHostKeyChecking yes
+          EOF
+          ssh deploy-target true || { echo "::error::SSH to the deploy host failed – check VPS_HOST/VPS_USER/VPS_PORT, VPS_KNOWN_HOSTS (ssh-keyscan) and the deploy key"; exit 1; }
       - name: Run apply
         env:
-          TARGET: ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}
           DEPLOY_DIR: ${{ vars.DEPLOY_DIR }}
           MODE: ${{ inputs.mode }}
           GHCR_USER: ${{ github.actor }}
@@ -56,7 +73,9 @@ jobs:
             apply) ARGS="" ;;
             destructive) ARGS="--allow-destructive" ;;
           esac
-          remote() { ssh -i ~/.ssh/id_deploy "$TARGET" "$@"; }
+          # Arguments are expanded here on purpose (paths/sha), then run remotely.
+          # shellcheck disable=SC2029
+          remote() { ssh deploy-target "$@"; }
           printf '%s' "$GHCR_TOKEN" | remote "DOCKER_CONFIG='$DEPLOY_DIR/.docker' docker login ghcr.io -u '$GHCR_USER' --password-stdin"
           set +e
           remote "DOCKER_CONFIG='$DEPLOY_DIR/.docker' IMAGE_TAG='$GITHUB_SHA' bash '$DEPLOY_DIR/tools.sh' '$DEPLOY_DIR' apply $ARGS"

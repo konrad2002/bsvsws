@@ -111,13 +111,24 @@ and `PROXY_ALIAS` (e.g. `bsv-dev`) in `.env`. `deploy.sh`/`tools.sh` then add
 network. Find the network with
 `docker inspect <nginx-container> --format '{{json .NetworkSettings.Networks}}'`.
 
+If nginx runs as a **Docker Swarm service**, its overlay network must be _attachable_ – otherwise
+the deploy fails with "network … not manually attachable" (the flag cannot be added later).
+Create a dedicated network and add it to the nginx service (dev host, 2026-11-05):
+
+```bash
+docker network create --driver overlay --attachable bsv-proxy
+docker service update --network-add bsv-proxy <nginx-service>   # or add it in the nginx stack file
+```
+
+and set `PROXY_NETWORK=bsv-proxy`.
+
 ### Secrets separation (spec §14.3/§14.4)
 
-| Where                                    | What                                                                                                                    |
-| ---------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| `<DEPLOY_DIR>/.env` (server only)        | all application secrets: database, Directus secret/admin/setup token, service token, `APP_SECRET`, SMTP, licence key    |
-| GitHub Environment `test` / `production` | secrets `VPS_HOST`, `VPS_USER`, `VPS_SSH_KEY` (deploy key), `VPS_KNOWN_HOSTS`; variables `DEPLOY_DIR`, `WEB_PUBLIC_URL` |
-| GitHub job token                         | short-lived GHCR push (CI) / pull (deploy); logged out after each deploy                                                |
+| Where                                    | What                                                                                                                                         |
+| ---------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| `<DEPLOY_DIR>/.env` (server only)        | all application secrets: database, Directus secret/admin/setup token, service token, `APP_SECRET`, SMTP, licence key                         |
+| GitHub Environment `test` / `production` | secrets `VPS_HOST`, `VPS_USER`, `VPS_SSH_KEY` (deploy key), `VPS_KNOWN_HOSTS`; variables `DEPLOY_DIR`, `WEB_PUBLIC_URL`, optional `VPS_PORT` |
+| GitHub job token                         | short-lived GHCR push (CI) / pull (deploy); logged out after each deploy                                                                     |
 
 The deploy job refuses to run if `DEPLOY_DIR` does not match the environment
 (directory name `dev`/`test` for `develop`, `production`/`prod` for `master`; the name is also the
@@ -154,9 +165,11 @@ browser login (secure cookies, Server Action origin check).
    in **new** secrets (`openssl rand -hex 32`), `chmod 600`. Set `DIRECTUS_ADMIN_TOKEN` before the
    first start – Directus assigns it to the bootstrap admin, the tools job uses it.
 3. Deploy key: `ssh-keygen -t ed25519 -f bsv-sws-<env>`; public key into the deploy user's
-   `authorized_keys`; private key → GitHub Environment secret `VPS_SSH_KEY`;
-   `ssh-keyscan <host>` → `VPS_KNOWN_HOSTS`. Set `VPS_HOST`, `VPS_USER`, variables `DEPLOY_DIR`,
-   `WEB_PUBLIC_URL`.
+   `authorized_keys`. GitHub Environment secrets: `VPS_SSH_KEY` (private key), `VPS_HOST`,
+   `VPS_USER`, `VPS_KNOWN_HOSTS` = output of `ssh-keyscan [-p <port>] <VPS_HOST>` run against
+   **exactly** the `VPS_HOST` value (hostname vs. IP matters; otherwise "Host key verification
+   failed"). Variables: `DEPLOY_DIR`, `WEB_PUBLIC_URL`, optional `VPS_PORT` (default 22). The
+   workflow checks the SSH connection before copying anything.
 4. DNS: `A`/`AAAA` records → host (dev: `bsv.konrad2002.de`, `bsv-cms.konrad2002.de`;
    production: `bsv-sws.de`, `www.bsv-sws.de`, `cms.bsv-sws.de`).
 5. nginx: dev → [`bsv-dev.conf.example`](../infrastructure/deployment/nginx/bsv-dev.conf.example)
