@@ -22,6 +22,7 @@ describe("content path classification (proxy status codes)", () => {
     ["/einladung/abc", false],
     ["/api/clubs/x/logo", false],
     ["/kalender/alle.ics", false],
+    ["/kalender/eventdetail/20/-/bezirksmeisterschaften-2026", true],
     ["/medien/abc", false],
     ["/robots.txt", false],
   ])("%s → %s", (path, expected) => {

@@ -97,6 +97,12 @@ services:
       SMTP_USER: ${SMTP_USER:-}
       SMTP_PASSWORD: ${SMTP_PASSWORD:-}
       EMAIL_FROM: ${EMAIL_FROM}
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:4000/health/ready || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
 
   web:
     profiles: ["app"]
@@ -106,7 +112,8 @@ services:
     image: bsv-sws/web:local
     restart: unless-stopped
     depends_on:
-      - api
+      api:
+        condition: service_healthy
     ports:
       - "127.0.0.1:${WEB_PORT:-3000}:3000"
     environment:
@@ -116,6 +123,12 @@ services:
       API_URL: http://api:4000
       # Local production-like run over plain HTTP; deployed environments keep the default (secure).
       SESSION_COOKIE_SECURE: ${SESSION_COOKIE_SECURE:-false}
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:3000/api/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 15s
 
   # Local development only: catches all outgoing email (UI http://localhost:8025).
   mailpit:

@@ -24,7 +24,7 @@ export interface BasePage {
   children?: BasePage[];
 }
 
-const PLACEHOLDER = "<p>Dieser Inhalt wird gerade übertragen.</p>";
+export const PLACEHOLDER = "<p>Dieser Inhalt wird gerade übertragen.</p>";
 export const placeholderContent = (title: string) => `<p>${title}</p>${PLACEHOLDER}`;
 
 /** Page structure of the current website (spec §9.1) + legal pages. Created only if `pages` is empty. */

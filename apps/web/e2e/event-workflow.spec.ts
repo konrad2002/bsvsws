@@ -40,6 +40,16 @@ test("club creates and submits an event", async ({ page }) => {
   await expect(page.getByRole("heading", { name: title })).toBeVisible();
   await expectStatus(page, "Entwurf");
   await expect(page.getByRole("textbox", { name: "Titel des Eintrags" })).toHaveValue("Einlass"); // schedule row title prefilled from type
+
+  // Uploads > 1 MB pass the server-action body limit (next.config.ts bodySizeLimit).
+  await page.getByRole("textbox", { name: "Beschreibung", exact: true }).fill("Ausschreibung");
+  await page.locator("#file-upload").setInputFiles({
+    name: "ausschreibung.pdf",
+    mimeType: "application/pdf",
+    buffer: Buffer.concat([Buffer.from("%PDF-1.4\n"), Buffer.alloc(3 * 1024 * 1024, 32)]),
+  });
+  await page.getByRole("button", { name: "Hinzufügen", exact: true }).click();
+  await expect(page.getByRole("link", { name: /Ausschreibung/ })).toBeVisible();
   await page.getByRole("button", { name: "Zur Freigabe einreichen" }).click();
   await expectStatus(page, "Eingereicht");
   await expect(page.getByText("wartet auf die Prüfung")).toBeVisible();

@@ -1,0 +1,26 @@
+# Optional overlay when nginx runs as a Docker container (e.g. the dev host): web and
+# Directus join the nginx network under fixed aliases instead of publishing host ports.
+# Used by deploy.sh/tools.sh automatically when .env sets PROXY_NETWORK.
+#   PROXY_NETWORK  existing Docker network of the nginx container (external)
+#   PROXY_ALIAS    alias prefix, e.g. bsv-dev → bsv-dev-web:3000, bsv-dev-cms:8055
+# Only web and Directus are reachable from nginx; api and postgres stay internal.
+
+services:
+  directus:
+    ports: !reset []
+    networks:
+      default: {}
+      proxy:
+        aliases: ["${PROXY_ALIAS:?set PROXY_ALIAS}-cms"]
+
+  web:
+    ports: !reset []
+    networks:
+      default: {}
+      proxy:
+        aliases: ["${PROXY_ALIAS}-web"]
+
+networks:
+  proxy:
+    external: true
+    name: ${PROXY_NETWORK:?set PROXY_NETWORK}

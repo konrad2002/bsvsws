@@ -10,12 +10,14 @@
     "seed:dev": "tsx --env-file-if-exists=../../.env src/seed-dev.ts",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "migrate:joomla": "tsx --env-file-if-exists=../../.env src/migrate-joomla.ts"
   },
   "dependencies": {
     "@bsv-sws/directus": "workspace:*",
     "@bsv-sws/shared": "workspace:*",
     "@directus/sdk": "^27.1.0",
+    "cheerio": "^1.2.0",
     "zod": "^4.6.7"
   },
   "devDependencies": {

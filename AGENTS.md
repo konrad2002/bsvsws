@@ -36,18 +36,18 @@ Implementation docs (read before touching the area): [docs/README.md](docs/READM
 [05-workflows](docs/05-workflows.md), [06-api-specification](docs/06-api-specification.md),
 [07-frontend-specification](docs/07-frontend-specification.md), [08-ui-ux](docs/08-ui-ux.md),
 [redaktion](docs/redaktion.md) (German editor guide),
-[09-infrastructure](docs/09-infrastructure.md), [10-testing](docs/10-testing.md),
+[09-infrastructure](docs/09-infrastructure.md) (incl. deployment), [10-testing](docs/10-testing.md),
+[migration](docs/migration.md), [launch](docs/launch.md),
 [decisions](docs/decisions/README.md), [DIRECTUS_API](docs/DIRECTUS_API.md) (agent access to local Directus).
 
 ## Current status
 
-Phases 0–6 are done: foundation; schema/roles/login/Fastify auth; clubs, invitations,
-memberships; events with review workflow; public calendar + WebCal; CMS (news, hierarchical pages,
-database navigation, club pages, redirects, public media); internal area with role dashboard,
-protected pages (`/intern/seiten`) and files (reference rule); federation administration
-(settings, representative limit, account overview, audit log). **Next: Phase 8** — deployment,
-migration and launch (see spec §17).
-Do not start later phases prematurely. Keep this section current.
+Phases 0–8 are implemented: foundation; schema/roles/login/Fastify auth; clubs, invitations,
+memberships; events with review workflow; public calendar + WebCal; CMS; internal area with
+protected pages/files; federation administration; deployment (GHCR images, `deploy.sh` on one
+VPS with test/production stacks, nginx example), Joomla migration tool, launch docs. **Open:**
+provisioning the dev host (`/home/konrad/docker/bsv/dev`, bsv.konrad2002.de) and GitHub Environment `test` (production not used yet: `DEPLOY_PRODUCTION`), backups (deferred by the owner, required
+before launch – `docs/launch.md`), migration run and final manual review. Do not start later phases prematurely. Keep this section current.
 
 ## Repository map
 

@@ -18,6 +18,7 @@ still a functional placeholder (spec §9.5) – structure and behaviour are bind
 | `/veranstaltungen`                                                                     | Event calendar: list (default), month and year view, filters, WebCal subscriptions                                 |
 | `/veranstaltungen/<slug>`                                                              | Public event detail (published events only, otherwise 404)                                                         |
 | `/kalender/<feed>.ics`                                                                 | WebCal feeds: `alle`, `schwimmen`, `wasserball`, `synchronschwimmen`, `masters`, `allgemein`                       |
+| `/api/health`                                                                          | Container healthcheck / smoke test: web up and API reachable (`{status}` only)                                     |
 | `/medien/<id>`                                                                         | File proxy (Fastify `/content/files`); forwards the session; 401 → login redirect, 403 → plain-text "Kein Zugriff" |
 | `/login`, `/einladung/<token>`                                                         | Login, invitation acceptance / registration                                                                        |
 | `/api/clubs/:id/logo`, `/api/events/:id/files/:fileId`, `/api/events/:id/images/:kind` | Asset proxies                                                                                                      |

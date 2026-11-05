@@ -9,12 +9,15 @@ import { env } from "./env";
  */
 
 const STATIC_EXACT = new Set(["/", "/news", "/veranstaltungen", "/vereine", "/login"]);
-const APP_PREFIXES = ["/intern", "/einladung", "/api", "/kalender", "/medien", "/_next"];
+const APP_PREFIXES = ["/intern", "/einladung", "/api", "/medien", "/_next"];
+/** WebCal feeds. Other /kalender/… paths are legacy Joomla event URLs → redirect lookup. */
+const CALENDAR_FEED = /^\/kalender\/[a-z]+\.ics$/;
 
 /** Paths whose existence depends on CMS/workflow data (detail routes + catch-all). */
 export function isContentPath(pathname: string): boolean {
   if (STATIC_EXACT.has(pathname)) return false;
   if (APP_PREFIXES.some((p) => pathname === p || pathname.startsWith(`${p}/`))) return false;
+  if (CALENDAR_FEED.test(pathname)) return false;
   // Static assets – but NOT legacy page URLs like /index.php or /foo.html (redirect candidates).
   if (
     /\.(?:txt|xml|ico|png|jpe?g|gif|svg|webp|avif|css|js|map|json|woff2?|webmanifest)$/i.test(
