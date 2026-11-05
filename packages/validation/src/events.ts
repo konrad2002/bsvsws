@@ -452,6 +452,7 @@ export const publicEventDetailSchema = publicEventSummarySchema.extend({
   swimresults: z
     .object({
       meetingId: z.string(),
+      meetingUrl: z.string(),
       liveUrl: z.string(),
       resultsUrl: z.string(),
       athletesUrl: z.string(),

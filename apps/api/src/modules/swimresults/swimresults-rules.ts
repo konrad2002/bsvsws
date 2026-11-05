@@ -80,6 +80,7 @@ export function swimResultsLinks(appUrl: string, meetingId: string) {
   const base = `${appUrl.replace(/\/$/, "")}/m/${encodeURIComponent(meetingId)}`;
   return {
     meetingId,
+    meetingUrl: base,
     liveUrl: `${base}/live?live=1`,
     resultsUrl: `${base}/event`,
     athletesUrl: `${base}/athlete`,

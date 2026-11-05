@@ -23,6 +23,7 @@ describe("swimResultsLinks", () => {
   it("builds the web app links", () => {
     expect(swimResultsLinks("https://app.swimresults.de/", "IESC26")).toEqual({
       meetingId: "IESC26",
+      meetingUrl: "https://app.swimresults.de/m/IESC26",
       liveUrl: "https://app.swimresults.de/m/IESC26/live?live=1",
       resultsUrl: "https://app.swimresults.de/m/IESC26/event",
       athletesUrl: "https://app.swimresults.de/m/IESC26/athlete",

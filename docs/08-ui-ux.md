@@ -82,7 +82,9 @@ in `components/layout/` (header, navigation, footer, sidebar).
   (`lib/file-format.ts`; tokens `--file-pdf/-dsv/-lenex/-zip/-other`, icons inlined Material
   Symbols), extension badge, and download count for SwimResults files (link icon for external
   links). Files that are announced but not published yet are greyed out and not linked; screen
-  readers get "(noch nicht verfügbar)". The list sits directly below "Live & Ergebnisse".
+  readers get "(noch nicht verfügbar)". The list sits directly below "Live & Ergebnisse", which
+  shows the "Veranstaltung mit SwimResults" badge (`public/swimresults-badge.png`, from bsv-sws.de,
+  linked to the meeting in the SwimResults app) above the three app links.
 - Accessibility: every control is labelled, sections use `aria-labelledby`, active views/pages
   use `aria-current`, decorative images have empty `alt`, external links open with
   `rel="noopener noreferrer"`.
