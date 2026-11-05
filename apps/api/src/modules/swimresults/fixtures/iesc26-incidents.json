@@ -1,0 +1,46 @@
+[
+ {
+  "_id": "6ad635200bad0e1e14671f52",
+  "meeting": "IESC26",
+  "type": "EVENT",
+  "name": "WARMUP",
+  "start": "2026-12-12T06:30:00Z",
+  "end": "2026-12-12T07:30:00Z",
+  "next_event": 1,
+  "added_at": "2026-10-19T15:20:00.169Z",
+  "updated_at": "2026-10-19T15:20:00.169Z"
+ },
+ {
+  "_id": "6ad6356a0bad0e1e14671f53",
+  "meeting": "IESC26",
+  "type": "EVENT",
+  "name": "JUDGES_MEETING",
+  "start": "2026-12-12T07:00:00Z",
+  "end": "2026-12-12T07:15:00Z",
+  "next_event": 1,
+  "added_at": "2026-10-19T15:21:14.138Z",
+  "updated_at": "2026-10-19T15:21:14.138Z"
+ },
+ {
+  "_id": "6ad6357c0bad0e1e14671f54",
+  "meeting": "IESC26",
+  "type": "EVENT",
+  "name": "TEAM_LEADER_MEETING",
+  "start": "2026-12-12T07:15:00Z",
+  "end": "2026-12-12T07:30:00Z",
+  "next_event": 1,
+  "added_at": "2026-10-19T15:21:32.836Z",
+  "updated_at": "2026-10-19T15:21:32.836Z"
+ },
+ {
+  "_id": "6ad635e00bad0e1e14671f55",
+  "meeting": "IESC26",
+  "type": "DURATION",
+  "name": "BREAK",
+  "start": "2026-12-12T11:00:00Z",
+  "end": "2026-12-12T11:30:00Z",
+  "prev_event": 11,
+  "added_at": "2026-10-19T15:23:12.767Z",
+  "updated_at": "2026-10-19T15:23:12.767Z"
+ }
+]

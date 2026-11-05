@@ -1,11 +1,13 @@
-import { EVENT_CALENDAR_LABELS, SCHEDULE_ENTRY_TYPE_LABELS } from "@bsv-sws/shared";
-import type { PublicEventDetail } from "@bsv-sws/validation";
+import { EVENT_CALENDAR_LABELS } from "@bsv-sws/shared";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { EventFileList } from "@/components/public/events/event-file-list";
 import { eventTime } from "@/components/public/events/event-list-item";
+import { EventSchedule } from "@/components/public/events/event-schedule";
+import { SwimResultsLinks } from "@/components/public/events/swimresults-links";
 import { getPublicEvent } from "@/lib/data/public-events";
-import { formatDate, formatDateRange, formatFileSize } from "@/lib/format";
+import { formatDateRange } from "@/lib/format";
 
 const validSlug = (slug: string) => /^[a-z0-9-]{1,120}$/.test(slug);
 
@@ -114,22 +116,12 @@ export default async function PublicEventPage({
         </section>
       )}
 
-      {event.schedule.length > 0 && <Schedule event={event} multiDay={multiDay} />}
+      {event.swimresults && <SwimResultsLinks links={event.swimresults} />}
 
-      {event.files.length > 0 && (
-        <section aria-labelledby="dateien" className="flex flex-col gap-2">
-          <h2 id="dateien">Dateien</h2>
-          <ul className="flex flex-col gap-1 text-sm">
-            {event.files.map((f) => (
-              <li key={f.id}>
-                <a href={`/api/events/${event.id}/files/${f.id}`} className="link">
-                  {f.description}
-                </a>{" "}
-                <span className="text-muted-foreground">{formatFileSize(f.size)}</span>
-              </li>
-            ))}
-          </ul>
-        </section>
+      {event.files.length > 0 && <EventFileList eventId={event.id} files={event.files} />}
+
+      {event.schedule.length > 0 && (
+        <EventSchedule entries={event.schedule} multiDay={multiDay} source={event.scheduleSource} />
       )}
 
       {event.additionalInfo && (
@@ -139,35 +131,5 @@ export default async function PublicEventPage({
         </section>
       )}
     </article>
-  );
-}
-
-function Schedule({ event, multiDay }: { event: PublicEventDetail; multiDay: boolean }) {
-  return (
-    <section aria-labelledby="ablauf" className="flex flex-col gap-2">
-      <h2 id="ablauf">Ablauf</h2>
-      <table className="data-table text-sm">
-        <tbody>
-          {event.schedule.map((s, i) => (
-            <tr key={i}>
-              <td className="whitespace-nowrap text-muted-foreground">
-                {multiDay && s.date ? `${formatDate(s.date)} ` : ""}
-                {s.time ? `${s.time}${s.endTime ? `–${s.endTime}` : ""}` : ""}
-              </td>
-              <td>
-                <span className="font-medium">{s.title}</span>
-                {s.type !== "custom" && s.title !== SCHEDULE_ENTRY_TYPE_LABELS[s.type] && (
-                  <span className="text-muted-foreground">
-                    {" "}
-                    ({SCHEDULE_ENTRY_TYPE_LABELS[s.type]})
-                  </span>
-                )}
-                {s.description && <div className="text-muted-foreground">{s.description}</div>}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </section>
   );
 }

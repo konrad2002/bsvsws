@@ -18,6 +18,7 @@ import { createEventService, EVENT_FILE_MAX_BYTES } from "./modules/events/event
 import { createInvitationService } from "./modules/invitations/invitation-service.js";
 import { createMembershipService } from "./modules/memberships/membership-service.js";
 import { createPublicEventService } from "./modules/public-calendar/public-event-service.js";
+import { createSwimResultsClient } from "./modules/swimresults/swimresults-client.js";
 import { adminRoutes } from "./routes/admin.js";
 import { clubRoutes } from "./routes/clubs.js";
 import { eventRoutes } from "./routes/events.js";
@@ -105,7 +106,19 @@ export async function buildApp(env: Env, options: FastifyServerOptions = {}, dep
     now,
   });
 
-  const publicEvents = createPublicEventService({ client, webPublicUrl: env.WEB_PUBLIC_URL, now });
+  const swimResults = createSwimResultsClient({
+    apiUrl: env.SWIMRESULTS_API_URL,
+    downloadUrl: env.SWIMRESULTS_DOWNLOAD_URL,
+    ttlMs: env.SWIMRESULTS_CACHE_SECONDS * 1000,
+    log: app.log,
+  });
+  const publicEvents = createPublicEventService({
+    client,
+    webPublicUrl: env.WEB_PUBLIC_URL,
+    swimResults,
+    swimResultsAppUrl: env.SWIMRESULTS_APP_URL,
+    now,
+  });
   const publicContent = createPublicContentService({
     client,
     directusUrl: env.DIRECTUS_URL,

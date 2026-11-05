@@ -1,9 +1,13 @@
 import {
   EVENT_CALENDARS,
+  EVENT_FILE_TYPES,
   EVENT_STATUSES,
   ORGANIZER_TYPES,
+  RACE_GENDERS,
+  RACE_STROKES,
   REMOVAL_STATUSES,
   REMOVAL_TYPES,
+  SCHEDULE_ENTRY_KINDS,
   SCHEDULE_ENTRY_TYPES,
 } from "@bsv-sws/shared";
 import { z } from "zod";
@@ -45,14 +49,62 @@ const optionalUrl = z
   .nullable()
   .optional();
 
-export const scheduleEntrySchema = z.object({
-  date: dateSchema.nullable().optional(),
-  time: timeSchema,
-  endTime: timeSchema,
-  type: z.enum(SCHEDULE_ENTRY_TYPES).default("custom"),
-  title: z.string().trim().min(1, "Bitte einen Titel angeben.").max(255),
-  description: optionalText(2000),
-});
+/** Relay notation, e.g. "4x50" (stored without the distance unit). */
+const relaySchema = z
+  .string()
+  .trim()
+  .toLowerCase()
+  .transform((v) => (v === "" ? null : v.replace(/\s+/g, "").replace("×", "x")))
+  .pipe(
+    z
+      .string()
+      .regex(/^\d{1,2}x\d{1,5}$/, "Staffel im Format 4x50.")
+      .nullable(),
+  )
+  .nullable()
+  .optional();
+
+const optionalInt = (max: number) => z.number().int().min(0).max(max).nullable().optional();
+
+/**
+ * One schedule row (spec §7.6, SwimResults model – see SCHEDULE_ENTRY_KINDS).
+ * Fields that do not belong to the row's kind are dropped.
+ */
+export const scheduleEntrySchema = z
+  .object({
+    kind: z.enum(SCHEDULE_ENTRY_KINDS).default("item"),
+    /** Section or race number. */
+    number: optionalInt(9999),
+    date: dateSchema.nullable().optional(),
+    time: timeSchema,
+    endTime: timeSchema,
+    type: z.enum(SCHEDULE_ENTRY_TYPES).default("custom"),
+    /** Item title; for sections/races an optional name or suffix (e.g. "Finale"). */
+    title: optionalText(255),
+    description: optionalText(2000),
+    /** Race distance in metres (relays: total distance). */
+    distance: optionalInt(100_000),
+    relay: relaySchema,
+    stroke: z.enum(RACE_STROKES).nullable().optional(),
+    gender: z.enum(RACE_GENDERS).nullable().optional(),
+  })
+  .transform((e) => {
+    const race = e.kind === "race";
+    return {
+      kind: e.kind,
+      number: e.kind === "item" ? null : (e.number ?? null),
+      date: e.date ?? null,
+      time: e.time ?? null,
+      endTime: e.endTime ?? null,
+      type: e.kind === "item" ? e.type : ("custom" as const),
+      title: e.title ?? null,
+      description: e.description ?? null,
+      distance: race ? (e.distance ?? null) : null,
+      relay: race ? (e.relay ?? null) : null,
+      stroke: race ? (e.stroke ?? null) : null,
+      gender: race ? (e.gender ?? null) : null,
+    };
+  });
 export type ScheduleEntryInput = z.infer<typeof scheduleEntrySchema>;
 
 /** Editable event fields (spec §7.2). Cross-field rules: see `eventFieldRules` / Fastify. */
@@ -74,10 +126,34 @@ export const eventFieldsSchema = z.object({
   website: optionalUrl,
   admissionInfo: optionalText(5000),
   resultsService: optionalText(255),
-  swimresultsId: optionalText(100),
+  /** SwimResults meeting id (e.g. IESC26) – also used in SwimResults URLs. */
+  swimresultsId: optionalText(50).refine(
+    (v) => v == null || /^[A-Za-z0-9_-]+$/.test(v),
+    "Nur Buchstaben, Ziffern, „-“ und „_“ (z. B. IESC26).",
+  ),
   additionalInfo: optionalText(10_000),
   categoryIds: z.array(z.number().int().positive()).max(20).default([]),
-  schedule: z.array(scheduleEntrySchema).max(100).default([]),
+  schedule: z
+    .array(scheduleEntrySchema)
+    .max(400, "Maximal 400 Einträge im Ablauf.")
+    .superRefine((rows, ctx) =>
+      rows.forEach((r, i) => {
+        const fail = (message: string) =>
+          ctx.addIssue({
+            code: "custom",
+            path: [i],
+            message: `Ablauf, Zeile ${i + 1}: ${message}`,
+          });
+        if (r.kind === "item" && !r.title) fail("Bitte einen Titel angeben.");
+        if (r.kind === "section" && r.number == null) fail("Bitte die Abschnittsnummer angeben.");
+        if (r.kind === "race") {
+          if (r.number == null) fail("Bitte die Wettkampfnummer angeben.");
+          if (!r.distance) fail("Bitte die Strecke angeben.");
+          if (!r.stroke) fail("Bitte die Lage angeben.");
+        }
+      }),
+    )
+    .default([]),
   /** Federation only. */
   official: z.boolean().optional(),
   /** Owning club. Federation only (representatives always create for their own club). */
@@ -153,21 +229,44 @@ export const removalDecisionSchema = z.object({
 
 // --- responses --------------------------------------------------------------------
 
-export const scheduleEntrySchemaOut = z.object({
-  id: uuidSchema,
+/** Schedule row as returned by the API (manual or from SwimResults). */
+export const scheduleEntryOutSchema = z.object({
+  kind: z.enum(SCHEDULE_ENTRY_KINDS),
+  number: z.number().nullable(),
   date: z.string().nullable(),
   time: z.string().nullable(),
   endTime: z.string().nullable(),
   type: z.enum(SCHEDULE_ENTRY_TYPES),
-  title: z.string(),
+  title: z.string().nullable(),
   description: z.string().nullable(),
+  distance: z.number().nullable(),
+  relay: z.string().nullable(),
+  stroke: z.enum(RACE_STROKES).nullable(),
+  gender: z.enum(RACE_GENDERS).nullable(),
 });
+export type ScheduleEntry = z.infer<typeof scheduleEntryOutSchema>;
 
+export const scheduleEntrySchemaOut = scheduleEntryOutSchema.extend({ id: uuidSchema });
+
+/** Type and label of an uploaded file; "Sonstige Datei" needs a description. */
+export const eventFileMetaSchema = z
+  .object({
+    type: z.enum(EVENT_FILE_TYPES, { error: "Bitte eine Dateiart wählen." }).default("other"),
+    description: optionalText(255),
+  })
+  .refine((f) => f.type !== "other" || !!f.description, {
+    path: ["description"],
+    message: "Bitte eine Beschreibung angeben.",
+  });
+export type EventFileMeta = z.infer<typeof eventFileMetaSchema>;
+
+/** Uploaded event attachment (internal view). */
 export const eventFileSchema = z.object({
   id: uuidSchema,
-  description: z.string(),
+  type: z.enum(EVENT_FILE_TYPES),
+  description: z.string().nullable(),
   filename: z.string().nullable(),
-  type: z.string().nullable(),
+  mimeType: z.string().nullable(),
   size: z.number().nullable(),
 });
 export type EventFile = z.infer<typeof eventFileSchema>;
@@ -312,6 +411,25 @@ export const publicEventSummarySchema = z.object({
 });
 export type PublicEventSummary = z.infer<typeof publicEventSummarySchema>;
 
+const DATA_SOURCES = ["manual", "swimresults"] as const;
+
+/**
+ * File in the public event view: an upload (`fileId`, served via the website) or
+ * a SwimResults file (`url`). `available: false` = announced, not published yet.
+ */
+export const publicEventFileSchema = z.object({
+  type: z.enum(EVENT_FILE_TYPES),
+  label: z.string(),
+  fileId: uuidSchema.nullable(),
+  url: z.string().nullable(),
+  extension: z.string().nullable(),
+  size: z.number().nullable(),
+  /** SwimResults download counter; null for uploads and external links. */
+  downloads: z.number().nullable(),
+  available: z.boolean(),
+});
+export type PublicEventFile = z.infer<typeof publicEventFileSchema>;
+
 export const publicEventDetailSchema = publicEventSummarySchema.extend({
   /** Needed for public file/image URLs. */
   id: uuidSchema,
@@ -325,8 +443,20 @@ export const publicEventDetailSchema = publicEventSummarySchema.extend({
   additionalInfo: z.string().nullable(),
   hasTitleImage: z.boolean(),
   hasLogo: z.boolean(),
-  schedule: z.array(scheduleEntrySchemaOut.omit({ id: true })),
-  files: z.array(eventFileSchema),
+  schedule: z.array(scheduleEntryOutSchema),
+  files: z.array(publicEventFileSchema),
+  /** Where schedule/files come from: SwimResults wins per section if it has data. */
+  scheduleSource: z.enum(DATA_SOURCES),
+  filesSource: z.enum(DATA_SOURCES),
+  /** Links into the SwimResults web app (set whenever a SwimResults id is set). */
+  swimresults: z
+    .object({
+      meetingId: z.string(),
+      liveUrl: z.string(),
+      resultsUrl: z.string(),
+      athletesUrl: z.string(),
+    })
+    .nullable(),
   updatedAt: z.string(),
 });
 export type PublicEventDetail = z.infer<typeof publicEventDetailSchema>;

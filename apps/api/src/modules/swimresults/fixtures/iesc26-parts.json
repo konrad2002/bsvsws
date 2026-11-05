@@ -1,0 +1,383 @@
+[
+ {
+  "number": 1,
+  "events": [
+   {
+    "_id": "6ad6348d0bad0e1e14671f0c",
+    "number": 1,
+    "distance": 100,
+    "meeting": "IESC26",
+    "gender": "FEMALE",
+    "style": {
+     "_id": "64f0926ebdaab70007122eb5",
+     "name": "BUTTERFLY",
+     "aliases": [
+      "Schmetterling",
+      "Butterfly",
+      "Delfin",
+      "S",
+      "Schmetterlingsschwimmen",
+      "Schmetterling/Butterfly",
+      "FLY"
+     ]
+    },
+    "final": {},
+    "part": {
+     "number": 1
+    },
+    "ordering": 1,
+    "added_at": "2026-10-19T15:17:33.869Z",
+    "updated_at": "2026-10-19T15:17:33.869Z"
+   },
+   {
+    "_id": "6ad6348d0bad0e1e14671f0d",
+    "number": 2,
+    "distance": 100,
+    "meeting": "IESC26",
+    "gender": "MALE",
+    "style": {
+     "_id": "64f0926ebdaab70007122eb5",
+     "name": "BUTTERFLY",
+     "aliases": [
+      "Schmetterling",
+      "Butterfly",
+      "Delfin",
+      "S",
+      "Schmetterlingsschwimmen",
+      "Schmetterling/Butterfly",
+      "FLY"
+     ]
+    },
+    "final": {},
+    "part": {
+     "number": 1
+    },
+    "ordering": 2,
+    "added_at": "2026-10-19T15:17:33.873Z",
+    "updated_at": "2026-10-19T15:17:33.873Z"
+   },
+   {
+    "_id": "6ad6348d0bad0e1e14671f0e",
+    "number": 3,
+    "distance": 50,
+    "meeting": "IESC26",
+    "gender": "FEMALE",
+    "style": {
+     "_id": "64f0928fbdaab70007122eb8",
+     "name": "BACKSTROKE",
+     "aliases": [
+      "Rücken",
+      "Rucken",
+      "Backstroke",
+      "R",
+      "Rücken/Backstroke",
+      "BACK"
+     ]
+    },
+    "final": {},
+    "part": {
+     "number": 1
+    },
+    "ordering": 3,
+    "added_at": "2026-10-19T15:17:33.877Z",
+    "updated_at": "2026-10-19T15:17:33.877Z"
+   },
+   {
+    "_id": "6ad6348d0bad0e1e14671f0f",
+    "number": 4,
+    "distance": 50,
+    "meeting": "IESC26",
+    "gender": "MALE",
+    "style": {
+     "_id": "64f0928fbdaab70007122eb8",
+     "name": "BACKSTROKE",
+     "aliases": [
+      "Rücken",
+      "Rucken",
+      "Backstroke",
+      "R",
+      "Rücken/Backstroke",
+      "BACK"
+     ]
+    },
+    "final": {},
+    "part": {
+     "number": 1
+    },
+    "ordering": 4,
+    "added_at": "2026-10-19T15:17:33.88Z",
+    "updated_at": "2026-10-19T15:17:33.88Z"
+   },
+   {
+    "_id": "6ad6348d0bad0e1e14671f10",
+    "number": 5,
+    "distance": 100,
+    "meeting": "IESC26",
+    "gender": "FEMALE",
+    "style": {
+     "_id": "64f09279bdaab70007122eb6",
+     "name": "BREASTSTROKE",
+     "aliases": [
+      "Brust",
+      "Breaststroke",
+      "B",
+      "Brust/Breaststroke",
+      "BREAST"
+     ]
+    },
+    "final": {},
+    "part": {
+     "number": 1
+    },
+    "ordering": 5,
+    "added_at": "2026-10-19T15:17:33.884Z",
+    "updated_at": "2026-10-19T15:17:33.884Z"
+   },
+   {
+    "_id": "6ad6348d0bad0e1e14671f11",
+    "number": 6,
+    "distance": 100,
+    "meeting": "IESC26",
+    "gender": "MALE",
+    "style": {
+     "_id": "64f09279bdaab70007122eb6",
+     "name": "BREASTSTROKE",
+     "aliases": [
+      "Brust",
+      "Breaststroke",
+      "B",
+      "Brust/Breaststroke",
+      "BREAST"
+     ]
+    },
+    "final": {},
+    "part": {
+     "number": 1
+    },
+    "ordering": 6,
+    "added_at": "2026-10-19T15:17:33.888Z",
+    "updated_at": "2026-10-19T15:17:33.888Z"
+   },
+   {
+    "_id": "6ad6348d0bad0e1e14671f12",
+    "number": 7,
+    "distance": 50,
+    "meeting": "IESC26",
+    "gender": "FEMALE",
+    "style": {
+     "_id": "64f09285bdaab70007122eb7",
+     "name": "FREESTYLE",
+     "aliases": [
+      "Freistil",
+      "Kraul",
+      "Freestyle",
+      "F",
+      "Freistil/Freestyle",
+      "FREE"
+     ]
+    },
+    "final": {},
+    "part": {
+     "number": 1
+    },
+    "ordering": 7,
+    "added_at": "2026-10-19T15:17:33.891Z",
+    "updated_at": "2026-10-19T15:17:33.891Z"
+   },
+   {
+    "_id": "6ad6348d0bad0e1e14671f13",
+    "number": 8,
+    "distance": 50,
+    "meeting": "IESC26",
+    "gender": "MALE",
+    "style": {
+     "_id": "64f09285bdaab70007122eb7",
+     "name": "FREESTYLE",
+     "aliases": [
+      "Freistil",
+      "Kraul",
+      "Freestyle",
+      "F",
+      "Freistil/Freestyle",
+      "FREE"
+     ]
+    },
+    "final": {},
+    "part": {
+     "number": 1
+    },
+    "ordering": 8,
+    "added_at": "2026-10-19T15:17:33.895Z",
+    "updated_at": "2026-10-19T15:17:33.895Z"
+   },
+   {
+    "_id": "6ad6348d0bad0e1e14671f14",
+    "number": 9,
+    "distance": 100,
+    "meeting": "IESC26",
+    "gender": "FEMALE",
+    "style": {
+     "_id": "64f0929cbdaab70007122eb9",
+     "name": "MEDLEY",
+     "aliases": [
+      "Lagen",
+      "Lagenfolge",
+      "Medley",
+      "IM",
+      "indv. Medley",
+      "individual Medley",
+      "L",
+      "MEDLEY"
+     ]
+    },
+    "final": {},
+    "part": {
+     "number": 1
+    },
+    "ordering": 9,
+    "added_at": "2026-10-19T15:17:33.898Z",
+    "updated_at": "2026-10-19T15:17:33.898Z"
+   },
+   {
+    "_id": "6ad6348d0bad0e1e14671f15",
+    "number": 10,
+    "distance": 100,
+    "meeting": "IESC26",
+    "gender": "MALE",
+    "style": {
+     "_id": "64f0929cbdaab70007122eb9",
+     "name": "MEDLEY",
+     "aliases": [
+      "Lagen",
+      "Lagenfolge",
+      "Medley",
+      "IM",
+      "indv. Medley",
+      "individual Medley",
+      "L",
+      "MEDLEY"
+     ]
+    },
+    "final": {},
+    "part": {
+     "number": 1
+    },
+    "ordering": 10,
+    "added_at": "2026-10-19T15:17:33.902Z",
+    "updated_at": "2026-10-19T15:17:33.902Z"
+   },
+   {
+    "_id": "6ad6348d0bad0e1e14671f16",
+    "number": 11,
+    "distance": 200,
+    "relay_distance": "4x50",
+    "meeting": "IESC26",
+    "gender": "MIXED",
+    "style": {
+     "_id": "64f09285bdaab70007122eb7",
+     "name": "FREESTYLE",
+     "aliases": [
+      "Freistil",
+      "Kraul",
+      "Freestyle",
+      "F",
+      "Freistil/Freestyle",
+      "FREE"
+     ]
+    },
+    "final": {},
+    "part": {
+     "number": 1
+    },
+    "ordering": 11,
+    "added_at": "2026-10-19T15:17:33.905Z",
+    "updated_at": "2026-10-19T15:17:33.905Z"
+   }
+  ]
+ },
+ {
+  "number": 2,
+  "events": [
+   {
+    "_id": "6ad6348d0bad0e1e14671f17",
+    "number": 12,
+    "distance": 50,
+    "meeting": "IESC26",
+    "gender": "FEMALE",
+    "style": {
+     "_id": "64f0926ebdaab70007122eb5",
+     "name": "BUTTERFLY",
+     "aliases": [
+      "Schmetterling",
+      "Butterfly",
+      "Delfin",
+      "S",
+      "Schmetterlingsschwimmen",
+      "Schmetterling/Butterfly",
+      "FLY"
+     ]
+    },
+    "final": {},
+    "part": {
+     "number": 2
+    },
+    "ordering": 12,
+    "added_at": "2026-10-19T15:17:33.908Z",
+    "updated_at": "2026-10-19T15:17:33.908Z"
+   },
+   {
+    "_id": "6ad6348d0bad0e1e14671f18",
+    "number": 13,
+    "distance": 50,
+    "meeting": "IESC26",
+    "gender": "MALE",
+    "style": {
+     "_id": "64f0926ebdaab70007122eb5",
+     "name": "BUTTERFLY",
+     "aliases": [
+      "Schmetterling",
+      "Butterfly",
+      "Delfin",
+      "S",
+      "Schmetterlingsschwimmen",
+      "Schmetterling/Butterfly",
+      "FLY"
+     ]
+    },
+    "final": {},
+    "part": {
+     "number": 2
+    },
+    "ordering": 13,
+    "added_at": "2026-10-19T15:17:33.912Z",
+    "updated_at": "2026-10-19T15:17:33.912Z"
+   },
+   {
+    "_id": "6ad6348d0bad0e1e14671f19",
+    "number": 14,
+    "distance": 100,
+    "meeting": "IESC26",
+    "gender": "FEMALE",
+    "style": {
+     "_id": "64f0928fbdaab70007122eb8",
+     "name": "BACKSTROKE",
+     "aliases": [
+      "Rücken",
+      "Rucken",
+      "Backstroke",
+      "R",
+      "Rücken/Backstroke",
+      "BACK"
+     ]
+    },
+    "final": {},
+    "part": {
+     "number": 2
+    },
+    "ordering": 14,
+    "added_at": "2026-10-19T15:17:33.916Z",
+    "updated_at": "2026-10-19T15:17:33.916Z"
+   }
+  ]
+ }
+]

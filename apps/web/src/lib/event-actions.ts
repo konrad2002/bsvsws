@@ -1,8 +1,9 @@
 "use server";
 
-import { eventDetailSchema, uuidSchema } from "@bsv-sws/validation";
+import { eventDetailSchema, eventFileMetaSchema, uuidSchema } from "@bsv-sws/validation";
 import { refresh } from "next/cache";
 import { redirect } from "next/navigation";
+import { z } from "zod";
 import { formText, toActionError, type ActionState } from "./action-state";
 import { apiFetch, jsonBody } from "./api";
 import { getCurrentUser } from "./auth/current-user";
@@ -127,12 +128,17 @@ export async function uploadEventFileAction(
   form: FormData,
 ): Promise<ActionState> {
   const file = form.get("file");
-  const description = formText(form, "description")?.trim() ?? "";
   if (!(file instanceof File) || file.size === 0) return { error: "Bitte eine Datei auswählen." };
-  if (!description) return { fieldErrors: { description: ["Bitte eine Beschreibung angeben."] } };
+  const meta = eventFileMetaSchema.safeParse({
+    type: formText(form, "type") || undefined,
+    description: formText(form, "description") ?? "",
+  });
+  if (!meta.success) return { fieldErrors: z.flattenError(meta.error).fieldErrors };
   if (file.size > 20 * 1024 * 1024) return { error: "Die Datei darf höchstens 20 MB groß sein." };
   const body = new FormData();
-  body.append("description", description); // must precede the file part
+  // Text fields must precede the file part.
+  body.append("type", meta.data.type);
+  body.append("description", meta.data.description ?? "");
   body.append("file", file, file.name);
   try {
     await apiFetch(`/events/${uuidSchema.parse(eventId)}/files`, { method: "POST", body });

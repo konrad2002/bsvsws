@@ -1,7 +1,8 @@
 "use client";
 
+import { EVENT_FILE_TYPE_LABELS, EVENT_FILE_TYPES, eventFileLabel } from "@bsv-sws/shared";
 import { Button } from "@bsv-sws/ui/components/button";
-import { Alert, Field, Input } from "@bsv-sws/ui/components/form";
+import { Alert, Field, Input, Select } from "@bsv-sws/ui/components/form";
 import type { EventDetail } from "@bsv-sws/validation";
 import { useActionState, useTransition } from "react";
 import type { ActionState } from "@/lib/action-state";
@@ -13,7 +14,11 @@ import {
 } from "@/lib/event-actions";
 import { formatFileSize } from "@/lib/format";
 
-/** Event attachments: file + description, no type taxonomy (spec §7.2). */
+/**
+ * Event attachments with the SwimResults file types (Ausschreibung, Protokoll, …);
+ * "Sonstige Datei" needs a description. With a SwimResults id, the public page
+ * shows the SwimResults file list instead as soon as it has files.
+ */
 export function EventFiles({ event, editable }: { event: EventDetail; editable: boolean }) {
   const [state, action, pending] = useActionState<ActionState, FormData>(
     uploadEventFileAction.bind(null, event.id),
@@ -30,7 +35,12 @@ export function EventFiles({ event, editable }: { event: EventDetail; editable: 
           {event.files.map((f) => (
             <li key={f.id} className="flex items-center justify-between gap-3 px-3 py-2 text-sm">
               <a href={`/api/events/${event.id}/files/${f.id}`} className="link">
-                {f.description}
+                {eventFileLabel(f.type, f.description)}
+                {f.description && f.type !== "other" && (
+                  <span className="ml-2 text-muted-foreground">
+                    ({EVENT_FILE_TYPE_LABELS[f.type]})
+                  </span>
+                )}
                 <span className="ml-2 text-muted-foreground">
                   {f.filename} {formatFileSize(f.size)}
                 </span>
@@ -53,6 +63,15 @@ export function EventFiles({ event, editable }: { event: EventDetail; editable: 
       )}
       {editable && (
         <form action={action} className="flex flex-col gap-3 sm:flex-row sm:items-end">
+          <Field label="Dateiart" htmlFor="file-type" error={state.fieldErrors?.type}>
+            <Select id="file-type" name="type" defaultValue="meeting_info">
+              {EVENT_FILE_TYPES.map((t) => (
+                <option key={t} value={t}>
+                  {EVENT_FILE_TYPE_LABELS[t]}
+                </option>
+              ))}
+            </Select>
+          </Field>
           <Field
             label="Beschreibung"
             htmlFor="file-description"
@@ -62,8 +81,7 @@ export function EventFiles({ event, editable }: { event: EventDetail; editable: 
             <Input
               id="file-description"
               name="description"
-              placeholder="z. B. Ausschreibung"
-              required
+              placeholder="Pflicht bei „Sonstige Datei“"
             />
           </Field>
           <Field

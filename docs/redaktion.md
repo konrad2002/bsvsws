@@ -73,6 +73,20 @@ Button-Text/-Ziel führt der Button automatisch zur nächsten Veranstaltung. Als
 Pfade (`/veranstaltungen`) oder `https://…`-Adressen erlaubt. „Banner anzeigen“ blendet ihn aus.
 Der Text unter dem Banner ist die Seite **startseite**.
 
+## Veranstaltungen mit SwimResults
+
+Veranstaltungen werden im internen Bereich gepflegt. Ist dort eine **SwimResults-ID** (z. B.
+`IESC26`) eingetragen, zeigt die Veranstaltungsseite automatisch:
+
+- Links zu Livetiming, Echtzeit-Ergebnissen und „Sportler finden“,
+- den **Ablauf** aus SwimResults (Abschnitte, Wettkämpfe, Einschwimmen, Sitzungen, Pausen),
+  sobald dort Wettkämpfe angelegt sind,
+- die **Dateien** aus SwimResults, sobald dort Dateien hinterlegt sind; angekündigte Dateien (z. B.
+  Protokoll vor dem Wettkampf) erscheinen ausgegraut und ohne Link.
+
+Solange SwimResults für Ablauf oder Dateien nichts liefert, werden die im internen Bereich
+erfassten Angaben gezeigt. Änderungen in SwimResults erscheinen nach spätestens etwa 5 Minuten.
+
 ## Weiterleitungen
 
 **Inhalte → Weiterleitungen** für alte Adressen (z. B. aus Joomla):

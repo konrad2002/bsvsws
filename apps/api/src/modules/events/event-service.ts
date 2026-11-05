@@ -8,12 +8,13 @@ import {
   updateItem,
   uploadFiles,
 } from "@directus/sdk";
-import { slugify, type EventStatus } from "@bsv-sws/shared";
+import { eventFileLabel, slugify, type EventStatus } from "@bsv-sws/shared";
 import {
   eventFieldRules,
   type EventCategory,
   type EventCreateInput,
   type EventDetail,
+  type EventFileMeta,
   type EventHistoryEntry,
   type EventSummary,
   type EventUpdateInput,
@@ -737,7 +738,7 @@ export function createEventService(deps: EventServiceDeps) {
       ctx: AuthContext,
       id: string,
       file: UploadedFile,
-      description: string,
+      meta: EventFileMeta,
     ): Promise<EventDetail> {
       const { row, state } = await loadFor(ctx, id);
       assertAction(ctx, state, "edit");
@@ -747,20 +748,20 @@ export function createEventService(deps: EventServiceDeps) {
           "Dieser Dateityp ist nicht erlaubt (PDF, Office, Text, ZIP oder Bild).",
         );
       }
-      const desc = description.trim();
-      if (!desc) throw badRequest("DESCRIPTION_REQUIRED", "Bitte eine Beschreibung angeben.");
-      const fileId = await upload(file, `${row.title} – ${desc}`);
+      const label = eventFileLabel(meta.type, meta.description);
+      const fileId = await upload(file, `${row.title} – ${label}`);
       const sort = (row.files?.length ?? 0) + 1;
       await client.request(
         createItem("event_files", {
           event: id,
           file: fileId,
-          description: desc.slice(0, 255),
+          type: meta.type,
+          description: meta.description ?? null,
           sort,
         } as never),
       );
       await auditEvent(ctx, row, "event.file_added", {
-        context: { description: desc, file: fileId },
+        context: { description: label, file: fileId },
       });
       return detailFor(ctx, id);
     },
@@ -769,14 +770,15 @@ export function createEventService(deps: EventServiceDeps) {
       ctx: AuthContext,
       id: string,
       eventFileId: string,
-      description: string,
+      meta: EventFileMeta,
     ): Promise<EventDetail> {
       const { row, state } = await loadFor(ctx, id);
       assertAction(ctx, state, "edit");
       if (!row.files?.some((f) => f.id === eventFileId)) throw notFound("Datei nicht gefunden.");
       await client.request(
         updateItem("event_files", eventFileId, {
-          description: description.trim().slice(0, 255),
+          type: meta.type,
+          description: meta.description ?? null,
         } as never),
       );
       return detailFor(ctx, id);
@@ -789,7 +791,7 @@ export function createEventService(deps: EventServiceDeps) {
       if (!file) throw notFound("Datei nicht gefunden.");
       await client.request(deleteItem("event_files", eventFileId));
       await auditEvent(ctx, row, "event.file_removed", {
-        context: { description: file.description },
+        context: { description: eventFileLabel(file.type ?? "other", file.description) },
       });
       return detailFor(ctx, id);
     },

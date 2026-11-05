@@ -4,7 +4,9 @@ import {
   EVENT_CALENDAR_LABELS,
   EVENT_CALENDARS,
   ALL_EVENTS_FEED_SLUG,
+  eventFileLabel,
   type EventCalendar,
+  type EventFileType,
   type OrganizerType,
 } from "@bsv-sws/shared";
 import type {
@@ -15,6 +17,9 @@ import type {
 } from "@bsv-sws/validation";
 import type { ServiceClient } from "../../lib/directus.js";
 import { notFound } from "../../lib/errors.js";
+import { scheduleFields, toScheduleEntry, type ScheduleRecord } from "../events/event-mapper.js";
+import type { SwimResultsClient } from "../swimresults/swimresults-client.js";
+import { swimResultsLinks } from "../swimresults/swimresults-rules.js";
 import { renderCalendar, type IcalEvent } from "./ical.js";
 import { addDays } from "./timezone.js";
 
@@ -55,17 +60,11 @@ interface PublicRow {
   additional_info?: string | null;
   title_image?: string | null;
   logo?: string | null;
-  schedule?: {
-    date: string | null;
-    time: string | null;
-    end_time: string | null;
-    type: string;
-    title: string;
-    description: string | null;
-  }[];
+  schedule?: Omit<ScheduleRecord, "id">[];
   files?: {
     id: string;
-    description: string;
+    type: EventFileType | null;
+    description: string | null;
     file: {
       filename_download: string | null;
       type: string | null;
@@ -108,13 +107,9 @@ const DETAIL_FIELDS = [
   "additional_info",
   "title_image",
   "logo",
-  "schedule.date",
-  "schedule.time",
-  "schedule.end_time",
-  "schedule.type",
-  "schedule.title",
-  "schedule.description",
+  ...scheduleFields("schedule.").filter((f) => f !== "schedule.id"),
   "files.id",
+  "files.type",
   "files.description",
   "files.file.filename_download",
   "files.file.type",
@@ -161,6 +156,9 @@ function toSummary(row: PublicRow): PublicEventSummary {
 export function createPublicEventService(deps: {
   client: ServiceClient;
   webPublicUrl: string;
+  /** Optional: without it, only manually entered schedule/files are shown. */
+  swimResults?: SwimResultsClient;
+  swimResultsAppUrl?: string;
   now?: () => Date;
 }) {
   const { client } = deps;
@@ -178,6 +176,40 @@ export function createPublicEventService(deps: {
         limit,
       }),
     )) as unknown as PublicRow[];
+  }
+
+  /**
+   * Schedule and files of the detail view. With a SwimResults id, SwimResults
+   * replaces each section (schedule, files) that it has data for; otherwise –
+   * or if SwimResults is unreachable – the manually entered data is shown.
+   */
+  async function scheduleAndFiles(row: PublicRow) {
+    const manualSchedule = (row.schedule ?? []).map(toScheduleEntry);
+    const manualFiles = (row.files ?? []).map((f) => {
+      const type = f.type ?? "other";
+      return {
+        type,
+        label: eventFileLabel(type, f.description),
+        fileId: f.id,
+        url: null,
+        extension: f.file?.filename_download?.split(".").pop()?.toUpperCase() ?? null,
+        size: f.file?.filesize != null ? Number(f.file.filesize) : null,
+        downloads: null,
+        available: true,
+      };
+    });
+    const id = row.swimresults_id;
+    const sr = id && deps.swimResults ? await deps.swimResults.meeting(id) : null;
+    const useSchedule = !!sr?.schedule?.length;
+    const useFiles = !!sr?.files?.length;
+    return {
+      schedule: useSchedule ? sr!.schedule! : manualSchedule,
+      scheduleSource: useSchedule ? ("swimresults" as const) : ("manual" as const),
+      files: useFiles ? sr!.files! : manualFiles,
+      filesSource: useFiles ? ("swimresults" as const) : ("manual" as const),
+      swimresults:
+        id && deps.swimResultsAppUrl ? swimResultsLinks(deps.swimResultsAppUrl, id) : null,
+    };
   }
 
   return {
@@ -209,21 +241,7 @@ export function createPublicEventService(deps: {
         additionalInfo: row.additional_info ?? null,
         hasTitleImage: !!row.title_image,
         hasLogo: !!row.logo,
-        schedule: (row.schedule ?? []).map((s) => ({
-          date: s.date,
-          time: hhmm(s.time),
-          endTime: hhmm(s.end_time),
-          type: s.type as PublicEventDetail["schedule"][number]["type"],
-          title: s.title,
-          description: s.description,
-        })),
-        files: (row.files ?? []).map((f) => ({
-          id: f.id,
-          description: f.description,
-          filename: f.file?.filename_download ?? null,
-          type: f.file?.type ?? null,
-          size: f.file?.filesize != null ? Number(f.file.filesize) : null,
-        })),
+        ...(await scheduleAndFiles(row)),
         updatedAt: (row.date_updated ?? row.date_created)!,
       };
     },

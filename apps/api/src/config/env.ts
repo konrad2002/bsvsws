@@ -31,6 +31,12 @@ const envSchema = z.object({
   SMTP_USER: z.string().optional(),
   SMTP_PASSWORD: z.string().optional(),
   EMAIL_FROM: z.string().default("BSV-SWS <no-reply@bsv-sws.de>"),
+  /** SwimResults integration (public API, no credentials). */
+  SWIMRESULTS_API_URL: z.url().default("https://api.swimresults.de"),
+  SWIMRESULTS_DOWNLOAD_URL: z.url().default("https://download.swimresults.de"),
+  SWIMRESULTS_APP_URL: z.url().default("https://app.swimresults.de"),
+  /** Cache lifetime of SwimResults data in seconds. */
+  SWIMRESULTS_CACHE_SECONDS: z.coerce.number().int().min(0).max(3600).default(300),
 });
 
 export type Env = z.infer<typeof envSchema>;

@@ -136,9 +136,29 @@ Rules (implemented in `apps/api/src/modules/events/event-rules.ts`, unit-tested)
 | Discard                  | Representatives soft-delete their own never-published drafts and rejected events (owner decision).                                                                                                                                                                                                                              |
 | Delete                   | Federation soft-deletes any event; deleted events are hidden everywhere except the federation archive (`/intern/veranstaltungen?archiv=1`). Nothing is physically deleted.                                                                                                                                                      |
 | Visibility               | spec §7.11: published → everyone; draft/pending/rejected/unpublished → owning club's representatives + federation. Others get `404`.                                                                                                                                                                                            |
-| Files                    | Attachments (file + description, PDF/Office/text/ZIP/images ≤ 20 MB) and title image/logo (PNG/JPEG/WebP ≤ 5 MB). Downloads are public for published events, otherwise only for users who may view the event.                                                                                                                   |
-| Schedule                 | Ordered entries with optional day (multi-day), start/end time, predefined type (Einlass, Einschwimmen, Sitzung, Wettkampfabschnitt, Pause, Siegerehrung) or "Sonstiges", free title and note. Replaced as a whole on save (nested write).                                                                                       |
+| Files                    | Attachments (file type + optional description, PDF/Office/text/ZIP/images ≤ 20 MB) and title image/logo (PNG/JPEG/WebP ≤ 5 MB). Downloads are public for published events, otherwise only for users who may view the event.                                                                                                     |
+| Schedule                 | SwimResults model: sections (Abschnitte), races (Wettkämpfe) and programme items (Einlass, Einschwimmen, Kampfrichter-/Mannschaftsleitersitzung, Pause, Siegerehrung, …) in one ordered list. Replaced as a whole on save (nested write).                                                                                       |
 | Categories               | Administrator-managed in Studio (federation can add/rename/deactivate); only active categories can be assigned. Initial: Wettkampf, Kampfrichter, Verband.                                                                                                                                                                      |
+
+### SwimResults (owner decision)
+
+With a SwimResults id the public event page loads data **live** from the public SwimResults API
+(`apps/api/src/modules/swimresults`, cached in memory for `SWIMRESULTS_CACHE_SECONDS`, default
+5 min; failures cached 1 min, 4 s timeout):
+
+| Endpoint (`SWIMRESULTS_API_URL`)    | Used for                                                  |
+| ----------------------------------- | --------------------------------------------------------- |
+| `meeting/v1/file/meeting/list/<id>` | Files (type, download from `SWIMRESULTS_DOWNLOAD_URL`)    |
+| `meeting/v1/event/meet/<id>/parts`  | Sections with races                                       |
+| `meeting/v1/incident/meet/<id>`     | Items before (`next_event`) / after (`prev_event`) a race |
+
+- **Per section:** SwimResults replaces the schedule only if it has races, the file list only if
+  it has files; otherwise – or if SwimResults is unreachable – the manually entered data is shown.
+  Manual data is never overwritten in Directus.
+- Files that SwimResults announces but has not published yet are listed as "noch nicht
+  verfügbar"; only http(s) links are rendered. Times are UTC and shown in Europe/Berlin.
+- Links Livetiming / Echtzeit-Ergebnisse / Sportler finden (`SWIMRESULTS_APP_URL/m/<id>/…`) are
+  shown whenever the id is set. Mapping rules are unit-tested with real IESC26 responses.
 
 ### Event notifications
 

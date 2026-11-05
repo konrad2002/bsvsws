@@ -58,7 +58,7 @@ export function EventForm({
     : ["club", "external"];
 
   return (
-    <form action={formAction} className="flex max-w-3xl flex-col gap-6">
+    <form action={formAction} className="flex max-w-5xl flex-col gap-6">
       <Group title="Allgemein">
         <Field
           label="Titel"
@@ -270,7 +270,12 @@ export function EventForm({
               defaultValue={event?.resultsService ?? ""}
             />
           </Field>
-          <Field label="SwimResults-ID" htmlFor="swimresultsId" error={err.swimresultsId}>
+          <Field
+            label="SwimResults-ID"
+            htmlFor="swimresultsId"
+            error={err.swimresultsId}
+            hint="z. B. IESC26 – blendet Livetiming, Ergebnisse, Ablauf und Dateien aus SwimResults ein."
+          >
             <Input
               id="swimresultsId"
               name="swimresultsId"
@@ -293,16 +298,22 @@ export function EventForm({
       </Group>
 
       <Group title="Ablauf">
+        <p className="text-sm text-muted-foreground">
+          Ist eine SwimResults-ID gesetzt, zeigt die Veranstaltungsseite Ablauf und Dateien aus
+          SwimResults, sobald dort Daten vorliegen. Die Angaben hier gelten bis dahin bzw. ohne
+          SwimResults.
+        </p>
+        {err.schedule && (
+          <Alert variant="error">
+            {err.schedule.map((m) => (
+              <div key={m}>{m}</div>
+            ))}
+          </Alert>
+        )}
         <ScheduleEditor
           multiDay={!!startDate && !!endDate && startDate !== endDate}
-          initial={(event?.schedule ?? []).map((s) => ({
-            date: s.date ?? "",
-            time: s.time ?? "",
-            endTime: s.endTime ?? "",
-            type: s.type,
-            title: s.title,
-            description: s.description ?? "",
-          }))}
+          defaultDate={startDate ?? ""}
+          initial={event?.schedule ?? []}
         />
       </Group>
 

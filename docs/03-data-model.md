@@ -126,7 +126,7 @@ Append-only: no role has update/delete permissions (administrators excepted by D
 | `official`                                                            | boolean                                                                     | Federation only; default true for federation events                               |
 | `venue`, `street`, `postal_code`, `city`, `website`                   | string                                                                      |                                                                                   |
 | `title_image`, `logo`                                                 | file                                                                        | Served via Fastify (published = public)                                           |
-| `results_service`, `swimresults_id`                                   | string                                                                      | SwimResults integration postponed (spec §7.2)                                     |
+| `results_service`, `swimresults_id`                                   | string                                                                      | SwimResults meeting id (e.g. `IESC26`, `[A-Za-z0-9_-]`) – see 05-workflows        |
 | `categories`                                                          | M2M → `event_categories` (junction `events_event_categories`)               | 0..n                                                                              |
 | `schedule`                                                            | O2M → `event_schedule_entries`                                              | Replaced via nested write (`one_deselect_action = delete`)                        |
 | `files`                                                               | O2M → `event_files`                                                         |                                                                                   |
@@ -143,14 +143,24 @@ missing; existing entries are never overwritten.
 
 ### `event_schedule_entries`
 
-`event`, `date` (optional, multi-day), `time`, `end_time`, `type` (`admission`, `warm_up`,
-`meeting`, `session`, `break`, `awards`, `custom` – `SCHEDULE_ENTRY_TYPES`), `title`,
-`description`, `sort`.
+One ordered list in the SwimResults model (`sort`), `kind` (`SCHEDULE_ENTRY_KINDS`):
+
+- `section` – starts an Abschnitt: `number`, `date`, `time` (start), optional `title`.
+- `race` – a Wettkampf: `number`, `distance` (metres; relays: total), `relay` (e.g. `4x50`),
+  `stroke` (`RACE_STROKES`), `gender` (`female` \| `male` \| `mixed`), optional `title` (suffix;
+  name for stroke `other`).
+- `item` – programme item: `type` (`admission`, `warm_up`, `meeting`, `judges_meeting`,
+  `team_leader_meeting`, `session`, `break`, `awards`, `custom` – `SCHEDULE_ENTRY_TYPES`),
+  `title` (required), `date`, `time`, `end_time`, `description`.
+
+Fields not belonging to the kind are cleared by validation. Existing rows default to `item`.
 
 ### `event_files`
 
-`event`, `file` (M2O `directus_files`), `description` (required), `sort`. Removing an attachment
-deletes this row; the Directus file remains.
+`event`, `file` (M2O `directus_files`), `type` (`EVENT_FILE_TYPES` = SwimResults file names:
+`meeting_info` Ausschreibung, `start_list` Meldeergebnis, `results_list` Protokoll, … , `other`),
+`description` (required for `other`, otherwise an optional label override), `sort`. Removing an
+attachment deletes this row; the Directus file remains.
 
 ### `event_removal_requests` (spec §19.3)
 

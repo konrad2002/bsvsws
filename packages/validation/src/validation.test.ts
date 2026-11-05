@@ -109,3 +109,71 @@ describe("event schemas", () => {
     expect(eventFieldRules({ ...ok, clubId: null })).toHaveProperty("organizerType");
   });
 });
+
+import { eventFileMetaSchema } from "./index.js";
+
+describe("event schedule (SwimResults model)", () => {
+  const base = {
+    title: "Bezirksmeisterschaften",
+    startDate: "2026-12-05",
+    endDate: "2026-12-06",
+    allDay: true,
+    calendar: "swimming",
+    organizerType: "federation",
+  };
+
+  it("accepts sections, races and items and drops fields of other kinds", () => {
+    const parsed = eventCreateSchema.parse({
+      ...base,
+      schedule: [
+        { kind: "section", number: 1, date: "2026-12-05", time: "09:00", distance: 50 },
+        {
+          kind: "race",
+          number: 1,
+          distance: 200,
+          relay: "4 × 50",
+          stroke: "freestyle",
+          gender: "mixed",
+          type: "break",
+        },
+        { kind: "item", type: "break", title: "Pause", time: "11:00", endTime: "11:30", number: 9 },
+      ],
+    });
+    expect(parsed.schedule).toEqual([
+      expect.objectContaining({ kind: "section", number: 1, distance: null, type: "custom" }),
+      expect.objectContaining({ kind: "race", relay: "4x50", stroke: "freestyle", type: "custom" }),
+      expect.objectContaining({ kind: "item", number: null, title: "Pause", endTime: "11:30" }),
+    ]);
+  });
+
+  it("names the row of an invalid entry", () => {
+    const result = eventCreateSchema.safeParse({
+      ...base,
+      schedule: [
+        { kind: "item", title: "Einlass" },
+        { kind: "race", number: 2 },
+      ],
+    });
+    expect(result.success).toBe(false);
+    expect(result.error?.issues.map((i) => i.message)).toEqual([
+      "Ablauf, Zeile 2: Bitte die Strecke angeben.",
+      "Ablauf, Zeile 2: Bitte die Lage angeben.",
+    ]);
+  });
+
+  it("restricts the SwimResults id to URL-safe characters", () => {
+    expect(eventUpdateSchema.parse({ swimresultsId: " IESC26 " }).swimresultsId).toBe("IESC26");
+    expect(eventUpdateSchema.parse({ swimresultsId: "" }).swimresultsId).toBeNull();
+    expect(eventUpdateSchema.safeParse({ swimresultsId: "../x?y" }).success).toBe(false);
+  });
+});
+
+describe("event file meta", () => {
+  it("requires a description only for other files", () => {
+    expect(eventFileMetaSchema.parse({ type: "results_list" })).toMatchObject({
+      type: "results_list",
+    });
+    expect(eventFileMetaSchema.safeParse({ type: "other", description: " " }).success).toBe(false);
+    expect(eventFileMetaSchema.parse({ description: "Hallenplan" }).type).toBe("other");
+  });
+});

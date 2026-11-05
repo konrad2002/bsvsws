@@ -33,16 +33,21 @@ test("club creates and submits an event", async ({ page }) => {
   await page.locator('input[name="startDate"]').fill("2027-05-08");
   await page.locator('input[name="endDate"]').fill("2027-05-08");
   await page.getByRole("textbox", { name: "Schwimmhalle / Veranstaltungsort" }).fill("Stadtbad");
-  await page.getByRole("button", { name: "Eintrag hinzufügen" }).click();
+  await page.getByRole("button", { name: "Programmpunkt hinzufügen" }).click();
   await page.getByRole("combobox", { name: "Typ des Eintrags" }).selectOption("admission");
+  await page.getByRole("button", { name: "Wettkampf hinzufügen" }).click();
+  await page.getByRole("spinbutton", { name: "Strecke in Metern" }).fill("100");
+  await page.getByRole("combobox", { name: "Lage" }).selectOption("butterfly");
+  await page.getByRole("combobox", { name: "Geschlecht" }).selectOption("female");
   await page.getByRole("button", { name: "Als Entwurf anlegen" }).click();
 
   await expect(page.getByRole("heading", { name: title })).toBeVisible();
   await expectStatus(page, "Entwurf");
   await expect(page.getByRole("textbox", { name: "Titel des Eintrags" })).toHaveValue("Einlass"); // schedule row title prefilled from type
+  await expect(page.getByRole("spinbutton", { name: "Wettkampfnummer" })).toHaveValue("1");
 
   // Uploads > 1 MB pass the server-action body limit (next.config.ts bodySizeLimit).
-  await page.getByRole("textbox", { name: "Beschreibung", exact: true }).fill("Ausschreibung");
+  await page.getByRole("combobox", { name: "Dateiart" }).selectOption("meeting_info");
   await page.locator("#file-upload").setInputFiles({
     name: "ausschreibung.pdf",
     mimeType: "application/pdf",

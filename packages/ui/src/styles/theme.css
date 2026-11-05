@@ -42,6 +42,14 @@
   --highlight: var(--bsv-1); /* federation (BSV-SWS) events in lists/calendars */
   --highlight-foreground: #fff;
 
+  /* Event file icons by format (colours of the SwimResults file list). */
+  --file-pdf: #aa0a00;
+  --file-dsv: #0176bb;
+  --file-lenex: #5dc1f3;
+  --file-zip: #edc213;
+  --file-other: var(--bsv-dark-2);
+  --file-icon-foreground: #fff;
+
   --link: var(--bsv-1);
   --link-hover: var(--bsv-2);
   --heading-1: var(--bsv-1);
@@ -108,6 +116,12 @@
   --color-heading-2: var(--heading-2);
   --color-highlight: var(--highlight);
   --color-highlight-foreground: var(--highlight-foreground);
+  --color-file-pdf: var(--file-pdf);
+  --color-file-dsv: var(--file-dsv);
+  --color-file-lenex: var(--file-lenex);
+  --color-file-zip: var(--file-zip);
+  --color-file-other: var(--file-other);
+  --color-file-icon-foreground: var(--file-icon-foreground);
   --color-link: var(--link);
   --color-link-hover: var(--link-hover);
   --color-header: var(--header);

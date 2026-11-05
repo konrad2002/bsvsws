@@ -13,13 +13,13 @@ All colours, the font and the radius are **tokens** in
 raw colours (`neutral-600`, `#027db5`, …) – only semantic Tailwind classes generated from the
 tokens. Changing a token changes every page.
 
-| Layer           | Where (theme.css)                       | Examples                                                                                                                                                                                                                      |
-| --------------- | --------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Brand palette   | `:root` part 1                          | `--bsv-1` `#027db5`, `--bsv-2` `#04aadb`, `--bsv-dark` `#0d2046`, `--bsv-dark-2` `#0d2c68`                                                                                                                                    |
-| Semantic tokens | `:root` part 2                          | `--primary`, `--accent`, `--muted(-foreground)`, `--border`, `--page`, `--card`, `--link`, `--highlight(-foreground)`, `--heading-1/2`, `--header-*`, `--footer-*`, `--hero-*`, `--table-*`, `--radius`, `--font-family-base` |
-| Scopes          | `.theme-public`, `.theme-dark-header`   | override tokens for an area (centred page titles; dark internal header)                                                                                                                                                       |
-| Base styles     | `@layer base`                           | `h1`/`h2`/`h3`, plain links, focus outline, default border colour                                                                                                                                                             |
-| Shared classes  | `@utility link`, `.card`, `.data-table` | brand text link (incl. bold `aria-current`), white box on grey, tables                                                                                                                                                        |
+| Layer           | Where (theme.css)                       | Examples                                                                                                                                                                                                                                  |
+| --------------- | --------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Brand palette   | `:root` part 1                          | `--bsv-1` `#027db5`, `--bsv-2` `#04aadb`, `--bsv-dark` `#0d2046`, `--bsv-dark-2` `#0d2c68`                                                                                                                                                |
+| Semantic tokens | `:root` part 2                          | `--primary`, `--accent`, `--muted(-foreground)`, `--border`, `--page`, `--card`, `--link`, `--highlight(-foreground)`, `--file-*`, `--heading-1/2`, `--header-*`, `--footer-*`, `--hero-*`, `--table-*`, `--radius`, `--font-family-base` |
+| Scopes          | `.theme-public`, `.theme-dark-header`   | override tokens for an area (centred page titles; dark internal header)                                                                                                                                                                   |
+| Base styles     | `@layer base`                           | `h1`/`h2`/`h3`, plain links, focus outline, default border colour                                                                                                                                                                         |
+| Shared classes  | `@utility link`, `.card`, `.data-table` | brand text link (incl. bold `aria-current`), white box on grey, tables                                                                                                                                                                    |
 
 Tailwind classes available from the tokens: `bg-primary`, `hover:bg-primary-hover`,
 `text-primary-foreground`, `bg-accent`, `bg-muted`, `text-muted-foreground`, `border-border`,
@@ -78,6 +78,11 @@ in `components/layout/` (header, navigation, footer, sidebar).
 - Events organised by the federation (`byFederation`, organizer type "BSV-SWS") stand out in
   every public event view: `FederationBadge`, highlight bar in the list, filled entries with
   legend in the month grid (colours: `--highlight` tokens).
+- Event files (`EventFileList`) look like the SwimResults file list: a coloured icon per format
+  (`lib/file-format.ts`; tokens `--file-pdf/-dsv/-lenex/-zip/-other`, icons inlined Material
+  Symbols), extension badge, and download count for SwimResults files (link icon for external
+  links). Files that are announced but not published yet are greyed out and not linked; screen
+  readers get "(noch nicht verfügbar)". The list sits directly below "Live & Ergebnisse".
 - Accessibility: every control is labelled, sections use `aria-labelledby`, active views/pages
   use `aria-current`, decorative images have empty `alt`, external links open with
   `rel="noopener noreferrer"`.

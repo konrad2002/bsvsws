@@ -1,10 +1,14 @@
 import type {
   EventCalendar,
+  EventFileType,
   EventStatus,
   MembershipRole,
   OrganizerType,
   RemovalStatus,
+  RaceGender,
+  RaceStroke,
   RemovalType,
+  ScheduleEntryKind,
   ScheduleEntryType,
   Sport,
 } from "@bsv-sws/shared";
@@ -184,11 +188,19 @@ export interface EventRow {
 export interface EventScheduleEntryRow {
   id: Uuid;
   event: Uuid;
+  kind: ScheduleEntryKind;
+  /** Section or race number. */
+  number: number | null;
   date: string | null;
   time: string | null;
   end_time: string | null;
   type: ScheduleEntryType;
-  title: string;
+  title: string | null;
+  /** Race fields (kind = race). */
+  distance: number | null;
+  relay: string | null;
+  stroke: RaceStroke | null;
+  gender: RaceGender | null;
   description: string | null;
   sort: number | null;
 }
@@ -197,7 +209,8 @@ export interface EventFileRow {
   id: Uuid;
   event: Uuid;
   file: Uuid;
-  description: string;
+  type: EventFileType;
+  description: string | null;
   sort: number | null;
 }
 

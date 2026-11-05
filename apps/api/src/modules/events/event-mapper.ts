@@ -1,10 +1,11 @@
-import type { EventRow } from "@bsv-sws/directus";
+import type { EventFileRow, EventRow, EventScheduleEntryRow } from "@bsv-sws/directus";
 import type {
   EventCreateInput,
   EventDetail,
   EventSummary,
   EventUpdateInput,
   RemovalRequest,
+  ScheduleEntry,
 } from "@bsv-sws/validation";
 import type { EventState } from "./event-rules.js";
 
@@ -12,26 +13,53 @@ import type { EventState } from "./event-rules.js";
 export type EventRecord = Omit<EventRow, "club"> & {
   club: { id: string; name: string } | null;
   categories?: { event_categories_id: { id: number; name: string } | null }[];
-  schedule?: {
-    id: string;
-    date: string | null;
-    time: string | null;
-    end_time: string | null;
-    type: string;
-    title: string;
-    description: string | null;
-  }[];
-  files?: {
-    id: string;
-    description: string;
+  schedule?: ScheduleRecord[];
+  files?: (Pick<EventFileRow, "id" | "type" | "description"> & {
     file: {
       id: string;
       filename_download: string | null;
       type: string | null;
       filesize: number | string | null;
     } | null;
-  }[];
+  })[];
 };
+
+export type ScheduleRecord = Omit<EventScheduleEntryRow, "event" | "sort">;
+
+/** Directus fields of a schedule row (relational prefix, e.g. "schedule."). */
+export const scheduleFields = (prefix: string) =>
+  [
+    "id",
+    "kind",
+    "number",
+    "date",
+    "time",
+    "end_time",
+    "type",
+    "title",
+    "description",
+    "distance",
+    "relay",
+    "stroke",
+    "gender",
+  ].map((f) => prefix + f);
+
+export function toScheduleEntry(s: Omit<ScheduleRecord, "id">): ScheduleEntry {
+  return {
+    kind: s.kind ?? "item",
+    number: s.number,
+    date: s.date,
+    time: hhmm(s.time),
+    endTime: hhmm(s.end_time),
+    type: s.type ?? "custom",
+    title: s.title,
+    description: s.description,
+    distance: s.distance,
+    relay: s.relay,
+    stroke: s.stroke,
+    gender: s.gender,
+  };
+}
 
 export interface RemovalRecord {
   id: string;
@@ -86,14 +114,9 @@ export const DETAIL_FIELDS = [
   "review_comment",
   "categories.event_categories_id.id",
   "categories.event_categories_id.name",
-  "schedule.id",
-  "schedule.date",
-  "schedule.time",
-  "schedule.end_time",
-  "schedule.type",
-  "schedule.title",
-  "schedule.description",
+  ...scheduleFields("schedule."),
   "files.id",
+  "files.type",
   "files.description",
   "files.file.id",
   "files.file.filename_download",
@@ -206,20 +229,13 @@ export function toDetail(
     categories: (row.categories ?? [])
       .map((c) => c.event_categories_id)
       .filter((c): c is { id: number; name: string } => !!c),
-    schedule: (row.schedule ?? []).map((s) => ({
-      id: s.id,
-      date: s.date,
-      time: hhmm(s.time),
-      endTime: hhmm(s.end_time),
-      type: s.type as EventDetail["schedule"][number]["type"],
-      title: s.title,
-      description: s.description,
-    })),
+    schedule: (row.schedule ?? []).map((s) => ({ id: s.id, ...toScheduleEntry(s) })),
     files: (row.files ?? []).map((f) => ({
       id: f.id,
+      type: f.type ?? "other",
       description: f.description,
       filename: f.file?.filename_download ?? null,
-      type: f.file?.type ?? null,
+      mimeType: f.file?.type ?? null,
       size: f.file?.filesize != null ? Number(f.file.filesize) : null,
     })),
     reviewComment: row.review_comment,
@@ -269,12 +285,18 @@ export function toRow(input: EventUpdateInput): Record<string, unknown> {
     row.categories = input.categoryIds.map((id) => ({ event_categories_id: id }));
   if (input.schedule) {
     row.schedule = input.schedule.map((s, i) => ({
-      date: s.date ?? null,
-      time: s.time ?? null,
-      end_time: s.endTime ?? null,
+      kind: s.kind,
+      number: s.number,
+      date: s.date,
+      time: s.time,
+      end_time: s.endTime,
       type: s.type,
       title: s.title,
-      description: s.description ?? null,
+      description: s.description,
+      distance: s.distance,
+      relay: s.relay,
+      stroke: s.stroke,
+      gender: s.gender,
       sort: i + 1,
     }));
   }

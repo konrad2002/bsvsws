@@ -2,6 +2,7 @@ import { EVENT_STATUSES } from "@bsv-sws/shared";
 import {
   eventCommentSchema,
   eventCreateSchema,
+  eventFileMetaSchema,
   eventRejectSchema,
   eventReviewSchema,
   eventUpdateSchema,
@@ -49,10 +50,14 @@ export const eventRoutes: FastifyPluginAsync<{ auth: AuthService; events: EventS
     const file = await req.file({ limits: { fileSize: maxBytes } });
     if (!file) throw badRequest("FILE_REQUIRED", "Bitte eine Datei auswählen.");
     const data = await file.toBuffer(); // throws 413 above the limit
-    const description = (file.fields.description as { value?: unknown } | undefined)?.value;
+    // Multipart text fields must precede the file part in the request body.
+    const field = (name: string) => {
+      const value = (file.fields[name] as { value?: unknown } | undefined)?.value;
+      return typeof value === "string" ? value : undefined;
+    };
     return {
       file: { filename: file.filename, mimetype: file.mimetype, data },
-      description: typeof description === "string" ? description : "",
+      field,
     };
   }
 
@@ -137,17 +142,18 @@ export const eventRoutes: FastifyPluginAsync<{ auth: AuthService; events: EventS
   // --- files & images -------------------------------------------------------------
   app.post("/events/:eventId/files", async (req, reply) => {
     const ctx = await ctxOf(req);
-    const { file, description } = await readUpload(req, EVENT_FILE_MAX_BYTES);
-    return reply.code(201).send(await events.addFile(ctx, id(req), file, description));
+    const { file, field } = await readUpload(req, EVENT_FILE_MAX_BYTES);
+    const meta = parseInput(eventFileMetaSchema, {
+      type: field("type") || undefined,
+      description: field("description"),
+    });
+    return reply.code(201).send(await events.addFile(ctx, id(req), file, meta));
   });
 
   app.patch("/events/:eventId/files/:fileId", async (req) => {
     const { eventId, fileId } = parseInput(fileParams, req.params);
-    const { description } = parseInput(
-      z.object({ description: z.string().trim().min(1).max(255) }),
-      req.body,
-    );
-    return events.updateFile(await ctxOf(req), eventId, fileId, description);
+    const meta = parseInput(eventFileMetaSchema, req.body);
+    return events.updateFile(await ctxOf(req), eventId, fileId, meta);
   });
 
   app.delete("/events/:eventId/files/:fileId", async (req) => {
