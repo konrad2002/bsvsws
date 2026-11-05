@@ -2,6 +2,7 @@ import { EVENT_CALENDAR_LABELS } from "@bsv-sws/shared";
 import type { PublicEventSummary } from "@bsv-sws/validation";
 import Link from "next/link";
 import { formatDateRange } from "@/lib/format";
+import { FederationBadge } from "./federation-badge";
 
 export function eventTime(e: Pick<PublicEventSummary, "allDay" | "startTime" | "endTime">) {
   if (e.allDay || !e.startTime) return null;
@@ -11,15 +12,25 @@ export function eventTime(e: Pick<PublicEventSummary, "allDay" | "startTime" | "
 export function EventListItem({ event }: { event: PublicEventSummary }) {
   const time = eventTime(event);
   return (
-    <li className="flex flex-col gap-1 py-3 sm:flex-row sm:gap-6">
+    <li
+      className={`flex flex-col gap-1 border-l-4 py-3 pl-3 sm:flex-row sm:gap-6 ${
+        event.byFederation ? "border-l-highlight bg-highlight/5" : "border-l-transparent"
+      }`}
+    >
       <div className="shrink-0 text-sm font-medium sm:w-48">
         {formatDateRange(event.startDate, event.endDate)}
         {time && <div className="font-normal text-muted-foreground">{time}</div>}
       </div>
       <div className="flex flex-col gap-0.5">
-        <Link href={`/veranstaltungen/${event.slug}`} className="font-semibold link">
-          {event.title}
-        </Link>
+        <div className="flex flex-wrap items-center gap-2">
+          <Link
+            href={`/veranstaltungen/${event.slug}`}
+            className={`font-semibold link ${event.byFederation ? "text-lg" : ""}`}
+          >
+            {event.title}
+          </Link>
+          {event.byFederation && <FederationBadge />}
+        </div>
         <span className="text-sm text-muted-foreground">
           {[event.venue, event.city].filter(Boolean).join(", ")}
           {event.venue || event.city ? " · " : ""}

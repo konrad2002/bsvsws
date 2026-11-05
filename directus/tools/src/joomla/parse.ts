@@ -61,9 +61,19 @@ export function classify(html: string, path: string): PageKind {
 
 const text = (s: string) => s.replace(/\s+/g, " ").trim();
 
+const JOOMLA_MODULES =
+  ".moduletable, [class^='mod-'], [class*=' mod-'], [class^='mod_'], [class*=' mod_'], .newsflash";
+
 /** Inner HTML of the article body with Joomla/page-builder wrappers removed. */
 function cleanBody($: cheerio.CheerioAPI, body: ReturnType<cheerio.CheerioAPI>): string {
   body.find("script, style, form, .pagenav, .article-info").remove();
+  // Joomla modules embedded in articles (e.g. news flash, latest events on the old home
+  // page) are dynamic lists the new site renders itself – drop them.
+  body.find(JOOMLA_MODULES).remove();
+  body.find("p").each((_, el) => {
+    if (!$(el).text().trim() && !$(el).find("img, iframe, a").length) $(el).remove();
+  });
+  if (!body.text().trim() && !body.find("img").length) return "";
   // Unwrap layout-only containers (old page-builder markup: div/section with classes).
   let changed = true;
   while (changed) {

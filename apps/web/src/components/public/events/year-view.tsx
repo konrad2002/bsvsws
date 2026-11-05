@@ -3,6 +3,7 @@ import Link from "next/link";
 import { MONTH_NAMES, monthKey } from "@/lib/calendar";
 import { formatDateRange } from "@/lib/format";
 import { calendarHref, type CalendarParams } from "./calendar-params";
+import { FederationBadge } from "./federation-badge";
 
 /** Year view: all months with their events (by start month), linking to the month view. */
 export function YearView({
@@ -45,9 +46,18 @@ export function YearView({
                     <span className="text-muted-foreground">
                       {formatDateRange(e.startDate, e.endDate)}
                     </span>{" "}
-                    <Link href={`/veranstaltungen/${e.slug}`} className="link">
+                    <Link
+                      href={`/veranstaltungen/${e.slug}`}
+                      className={`link ${e.byFederation ? "font-semibold" : ""}`}
+                    >
                       {e.title}
                     </Link>
+                    {e.byFederation && (
+                      <>
+                        {" "}
+                        <FederationBadge />
+                      </>
+                    )}
                   </li>
                 ))}
               </ul>

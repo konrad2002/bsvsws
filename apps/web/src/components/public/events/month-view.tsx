@@ -3,6 +3,14 @@ import Link from "next/link";
 import { eventsByDay, monthGrid, WEEKDAYS_SHORT } from "@/lib/calendar";
 import { formatDate } from "@/lib/format";
 import { eventTime } from "./event-list-item";
+import { FederationBadge } from "./federation-badge";
+
+/** Calendar cell entry; federation events are filled with the highlight colour. */
+function entryClass(e: PublicEventSummary) {
+  return e.byFederation
+    ? "block truncate rounded-sm bg-highlight px-1 text-xs font-semibold text-highlight-foreground hover:bg-primary-hover"
+    : "link block truncate rounded-sm bg-accent/15 px-1 text-xs";
+}
 
 /**
  * Month view: grid on larger screens, day list on mobile (spec §9.4 – calendars
@@ -56,11 +64,12 @@ export function MonthView({
                       <li key={e.slug}>
                         <Link
                           href={`/veranstaltungen/${e.slug}`}
-                          className="link block truncate rounded-sm bg-accent/15 px-1 text-xs"
-                          title={e.title}
+                          className={entryClass(e)}
+                          title={e.byFederation ? `${e.title} (BSV-SWS)` : e.title}
                         >
                           {day.date === e.startDate && eventTime(e) ? `${e.startTime} ` : ""}
                           {e.title}
+                          {e.byFederation && <span className="sr-only"> (BSV-SWS)</span>}
                         </Link>
                       </li>
                     ))}
@@ -72,6 +81,11 @@ export function MonthView({
         </tbody>
       </table>
 
+      <p className="mt-2 hidden items-center gap-2 text-xs text-muted-foreground md:flex">
+        <span aria-hidden className="inline-block size-3 rounded-sm bg-highlight" />
+        Veranstaltung des BSV-SWS
+      </p>
+
       <div className="md:hidden">
         {daysWithEvents.length === 0 ? (
           <p className="text-sm text-muted-foreground">Keine Veranstaltungen in diesem Monat.</p>
@@ -82,11 +96,15 @@ export function MonthView({
                 <div className="text-sm font-medium">{formatDate(date)}</div>
                 <ul className="ml-3 flex flex-col">
                   {list.map((e) => (
-                    <li key={e.slug}>
-                      <Link href={`/veranstaltungen/${e.slug}`} className="text-sm link">
+                    <li key={e.slug} className="flex flex-wrap items-center gap-2">
+                      <Link
+                        href={`/veranstaltungen/${e.slug}`}
+                        className={`text-sm link ${e.byFederation ? "font-semibold" : ""}`}
+                      >
                         {eventTime(e) && date === e.startDate ? `${e.startTime} · ` : ""}
                         {e.title}
                       </Link>
+                      {e.byFederation && <FederationBadge />}
                     </li>
                   ))}
                 </ul>

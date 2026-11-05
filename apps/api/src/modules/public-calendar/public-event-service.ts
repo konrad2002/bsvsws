@@ -151,6 +151,7 @@ function toSummary(row: PublicRow): PublicEventSummary {
       .filter((c): c is { name: string; slug: string } => !!c),
     club: row.club ? { name: row.club.name, slug: row.club.slug } : null,
     organizer: organizerName(row),
+    byFederation: row.organizer_type === "federation",
     venue: row.venue,
     city: row.city,
     official: row.official,

@@ -121,4 +121,10 @@ describe("Joomla parsers (saved pages of bsv-sws.de)", () => {
     });
     expect(parseHomeBanner(fixture("page"), BASE)).toBeNull();
   });
+
+  it("drops embedded Joomla modules (old home page: news flash + latest events)", () => {
+    const home = parsePage(fixture("home"));
+    expect(home.title).toBe("Willkommen beim BSV-SWS!");
+    expect(home.html).toBe("");
+  });
 });

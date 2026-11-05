@@ -304,6 +304,8 @@ export const publicEventSummarySchema = z.object({
   club: z.object({ name: z.string(), slug: z.string() }).nullable(),
   /** Display name of the organizer (club name, "BSV-SWS" or external name). */
   organizer: z.string(),
+  /** Organised by the federation itself (BSV-SWS) – highlighted in lists and calendars. */
+  byFederation: z.boolean(),
   venue: z.string().nullable(),
   city: z.string().nullable(),
   official: z.boolean(),
