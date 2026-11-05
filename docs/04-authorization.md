@@ -40,6 +40,7 @@ Defined in [`directus/tools/src/access.ts`](../directus/tools/src/access.ts); fi
 | `invitations`           | –          | read             | read, create, update     |
 | `audit_logs`            | –          | read             | read, create             |
 | `notification_settings` | –          | read             | read, update             |
+| `homepage`              | –          | read, update     | read                     |
 | `directus_users`        | –          | read             | read, create\*, update\* |
 | `directus_files`        | –          | read             | read, create (logos)     |
 

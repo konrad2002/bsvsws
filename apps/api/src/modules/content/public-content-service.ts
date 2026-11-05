@@ -1,7 +1,8 @@
-import { aggregate, readFile, readItem, readItems } from "@directus/sdk";
+import { aggregate, readFile, readItem, readItems, readSingleton } from "@directus/sdk";
 import { DIRECTUS_FOLDER_IDS } from "@bsv-sws/directus";
 import type { Sport, UserLevel, VisibilityLevel } from "@bsv-sws/shared";
 import type {
+  Home,
   ArticleDetail,
   ArticlePage,
   ArticleSummary,
@@ -15,6 +16,8 @@ import { isNotFoundOrForbidden } from "../../lib/directus-errors.js";
 import { forbidden, notFound } from "../../lib/errors.js";
 import { canSeeVisibility } from "@bsv-sws/shared";
 import {
+  buildHero,
+  type HomepageRow,
   buildNavigation,
   buildPageIndex,
   normalizePath,
@@ -79,6 +82,24 @@ export function createPublicContentService(deps: {
   const nowIso = () => (deps.now ? deps.now() : new Date()).toISOString();
 
   /** Published and due articles only. */
+  async function homepageRow(): Promise<HomepageRow | null> {
+    return (await client.request(
+      readSingleton(
+        "homepage" as never,
+        {
+          fields: [
+            "hero_enabled",
+            "hero_kicker",
+            "hero_title",
+            "hero_image",
+            "hero_button_label",
+            "hero_button_url",
+          ],
+        } as never,
+      ),
+    )) as HomepageRow | null;
+  }
+
   const articleFilter = () => ({ status: { _eq: "published" }, published_at: { _lte: nowIso() } });
 
   async function pageIndex() {
@@ -421,6 +442,32 @@ export function createPublicContentService(deps: {
      * otherwise only users who may see a referencing published page. Copying the
      * URL does not help: unreferenced non-public files are never served.
      */
+    /** Home banner (Studio singleton `homepage`) + next upcoming published event for its button. */
+    async home(): Promise<Home> {
+      const today = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Berlin" }).format(
+        deps.now ? deps.now() : new Date(),
+      );
+      const [row, events] = await Promise.all([
+        homepageRow(),
+        client.request(
+          readItems(
+            "events" as never,
+            {
+              filter: {
+                status: { _eq: "published" },
+                deleted_at: { _null: true },
+                end_date: { _gte: today },
+              },
+              sort: ["start_date", "start_time"],
+              fields: ["title", "slug"],
+              limit: 1,
+            } as never,
+          ),
+        ) as Promise<{ title: string; slug: string }[]>,
+      ]);
+      return { hero: buildHero(row, events[0] ?? null) };
+    },
+
     async file(
       fileId: string,
       level: UserLevel,
@@ -449,7 +496,7 @@ export function createPublicContentService(deps: {
       const inPublicFolder = file.folder === DIRECTUS_FOLDER_IDS.publicMedia;
       const references: VisibilityLevel[] = [];
       if (!inPublicFolder) {
-        const [pages, articles, index] = await Promise.all([
+        const [pages, articles, index, home] = await Promise.all([
           client.request(
             readItems(
               "pages" as never,
@@ -474,8 +521,10 @@ export function createPublicContentService(deps: {
             ),
           ) as Promise<unknown[]>,
           pageIndex(),
+          homepageRow(),
         ]);
-        if (articles.length) references.push("public");
+        // The home banner image is public wherever it was uploaded.
+        if (articles.length || home?.hero_image === fileId) references.push("public");
         const reachable = new Map([...index.byPath.values()].map((p) => [p.id, p]));
         for (const { id } of pages) {
           const node = reachable.get(id);

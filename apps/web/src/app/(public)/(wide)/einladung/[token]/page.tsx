@@ -20,7 +20,7 @@ export const metadata: Metadata = { title: "Einladung", robots: { index: false }
 export default function InvitationPage({ params }: PageProps<"/einladung/[token]">) {
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-2xl font-semibold">Einladung</h1>
+      <h1>Einladung</h1>
       <Suspense fallback={<p>Einladung wird geprüft …</p>}>
         <InvitationContent params={params} />
       </Suspense>

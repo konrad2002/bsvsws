@@ -106,6 +106,18 @@ export interface NotificationSettings {
   date_updated: Timestamp | null;
 }
 
+/** Singleton: home page banner (Studio → Inhalte → Startseite). */
+export interface Homepage {
+  id: number;
+  hero_enabled: boolean;
+  hero_kicker: string | null;
+  hero_title: string | null;
+  hero_image: Uuid | null;
+  hero_button_label: string | null;
+  hero_button_url: string | null;
+  date_updated: Timestamp | null;
+}
+
 export interface AuditLog {
   /** bigInteger: Directus returns it as a string. */
   id: number | string;
@@ -210,6 +222,7 @@ export interface DirectusSchema {
   invitations: Invitation[];
   audit_logs: AuditLog[];
   notification_settings: NotificationSettings;
+  homepage: Homepage;
   events: EventRow[];
   event_categories: EventCategoryRow[];
   event_schedule_entries: EventScheduleEntryRow[];

@@ -24,7 +24,8 @@ export default async function EventsPage({ searchParams }: PageProps<"/intern/ve
     <Link
       key={label}
       href={`/intern/veranstaltungen${query}`}
-      className={active ? "font-semibold underline" : "hover:underline"}
+      aria-current={active ? "page" : undefined}
+      className="link"
     >
       {label}
     </Link>
@@ -33,9 +34,7 @@ export default async function EventsPage({ searchParams }: PageProps<"/intern/ve
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <h1 className="text-2xl font-semibold">
-          Veranstaltungen{federation ? "" : ` – ${user.membership!.club.name}`}
-        </h1>
+        <h1>Veranstaltungen{federation ? "" : ` – ${user.membership!.club.name}`}</h1>
         <Link href="/intern/veranstaltungen/neu" className={buttonVariants()}>
           Neue Veranstaltung
         </Link>

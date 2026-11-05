@@ -48,7 +48,7 @@ export async function InternalNav() {
       <ul className="flex flex-row flex-wrap gap-x-4 gap-y-2 md:flex-col">
         {appLinks.map((l) => (
           <li key={l.href}>
-            <Link href={l.href} className="text-sm hover:underline">
+            <Link href={l.href} className="text-sm link">
               {l.label}
             </Link>
           </li>
@@ -56,7 +56,7 @@ export async function InternalNav() {
       </ul>
       {cms.length > 0 && (
         <div className="flex flex-col gap-2">
-          <p className="text-xs font-semibold uppercase tracking-wide text-neutral-500">
+          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
             Interner Bereich
           </p>
           <CmsLinks items={cms} />
@@ -79,13 +79,13 @@ function CmsLinks({ items, nested = false }: { items: NavItem[]; nested?: boolea
             item.external ? (
               <a
                 href={item.href}
-                className="text-sm hover:underline"
+                className="text-sm link"
                 {...(item.newTab ? { target: "_blank", rel: "noopener noreferrer" } : {})}
               >
                 {item.label}
               </a>
             ) : (
-              <Link href={item.href} className="text-sm hover:underline">
+              <Link href={item.href} className="text-sm link">
                 {item.label}
               </Link>
             )

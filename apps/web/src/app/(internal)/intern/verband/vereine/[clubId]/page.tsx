@@ -34,10 +34,10 @@ export default async function FederationClubPage({
   return (
     <div className="flex flex-col gap-8">
       <div className="flex flex-col gap-1">
-        <Link href="/intern/verband/vereine" className="text-sm hover:underline">
+        <Link href="/intern/verband/vereine" className="text-sm link">
           ← Alle Vereine
         </Link>
-        <h1 className="text-2xl font-semibold">{club.name}</h1>
+        <h1>{club.name}</h1>
       </div>
       <Section title="Mitglieder">
         {!hasRepresentative && (

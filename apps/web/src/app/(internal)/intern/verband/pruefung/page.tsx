@@ -17,28 +17,25 @@ export default async function ReviewPage() {
 
   return (
     <div className="flex flex-col gap-8">
-      <h1 className="text-2xl font-semibold">Prüfung</h1>
+      <h1>Prüfung</h1>
       <Section title={`Eingereichte Veranstaltungen (${queue.pendingEvents.length})`}>
         <EventTable events={queue.pendingEvents} showClub />
       </Section>
       <Section title={`Entfernungsanträge (${queue.pendingRemovals.length})`}>
         {queue.pendingRemovals.length === 0 ? (
-          <p className="text-sm text-neutral-600">Keine offenen Anträge.</p>
+          <p className="text-sm text-muted-foreground">Keine offenen Anträge.</p>
         ) : (
           <ul className="flex flex-col divide-y rounded border">
             {queue.pendingRemovals.map((r) => (
               <li key={r.id} className="flex flex-col gap-1 px-3 py-2 text-sm">
-                <Link
-                  href={`/intern/veranstaltungen/${r.event.id}`}
-                  className="font-medium hover:underline"
-                >
+                <Link href={`/intern/veranstaltungen/${r.event.id}`} className="font-medium link">
                   {r.event.title}
                 </Link>
                 <span>
                   {REMOVAL_TYPE_LABELS[r.type]} · {r.requestedBy ?? "–"} ·{" "}
                   {formatDateTime(r.requestedAt)}
                 </span>
-                {r.reason && <span className="text-neutral-700">{r.reason}</span>}
+                {r.reason && <span className="text-muted-foreground">{r.reason}</span>}
               </li>
             ))}
           </ul>

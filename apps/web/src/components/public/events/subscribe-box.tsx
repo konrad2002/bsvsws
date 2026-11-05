@@ -17,17 +17,17 @@ export function SubscribeBox({ host, protocol }: { host: string; protocol: strin
   return (
     <details className="rounded border p-3 text-sm">
       <summary className="cursor-pointer font-medium">Kalender abonnieren</summary>
-      <p className="mt-2 text-neutral-700">
+      <p className="mt-2 text-muted-foreground">
         Abonniere die Veranstaltungen in deiner Kalender-App (z. B. Outlook, Apple- oder
         Google-Kalender). Änderungen werden automatisch übernommen.
       </p>
       <ul className="mt-2 flex flex-col gap-1">
         {feeds.map((f) => (
           <li key={f.slug} className="flex flex-wrap items-center gap-x-3">
-            <a href={`webcal://${host}/kalender/${f.slug}.ics`} className="font-medium underline">
+            <a href={`webcal://${host}/kalender/${f.slug}.ics`} className="font-medium link">
               {f.label}
             </a>
-            <span className="break-all text-xs text-neutral-600">
+            <span className="break-all text-xs text-muted-foreground">
               {protocol}://{host}/kalender/{f.slug}.ics
             </span>
           </li>

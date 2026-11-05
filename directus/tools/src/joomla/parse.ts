@@ -320,3 +320,12 @@ export function rewriteHtml(
   });
   return $.html();
 }
+
+/** Photo of the home banner (mod_bsv_banner: CSS background-image) → path on the old site. */
+export function parseHomeBanner(html: string, base: string): { imagePath: string } | null {
+  const $ = cheerio.load(html);
+  const style = $(".bsv-banner-image-container").first().attr("style") ?? "";
+  const url = style.match(/background-image:\s*url\(['"]?([^'")]+)['"]?\)/)?.[1];
+  const path = url ? sitePath(url, base) : null;
+  return path ? { imagePath: path } : null;
+}

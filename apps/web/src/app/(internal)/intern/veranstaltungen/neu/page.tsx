@@ -18,8 +18,8 @@ export default async function NewEventPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-2xl font-semibold">Neue Veranstaltung</h1>
-      <p className="max-w-prose text-sm text-neutral-700">
+      <h1>Neue Veranstaltung</h1>
+      <p className="max-w-prose text-sm text-muted-foreground">
         {federation
           ? "Veranstaltungen des Verbands oder im Auftrag eines Vereins. Nach dem Anlegen kannst du sie direkt veröffentlichen."
           : "Die Veranstaltung wird als Entwurf angelegt. Nach dem Einreichen prüft der Verband sie vor der Veröffentlichung."}

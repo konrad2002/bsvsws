@@ -45,7 +45,7 @@ export function MonthView({
               {week.map((day) => (
                 <td
                   key={day.date}
-                  className={`h-24 border p-1 align-top ${day.inMonth ? "" : "bg-neutral-50 text-neutral-400"}`}
+                  className={`h-24 border p-1 align-top ${day.inMonth ? "" : "bg-muted text-muted-foreground"}`}
                 >
                   <div className={`text-xs ${day.date === today ? "font-bold underline" : ""}`}>
                     <span className="sr-only">{formatDate(day.date)}</span>
@@ -56,7 +56,7 @@ export function MonthView({
                       <li key={e.slug}>
                         <Link
                           href={`/veranstaltungen/${e.slug}`}
-                          className="block truncate rounded bg-neutral-100 px-1 text-xs hover:underline"
+                          className="link block truncate rounded-sm bg-accent/15 px-1 text-xs"
                           title={e.title}
                         >
                           {day.date === e.startDate && eventTime(e) ? `${e.startTime} ` : ""}
@@ -74,7 +74,7 @@ export function MonthView({
 
       <div className="md:hidden">
         {daysWithEvents.length === 0 ? (
-          <p className="text-sm text-neutral-600">Keine Veranstaltungen in diesem Monat.</p>
+          <p className="text-sm text-muted-foreground">Keine Veranstaltungen in diesem Monat.</p>
         ) : (
           <ul className="flex flex-col divide-y">
             {daysWithEvents.map(([date, list]) => (
@@ -83,7 +83,7 @@ export function MonthView({
                 <ul className="ml-3 flex flex-col">
                   {list.map((e) => (
                     <li key={e.slug}>
-                      <Link href={`/veranstaltungen/${e.slug}`} className="text-sm hover:underline">
+                      <Link href={`/veranstaltungen/${e.slug}`} className="text-sm link">
                         {eventTime(e) && date === e.startDate ? `${e.startTime} · ` : ""}
                         {e.title}
                       </Link>

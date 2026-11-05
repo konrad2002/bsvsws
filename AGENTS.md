@@ -112,8 +112,10 @@ Run `pnpm lint && pnpm typecheck && pnpm test` before declaring work done (CI ru
   `packages/shared` — reuse, don't redefine.
 - **Business logic** stays out of React components and out of Fastify route handlers.
   Keep state transitions explicit and unit-testable. Send emails only after success; avoid duplicates on retry.
-- **UI:** follow the existing bsv-sws.de identity; do not invent colors/typography (spec §9.5).
-  Add shadcn components to `packages/ui` (`components.json` is configured there).
+- **UI:** bsv-sws.de identity. **Never hard-code colours** – use the semantic token classes
+  (`bg-primary`, `text-muted-foreground`, `link`, `card`, `data-table`, plain `<h1>`/`<h2>`);
+  tokens live in `packages/ui/src/styles/theme.css` (see `docs/08-ui-ux.md`). Add shadcn
+  components to `packages/ui` (`components.json` is configured there), restyle them in colour only.
 - **Next.js 16 differs from older versions** — consult `apps/web/AGENTS.md` and
   `node_modules/next/dist/docs/` before writing Next code.
 - **TypeScript is pinned to `~6.0`** because typescript-eslint does not support TS 7 yet.

@@ -212,3 +212,44 @@ export function fileAccess(input: {
   if (input.references.some((v) => canSeeVisibility(input.level, v))) return "allow";
   return input.authenticated ? "forbidden" : "unauthenticated";
 }
+
+export interface HomepageRow {
+  hero_enabled: boolean | null;
+  hero_kicker: string | null;
+  hero_title: string | null;
+  hero_image: string | null;
+  hero_button_label: string | null;
+  hero_button_url: string | null;
+}
+
+/**
+ * Home banner (Studio singleton `homepage`). The button links to an explicit target if
+ * label + safe URL are set (internal path or http(s)), otherwise to the next event.
+ */
+export function buildHero(
+  row: HomepageRow | null,
+  nextEvent: { title: string; slug: string } | null,
+): {
+  kicker: string | null;
+  title: string;
+  imageId: string | null;
+  button: { label: string; href: string; external: boolean } | null;
+} | null {
+  if (row && row.hero_enabled === false) return null;
+  const url = row?.hero_button_url?.trim() ?? "";
+  const label = row?.hero_button_label?.trim() ?? "";
+  const internal = /^\/(?!\/)/.test(url);
+  const external = /^https?:\/\//i.test(url);
+  const button =
+    label && (internal || external)
+      ? { label, href: url, external }
+      : nextEvent
+        ? { label: nextEvent.title, href: `/veranstaltungen/${nextEvent.slug}`, external: false }
+        : null;
+  return {
+    kicker: row?.hero_kicker?.trim() || null,
+    title: row?.hero_title?.trim() || "Bezirksschwimmverband Südwestsachsen e.V.",
+    imageId: row?.hero_image ?? null,
+    button,
+  };
+}

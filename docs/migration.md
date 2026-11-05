@@ -15,6 +15,7 @@ against saved pages of bsv-sws.de).
 | Pages (`/verband/vorstand`, …)                         | `pages`, same URL. Fills the placeholder base pages; creates missing ones (e.g. `/links`, **not** added to the navigation). Home intro → `startseite` |
 | JEvents `/kalender/eventdetail/<id>/…`                 | published **federation** events (`/veranstaltungen/<date>-<title>`) + **308 redirect** from every old URL                                             |
 | Images/downloads under `/images/…`                     | Directus files: news → "Öffentliche Medien", pages/event files → "Seitendokumente"; links rewritten to `/medien/<id>`                                 |
+| Home banner photo                                      | `homepage.hero_image` ("Öffentliche Medien"), only if no image is set                                                                                 |
 | `/news?start=10` etc.                                  | redirect to the list page                                                                                                                             |
 | `/news`, `/veranstaltungen`, `/sportarten`, `/verband` | served by the new site (app pages / existing pages)                                                                                                   |
 

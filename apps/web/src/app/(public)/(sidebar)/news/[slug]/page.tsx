@@ -27,19 +27,19 @@ export default async function ArticlePage({ params }: Pick<PageProps<"/news/[slu
   const article = validSlug(slug) ? await getArticle(slug) : null;
   if (!article) notFound();
   return (
-    <article className="flex max-w-3xl flex-col gap-5">
-      <Link href="/news" className="text-sm hover:underline">
+    <article className="flex flex-col gap-5">
+      <Link href="/news" className="text-sm link">
         ← Alle News
       </Link>
       <header className="flex flex-col gap-1">
-        <p className="text-sm text-neutral-600">
+        <p className="text-sm text-muted-foreground">
           {formatPublishedDate(article.publishedAt)} ·{" "}
-          <Link href={`/news/kategorie/${article.category.slug}`} className="hover:underline">
+          <Link href={`/news/kategorie/${article.category.slug}`} className="link">
             {article.category.name}
           </Link>
           {article.author ? ` · ${article.author}` : ""}
         </p>
-        <h1 className="text-2xl font-semibold">{article.title}</h1>
+        <h1>{article.title}</h1>
       </header>
       {article.featuredImage && (
         // eslint-disable-next-line @next/next/no-img-element -- proxied CMS media with width transform

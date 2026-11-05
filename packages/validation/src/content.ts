@@ -106,4 +106,17 @@ export const publicClubDetailSchema = publicClubSchema.extend({
 });
 export type PublicClubDetail = z.infer<typeof publicClubDetailSchema>;
 
+/** Home banner (Studio singleton `homepage`); null = banner switched off. */
+export const homeSchema = z.object({
+  hero: z
+    .object({
+      kicker: z.string().nullable(),
+      title: z.string(),
+      imageId: z.string().nullable(),
+      button: z.object({ label: z.string(), href: z.string(), external: z.boolean() }).nullable(),
+    })
+    .nullable(),
+});
+export type Home = z.infer<typeof homeSchema>;
+
 export const redirectSchema = z.object({ to: z.string(), permanent: z.boolean() });

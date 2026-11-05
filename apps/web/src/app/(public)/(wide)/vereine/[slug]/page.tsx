@@ -35,8 +35,8 @@ export default async function ClubPage({ params }: Pick<PageProps<"/vereine/[slu
     .join(", ");
 
   return (
-    <div className="flex max-w-3xl flex-col gap-6">
-      <Link href="/vereine" className="text-sm hover:underline">
+    <div className="mx-auto flex w-full max-w-4xl flex-col gap-6">
+      <Link href="/vereine" className="text-sm link">
         ← Alle Vereine
       </Link>
       <header className="flex items-center gap-4">
@@ -48,7 +48,7 @@ export default async function ClubPage({ params }: Pick<PageProps<"/vereine/[slu
             className="h-20 w-20 object-contain"
           />
         )}
-        <h1 className="text-2xl font-semibold">{club.name}</h1>
+        <h1>{club.name}</h1>
       </header>
       <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">
         {club.sports.length > 0 && (
@@ -75,7 +75,7 @@ export default async function ClubPage({ params }: Pick<PageProps<"/vereine/[slu
             <dd>
               <a
                 href={club.website}
-                className="break-all underline"
+                className="break-all link"
                 rel="noopener noreferrer"
                 target="_blank"
               >
@@ -88,7 +88,7 @@ export default async function ClubPage({ params }: Pick<PageProps<"/vereine/[slu
           <>
             <dt className="font-medium">E-Mail</dt>
             <dd>
-              <a href={`mailto:${club.email}`} className="underline">
+              <a href={`mailto:${club.email}`} className="link">
                 {club.email}
               </a>
             </dd>
@@ -103,9 +103,7 @@ export default async function ClubPage({ params }: Pick<PageProps<"/vereine/[slu
       </dl>
       {club.description && <p className="whitespace-pre-line">{club.description}</p>}
       <section aria-labelledby="club-events" className="flex flex-col gap-2">
-        <h2 id="club-events" className="text-lg font-semibold">
-          Kommende Veranstaltungen
-        </h2>
+        <h2 id="club-events">Kommende Veranstaltungen</h2>
         <EventList events={events} empty="Keine kommenden Veranstaltungen." />
       </section>
     </div>

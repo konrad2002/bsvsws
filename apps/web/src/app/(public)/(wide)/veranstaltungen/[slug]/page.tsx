@@ -50,8 +50,8 @@ export default async function PublicEventPage({
   const multiDay = event.startDate !== event.endDate;
 
   return (
-    <article className="flex max-w-3xl flex-col gap-6">
-      <Link href="/veranstaltungen" className="text-sm hover:underline">
+    <article className="mx-auto flex w-full max-w-4xl flex-col gap-6">
+      <Link href="/veranstaltungen" className="text-sm link">
         ← Alle Veranstaltungen
       </Link>
       {event.hasTitleImage && (
@@ -64,8 +64,8 @@ export default async function PublicEventPage({
       )}
       <header className="flex items-start justify-between gap-4">
         <div className="flex flex-col gap-1">
-          <h1 className="text-2xl font-semibold">{event.title}</h1>
-          <p className="text-neutral-700">
+          <h1>{event.title}</h1>
+          <p className="text-muted-foreground">
             {formatDateRange(event.startDate, event.endDate)}
             {time ? `, ${time}` : ""}
           </p>
@@ -94,7 +94,7 @@ export default async function PublicEventPage({
           <Info label="Website">
             <a
               href={event.website}
-              className="break-all underline"
+              className="break-all link"
               rel="noopener noreferrer"
               target="_blank"
             >
@@ -109,9 +109,7 @@ export default async function PublicEventPage({
 
       {event.admissionInfo && (
         <section aria-labelledby="zulassung" className="flex flex-col gap-1">
-          <h2 id="zulassung" className="text-lg font-semibold">
-            Zulassung / Meldung
-          </h2>
+          <h2 id="zulassung">Zulassung / Meldung</h2>
           <p className="whitespace-pre-line text-sm">{event.admissionInfo}</p>
         </section>
       )}
@@ -120,16 +118,14 @@ export default async function PublicEventPage({
 
       {event.files.length > 0 && (
         <section aria-labelledby="dateien" className="flex flex-col gap-2">
-          <h2 id="dateien" className="text-lg font-semibold">
-            Dateien
-          </h2>
+          <h2 id="dateien">Dateien</h2>
           <ul className="flex flex-col gap-1 text-sm">
             {event.files.map((f) => (
               <li key={f.id}>
-                <a href={`/api/events/${event.id}/files/${f.id}`} className="underline">
+                <a href={`/api/events/${event.id}/files/${f.id}`} className="link">
                   {f.description}
                 </a>{" "}
-                <span className="text-neutral-500">{formatFileSize(f.size)}</span>
+                <span className="text-muted-foreground">{formatFileSize(f.size)}</span>
               </li>
             ))}
           </ul>
@@ -138,9 +134,7 @@ export default async function PublicEventPage({
 
       {event.additionalInfo && (
         <section aria-labelledby="hinweise" className="flex flex-col gap-1">
-          <h2 id="hinweise" className="text-lg font-semibold">
-            Weitere Hinweise
-          </h2>
+          <h2 id="hinweise">Weitere Hinweise</h2>
           <p className="whitespace-pre-line text-sm">{event.additionalInfo}</p>
         </section>
       )}
@@ -151,23 +145,24 @@ export default async function PublicEventPage({
 function Schedule({ event, multiDay }: { event: PublicEventDetail; multiDay: boolean }) {
   return (
     <section aria-labelledby="ablauf" className="flex flex-col gap-2">
-      <h2 id="ablauf" className="text-lg font-semibold">
-        Ablauf
-      </h2>
-      <table className="w-full text-left text-sm">
+      <h2 id="ablauf">Ablauf</h2>
+      <table className="data-table text-sm">
         <tbody>
           {event.schedule.map((s, i) => (
-            <tr key={i} className="border-b last:border-0 align-top">
-              <td className="whitespace-nowrap py-1 pr-4 text-neutral-700">
+            <tr key={i}>
+              <td className="whitespace-nowrap text-muted-foreground">
                 {multiDay && s.date ? `${formatDate(s.date)} ` : ""}
                 {s.time ? `${s.time}${s.endTime ? `–${s.endTime}` : ""}` : ""}
               </td>
-              <td className="py-1">
+              <td>
                 <span className="font-medium">{s.title}</span>
                 {s.type !== "custom" && s.title !== SCHEDULE_ENTRY_TYPE_LABELS[s.type] && (
-                  <span className="text-neutral-500"> ({SCHEDULE_ENTRY_TYPE_LABELS[s.type]})</span>
+                  <span className="text-muted-foreground">
+                    {" "}
+                    ({SCHEDULE_ENTRY_TYPE_LABELS[s.type]})
+                  </span>
                 )}
-                {s.description && <div className="text-neutral-600">{s.description}</div>}
+                {s.description && <div className="text-muted-foreground">{s.description}</div>}
               </td>
             </tr>
           ))}

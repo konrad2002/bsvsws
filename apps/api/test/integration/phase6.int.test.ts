@@ -259,4 +259,47 @@ describe.skipIf(!enabled)("Phase 6 internal area and protected content (real Dir
     // the public navigation never contains internal entries
     expect(JSON.stringify((await get("/public/navigation")).json())).not.toContain(run);
   });
+
+  it("home banner: Studio singleton, safe button target, banner image is public", async () => {
+    const url = new URL("/items/homepage", env.DIRECTUS_URL);
+    const headers = {
+      authorization: `Bearer ${process.env.DIRECTUS_ADMIN_TOKEN}`,
+      "content-type": "application/json",
+    };
+    const original = (
+      (await (await fetch(url, { headers })).json()) as { data: Record<string, unknown> }
+    ).data;
+    const patch = (body: Record<string, unknown>) =>
+      fetch(url, { method: "PATCH", headers, body: JSON.stringify(body) });
+    try {
+      await patch({
+        hero_enabled: true,
+        hero_image: files.orphan,
+        hero_button_label: "Los",
+        hero_button_url: "javascript:alert(1)",
+      });
+      const home = (await get("/public/home")).json();
+      expect(home.hero).toMatchObject({ imageId: files.orphan });
+      // unsafe target → falls back to the next event (or no button)
+      expect(home.hero.button?.href ?? "").not.toContain("javascript");
+      // the banner image is public even outside "Öffentliche Medien" (otherwise 404 as orphan)
+      const image = await get(`/content/files/${files.orphan}`);
+      expect(image.statusCode).toBe(200);
+      expect(image.headers["cache-control"]).toContain("public");
+
+      await patch({ hero_button_url: "/news" });
+      expect((await get("/public/home")).json().hero.button).toEqual({
+        label: "Los",
+        href: "/news",
+        external: false,
+      });
+      await patch({ hero_enabled: false });
+      expect((await get("/public/home")).json()).toEqual({ hero: null });
+    } finally {
+      const restore = Object.fromEntries(
+        Object.entries(original).filter(([k]) => k !== "id" && k !== "date_updated"),
+      );
+      await patch(restore);
+    }
+  });
 });

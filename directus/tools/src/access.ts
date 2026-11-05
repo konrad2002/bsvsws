@@ -78,6 +78,7 @@ export const MANAGED_COLLECTIONS = [
   "pages",
   "navigation_items",
   "redirects",
+  "homepage",
   "directus_users",
   "directus_files",
   "directus_folders",
@@ -136,6 +137,9 @@ export const POLICIES: PolicyDef[] = [
       read("notification_settings"),
       // Administrator-managed event categories (deactivate instead of delete).
       ...crud("event_categories"),
+      // Home page banner (singleton: no create/delete).
+      read("homepage"),
+      write("homepage", "update"),
       // CMS (spec §3.3: articles and navigation are managed in Directus Studio).
       ...STUDIO_CONTENT_COLLECTIONS.flatMap((c) => crud(c, true)),
       write("directus_files", "create"),
@@ -172,6 +176,7 @@ export const POLICIES: PolicyDef[] = [
       ...crud("event_removal_requests"),
       read("event_categories"),
       ...STUDIO_CONTENT_COLLECTIONS.map((c) => read(c)),
+      read("homepage"),
       // Registration via invitation creates/activates accounts (role is set by Fastify).
       read("directus_users"),
       {

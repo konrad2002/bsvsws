@@ -8,6 +8,7 @@
  *   - images/files under /images/ → Directus files ("Öffentliche Medien" for news,
  *                                    "Seitendokumente" for pages)
  *   - legacy URLs that changed (events, list pagination) → `redirects`
+ *   - photo of the home banner → `homepage.hero_image` (only if none is set)
  *
  * Default is a dry run that only prints the plan/report. `--apply` writes.
  * Idempotent: existing articles (slug), events (title + start date), pages with real
@@ -23,6 +24,8 @@ import {
   createItems,
   readFiles,
   readItems,
+  readSingleton,
+  updateSingleton,
   updateItem,
   uploadFiles,
 } from "@directus/sdk";
@@ -37,6 +40,7 @@ import {
   isCrawlable,
   parseArticle,
   parseEvent,
+  parseHomeBanner,
   parsePage,
   rewriteHtml,
   type PageKind,
@@ -464,6 +468,35 @@ async function main() {
         from: c.path,
         note: "no counterpart – add a page or redirect",
       });
+    }
+  }
+
+  // --- Home banner photo -----------------------------------------------------------
+  const home = crawled.find((c) => c.path === "/" && c.html);
+  const banner = home ? parseHomeBanner(home.html, BASE) : null;
+  if (banner) {
+    const row = (await client.request(readSingleton("homepage", { fields: ["hero_image"] }))) as {
+      hero_image: string | null;
+    } | null;
+    if (row?.hero_image) {
+      plan.push({
+        kind: "banner",
+        action: "skip",
+        from: banner.imagePath,
+        note: "banner image already set",
+      });
+    } else {
+      plan.push({
+        kind: "banner",
+        action: "update",
+        from: banner.imagePath,
+        to: "Startseite → Bild",
+      });
+      plannedFiles.add(banner.imagePath);
+      if (APPLY) {
+        const id = await uploadAsset(banner.imagePath, DIRECTUS_FOLDER_IDS.publicMedia, assets);
+        if (id) await client.request(updateSingleton("homepage", { hero_image: id } as never));
+      }
     }
   }
 

@@ -31,7 +31,7 @@ export function LoginForm({ next, defaultEmail }: { next: string; defaultEmail?:
         />
       </label>
       {state.error && (
-        <p role="alert" className="text-sm text-red-700">
+        <p role="alert" className="text-sm text-destructive">
           {state.error}
         </p>
       )}

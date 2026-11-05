@@ -15,9 +15,9 @@ export default async function SettingsPage() {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-1">
-        <h1 className="text-2xl font-semibold">Einstellungen</h1>
+        <h1>Einstellungen</h1>
         {settings.updatedAt && (
-          <p className="text-sm text-neutral-600">
+          <p className="text-sm text-muted-foreground">
             Zuletzt geändert: {formatDateTime(settings.updatedAt)}
           </p>
         )}

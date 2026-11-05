@@ -67,7 +67,11 @@ test("news published in Directus appears on home, list, category and detail page
   await expect(page.getByRole("link", { name: `Bezirksmeister gekürt ${run}` })).toBeVisible();
 
   await page.goto("/news");
-  await page.getByRole("link", { name: `Bezirksmeister gekürt ${run}` }).click();
+  // the list uses h2, the "Neuigkeiten" sidebar h3 with the same title
+  await page
+    .getByRole("heading", { level: 2, name: `Bezirksmeister gekürt ${run}` })
+    .getByRole("link")
+    .click();
   await expect(page).toHaveURL(new RegExp(`/news/bezirksmeister-${run}$`));
   await expect(page.getByRole("heading", { name: "Ergebnisse" })).toBeVisible();
   expect(await page.locator(".rich-content").innerHTML()).not.toContain("script");

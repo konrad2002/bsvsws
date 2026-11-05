@@ -1,3 +1,4 @@
+import { Alert } from "@bsv-sws/ui/components/form";
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { safeRedirectPath } from "@/lib/safe-redirect";
@@ -8,7 +9,7 @@ export const metadata: Metadata = { title: "Anmelden" };
 export default function LoginPage({ searchParams }: PageProps<"/login">) {
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-2xl font-semibold">Anmelden</h1>
+      <h1>Anmelden</h1>
       <p className="max-w-prose text-sm">
         Der interne Bereich ist Vereinen und dem Verband vorbehalten. Ein Zugang ist nur über eine
         Einladung möglich.
@@ -30,12 +31,9 @@ async function LoginFormWithTarget({ searchParams }: Pick<PageProps<"/login">, "
   return (
     <div className="flex flex-col gap-4">
       {registered && (
-        <p
-          role="status"
-          className="max-w-sm rounded-md border border-green-300 bg-green-50 px-3 py-2 text-sm text-green-800"
-        >
+        <Alert variant="success" className="max-w-sm">
           Dein Konto ist bestätigt und du bist dem Verein beigetreten. Bitte melde dich jetzt an.
-        </p>
+        </Alert>
       )}
       <LoginForm
         next={safeRedirectPath(first(params.next))}

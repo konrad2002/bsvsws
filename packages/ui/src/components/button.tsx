@@ -2,20 +2,17 @@ import { cva, type VariantProps } from "class-variance-authority";
 import type { ComponentProps } from "react";
 import { cn } from "../lib/utils";
 
-/**
- * Button (shadcn/ui pattern). Neutral styling only – colors follow the
- * project owner's design direction later (spec §9.5).
- */
+/** Button (shadcn/ui pattern). Colours come from the theme tokens (styles/theme.css). */
 export const buttonVariants = cva(
   "inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 disabled:pointer-events-none disabled:opacity-50",
   {
     variants: {
       variant: {
-        default: "bg-neutral-900 text-white hover:bg-neutral-700",
-        outline: "border border-neutral-300 bg-white hover:bg-neutral-100",
-        destructive: "bg-red-700 text-white hover:bg-red-600",
-        ghost: "hover:bg-neutral-100",
-        link: "underline underline-offset-4 hover:no-underline",
+        default: "bg-primary text-primary-foreground hover:bg-primary-hover",
+        outline: "border border-input bg-background text-foreground hover:bg-muted",
+        destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90",
+        ghost: "hover:bg-muted",
+        link: "text-link underline underline-offset-4 hover:text-link-hover hover:no-underline",
       },
       size: {
         default: "h-9 px-4 py-2",

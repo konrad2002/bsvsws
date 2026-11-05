@@ -191,6 +191,14 @@ its path (a child is never more visible than its parent).
 (`page` \| `article` \| `route` \| `url` \| `none`), `page`, `article`, `route`, `url`,
 `visibility`, `open_in_new_tab`, `active`, `sort`.
 
+### `homepage` (singleton, Studio: Inhalte → Startseite)
+
+Home banner: `hero_enabled` (default true), `hero_kicker`, `hero_title`, `hero_image` (M2O
+`directus_files`, upload folder "Öffentliche Medien"; served publicly wherever it lies),
+`hero_button_label` + `hero_button_url` (optional; empty → button to the next upcoming event;
+only internal paths or http(s) URLs are used), `date_updated`. The row is created by
+`directus:apply`; the migration sets the photo of the old banner if none is set.
+
 ### `redirects`
 
 `from_path` (**unique**, may include a query), `to_path`, `permanent`, `active`, `note`.

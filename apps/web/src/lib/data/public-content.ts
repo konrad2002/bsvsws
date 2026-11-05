@@ -3,6 +3,7 @@ import {
   articleCategorySchema,
   articleDetailSchema,
   articlePageSchema,
+  homeSchema,
   navigationSchema,
   pageSchema,
   publicClubDetailSchema,
@@ -14,6 +15,11 @@ import { publicJson } from "../public-api";
 
 export async function getNavigation() {
   return navigationSchema.parse(await publicJson("/public/navigation"));
+}
+
+/** Home banner (Studio: Inhalte → Startseite). */
+export async function getHome() {
+  return homeSchema.parse(await publicJson("/public/home"));
 }
 
 /** null = no visible page at this path. */

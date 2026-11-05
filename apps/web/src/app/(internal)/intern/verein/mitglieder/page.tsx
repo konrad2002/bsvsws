@@ -17,7 +17,7 @@ export default async function ClubMembersPage() {
 
   return (
     <div className="flex flex-col gap-8">
-      <h1 className="text-2xl font-semibold">Mitglieder – {user.membership.club.name}</h1>
+      <h1>Mitglieder – {user.membership.club.name}</h1>
       <Section title="Mitglieder">
         <MembersTable members={members} currentUserId={user.id} isFederation={false} />
       </Section>

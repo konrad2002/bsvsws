@@ -18,7 +18,7 @@ export function SettingsForm({ settings }: { settings: AppSettings }) {
     <form action={formAction} className="flex max-w-2xl flex-col gap-6">
       <fieldset className="flex flex-col gap-4">
         <legend className="mb-2 text-lg font-semibold">E-Mail-Benachrichtigungen</legend>
-        <p className="text-sm text-neutral-700">
+        <p className="text-sm text-muted-foreground">
           Eine Adresse pro Zeile. Wer hier eingetragen ist, erhält nur E-Mails – aber{" "}
           <strong>keine zusätzlichen Rechte</strong>. Prüfen kann weiterhin nur, wer ein
           Verbandskonto hat.

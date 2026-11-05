@@ -47,7 +47,7 @@ export default async function AccountsPage({
 
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-2xl font-semibold">Benutzerkonten</h1>
+      <h1>Benutzerkonten</h1>
       <form className="flex flex-wrap items-end gap-3" role="search">
         <label className="flex flex-col gap-1 text-sm">
           Suche (Name oder E-Mail)
@@ -68,35 +68,35 @@ export default async function AccountsPage({
         </Button>
       </form>
 
-      <p className="text-sm text-neutral-700">
+      <p className="text-sm text-muted-foreground">
         {result.total} {result.total === 1 ? "Konto" : "Konten"}. Rollen und Mitgliedschaften
         änderst du auf der Seite des Vereins.
       </p>
-      <div className="overflow-x-auto rounded border">
-        <table className="w-full text-left text-sm">
-          <thead className="bg-neutral-50">
+      <div className="overflow-x-auto">
+        <table className="data-table text-sm">
+          <thead>
             <tr>
-              <th className="px-3 py-2 font-medium">Name</th>
-              <th className="px-3 py-2 font-medium">E-Mail</th>
-              <th className="px-3 py-2 font-medium">Stufe</th>
-              <th className="px-3 py-2 font-medium">Verein</th>
-              <th className="px-3 py-2 font-medium">Letzte Anmeldung</th>
+              <th>Name</th>
+              <th>E-Mail</th>
+              <th>Stufe</th>
+              <th>Verein</th>
+              <th>Letzte Anmeldung</th>
             </tr>
           </thead>
-          <tbody className="divide-y">
+          <tbody>
             {result.items.map((a) => (
               <tr key={a.id}>
-                <td className="px-3 py-2">
+                <td>
                   {[a.firstName, a.lastName].filter(Boolean).join(" ") || "–"}
                   {STATUS_LABELS[a.status] && (
                     <Badge className="ml-2">{STATUS_LABELS[a.status]}</Badge>
                   )}
                 </td>
-                <td className="px-3 py-2">{a.email ?? "–"}</td>
-                <td className="px-3 py-2">{levelLabel(a)}</td>
-                <td className="px-3 py-2">
+                <td>{a.email ?? "–"}</td>
+                <td>{levelLabel(a)}</td>
+                <td>
                   {a.club ? (
-                    <Link href={`/intern/verband/vereine/${a.club.id}`} className="hover:underline">
+                    <Link href={`/intern/verband/vereine/${a.club.id}`} className="link">
                       {a.club.name}
                       {a.membershipRole && ` (${MEMBERSHIP_ROLE_LABELS[a.membershipRole]})`}
                     </Link>
@@ -104,12 +104,12 @@ export default async function AccountsPage({
                     "–"
                   )}
                 </td>
-                <td className="px-3 py-2 whitespace-nowrap">{formatDateTime(a.lastAccess)}</td>
+                <td className="whitespace-nowrap">{formatDateTime(a.lastAccess)}</td>
               </tr>
             ))}
             {result.items.length === 0 && (
               <tr>
-                <td colSpan={5} className="px-3 py-2 text-neutral-600">
+                <td colSpan={5} className="px-3 py-2 text-muted-foreground">
                   Keine Konten gefunden.
                 </td>
               </tr>

@@ -189,7 +189,7 @@ export function EventForm({
           </Field>
         </div>
         {locked.has("startDate") && (
-          <p className="text-xs text-neutral-600">
+          <p className="text-xs text-muted-foreground">
             Die Kalenderdaten sind nach der Veröffentlichung gesperrt; Uhrzeiten können geändert
             werden.
           </p>

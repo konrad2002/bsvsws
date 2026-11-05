@@ -16,7 +16,7 @@ export default async function MyClubPage() {
 
   return (
     <div className="flex flex-col gap-8">
-      <h1 className="text-2xl font-semibold">{club.name}</h1>
+      <h1>{club.name}</h1>
       {isRep ? (
         <>
           <Section title="Logo">

@@ -29,13 +29,13 @@ function Changes({ entry }: { entry: AuditLogEntry }) {
   if (!hasChanges && !entry.context) return null;
   return (
     <details className="mt-1 text-xs">
-      <summary className="cursor-pointer text-neutral-600">Details</summary>
+      <summary className="cursor-pointer text-muted-foreground">Details</summary>
       <dl className="mt-1 grid gap-1">
         {entry.changes?.before !== undefined && (
           <>
             <dt className="font-medium">Vorher</dt>
             <dd>
-              <pre className="overflow-x-auto rounded bg-neutral-50 p-2 whitespace-pre-wrap">
+              <pre className="overflow-x-auto rounded bg-muted p-2 whitespace-pre-wrap">
                 {JSON.stringify(entry.changes.before, null, 2)}
               </pre>
             </dd>
@@ -45,7 +45,7 @@ function Changes({ entry }: { entry: AuditLogEntry }) {
           <>
             <dt className="font-medium">Nachher</dt>
             <dd>
-              <pre className="overflow-x-auto rounded bg-neutral-50 p-2 whitespace-pre-wrap">
+              <pre className="overflow-x-auto rounded bg-muted p-2 whitespace-pre-wrap">
                 {JSON.stringify(entry.changes.after, null, 2)}
               </pre>
             </dd>
@@ -55,7 +55,7 @@ function Changes({ entry }: { entry: AuditLogEntry }) {
           <>
             <dt className="font-medium">Kontext</dt>
             <dd>
-              <pre className="overflow-x-auto rounded bg-neutral-50 p-2 whitespace-pre-wrap">
+              <pre className="overflow-x-auto rounded bg-muted p-2 whitespace-pre-wrap">
                 {JSON.stringify(entry.context, null, 2)}
               </pre>
             </dd>
@@ -80,7 +80,7 @@ export default async function AuditLogPage({
 
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-2xl font-semibold">Protokoll</h1>
+      <h1>Protokoll</h1>
       <form className="flex flex-wrap items-end gap-3">
         <label className="flex flex-col gap-1 text-sm">
           Bereich
@@ -109,7 +109,7 @@ export default async function AuditLogPage({
         </Button>
       </form>
 
-      <p className="text-sm text-neutral-700">{log.total} Einträge</p>
+      <p className="text-sm text-muted-foreground">{log.total} Einträge</p>
       <ol className="flex flex-col divide-y rounded border">
         {log.items.map((e) => {
           const href = entityHref(e);
@@ -118,28 +118,28 @@ export default async function AuditLogPage({
               <div className="flex flex-wrap items-baseline justify-between gap-2">
                 <span className="font-medium">
                   {href ? (
-                    <Link href={href} className="hover:underline">
+                    <Link href={href} className="link">
                       {auditActionLabel(e.action)}
                     </Link>
                   ) : (
                     auditActionLabel(e.action)
                   )}
                 </span>
-                <time className="text-xs text-neutral-600" dateTime={e.timestamp ?? undefined}>
+                <time className="text-xs text-muted-foreground" dateTime={e.timestamp ?? undefined}>
                   {formatDateTime(e.timestamp)}
                 </time>
               </div>
-              <span className="text-neutral-700">
+              <span className="text-muted-foreground">
                 {e.actor?.name ?? "System"}
                 {e.club && ` · ${e.club.name}`}
               </span>
-              {e.comment && <span className="text-neutral-700">„{e.comment}“</span>}
+              {e.comment && <span className="text-muted-foreground">„{e.comment}“</span>}
               <Changes entry={e} />
             </li>
           );
         })}
         {log.items.length === 0 && (
-          <li className="px-3 py-2 text-sm text-neutral-600">Keine Einträge.</li>
+          <li className="px-3 py-2 text-sm text-muted-foreground">Keine Einträge.</li>
         )}
       </ol>
       <Pagination

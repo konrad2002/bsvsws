@@ -29,11 +29,7 @@ export function Pagination({
   return (
     <nav aria-label="Seiten" className="flex flex-wrap items-center gap-2 text-sm">
       {page > 1 && (
-        <Link
-          href={href(page - 1)}
-          className="rounded border px-2 py-1 hover:bg-neutral-100"
-          rel="prev"
-        >
+        <Link href={href(page - 1)} className="rounded border px-2 py-1 hover:bg-muted" rel="prev">
           {labels.prev}
         </Link>
       )}
@@ -42,17 +38,13 @@ export function Pagination({
           key={p}
           href={href(p)}
           aria-current={p === page ? "page" : undefined}
-          className={`rounded border px-2 py-1 ${p === page ? "bg-neutral-900 text-white" : "hover:bg-neutral-100"}`}
+          className={`rounded border px-2 py-1 ${p === page ? "bg-primary text-primary-foreground" : "hover:bg-muted"}`}
         >
           {p}
         </Link>
       ))}
       {page < pageCount && (
-        <Link
-          href={href(page + 1)}
-          className="rounded border px-2 py-1 hover:bg-neutral-100"
-          rel="next"
-        >
+        <Link href={href(page + 1)} className="rounded border px-2 py-1 hover:bg-muted" rel="next">
           {labels.next}
         </Link>
       )}

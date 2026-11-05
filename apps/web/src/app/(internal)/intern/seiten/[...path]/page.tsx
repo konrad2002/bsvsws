@@ -32,11 +32,11 @@ export default async function InternalCmsPage({ params }: PageProps<"/intern/sei
   return (
     <article className="flex max-w-3xl flex-col gap-4">
       {page.breadcrumbs.length > 0 && (
-        <nav aria-label="Brotkrumen" className="text-sm text-neutral-600">
+        <nav aria-label="Brotkrumen" className="text-sm text-muted-foreground">
           <ol className="flex flex-wrap gap-1">
             {page.breadcrumbs.map((b) => (
               <li key={b.href} className="after:ml-1 after:content-['›']">
-                <Link href={b.href} className="hover:underline">
+                <Link href={b.href} className="link">
                   {b.title}
                 </Link>
               </li>
@@ -44,14 +44,14 @@ export default async function InternalCmsPage({ params }: PageProps<"/intern/sei
           </ol>
         </nav>
       )}
-      <h1 className="text-2xl font-semibold">{page.title}</h1>
+      <h1>{page.title}</h1>
       <RichContent html={page.contentHtml} />
       {page.children.length > 0 && (
         <nav aria-label="Unterseiten" className="mt-4">
           <ul className="grid gap-2 sm:grid-cols-2">
             {page.children.map((c) => (
               <li key={c.href}>
-                <Link href={c.href} className="block rounded border px-3 py-2 hover:bg-neutral-50">
+                <Link href={c.href} className="block rounded border px-3 py-2 hover:bg-muted">
                   {c.title}
                 </Link>
               </li>

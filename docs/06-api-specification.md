@@ -99,15 +99,16 @@ or personal data). Rate limit per client IP.
 
 ## Public content (no authentication, Phase 5)
 
-| Method & path                                  | Response                                                      | Notes                                                 |
-| ---------------------------------------------- | ------------------------------------------------------------- | ----------------------------------------------------- |
-| `GET /public/navigation`                       | `{ main: NavItem[], footer: NavItem[] }`                      | visible tree for visitors                             |
-| `GET /public/pages?path=/verband/vorstand`     | `PublicPage` (sanitized `contentHtml`, breadcrumbs, children) | `404` if missing/unpublished/not public               |
-| `GET /public/articles?category&page&pageSize`  | `{ items, page, pageCount, total }`                           | published and due only, newest first, `pageSize ≤ 50` |
-| `GET /public/articles/:slug`                   | `ArticleDetail`                                               | `404` for drafts, archived, scheduled                 |
-| `GET /public/article-categories`               | `{ name, slug }[]`                                            | active only                                           |
-| `GET /public/clubs`, `GET /public/clubs/:slug` | `PublicClub[]`, `PublicClubDetail`                            | active clubs only                                     |
-| `GET /public/redirects?path&query`             | `{ to, permanent }`                                           | `404` if none                                         |
+| Method & path                                  | Response                                                                                  | Notes                                                                              |
+| ---------------------------------------------- | ----------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| `GET /public/navigation`                       | `{ main: NavItem[], footer: NavItem[] }`                                                  | visible tree for visitors                                                          |
+| `GET /public/pages?path=/verband/vorstand`     | `PublicPage` (sanitized `contentHtml`, breadcrumbs, children)                             | `404` if missing/unpublished/not public                                            |
+| `GET /public/articles?category&page&pageSize`  | `{ items, page, pageCount, total }`                                                       | published and due only, newest first, `pageSize ≤ 50`                              |
+| `GET /public/articles/:slug`                   | `ArticleDetail`                                                                           | `404` for drafts, archived, scheduled                                              |
+| `GET /public/article-categories`               | `{ name, slug }[]`                                                                        | active only                                                                        |
+| `GET /public/clubs`, `GET /public/clubs/:slug` | `PublicClub[]`, `PublicClubDetail`                                                        | active clubs only                                                                  |
+| `GET /public/home`                             | `{ hero: { kicker, title, imageId, button: { label, href, external } \| null } \| null }` | banner (Studio singleton); button: custom target if safe, else next upcoming event |
+| `GET /public/redirects?path&query`             | `{ to, permanent }`                                                                       | `404` if none                                                                      |
 
 ## Internal content and files (Phase 6)
 

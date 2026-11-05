@@ -36,26 +36,27 @@ const FIELD_LABELS: Record<string, string> = {
 
 /** Review history (spec §7.8/§19.4), read from the audit log. */
 export function EventHistory({ entries }: { entries: EventHistoryEntry[] }) {
-  if (entries.length === 0) return <p className="text-sm text-neutral-600">Noch keine Einträge.</p>;
+  if (entries.length === 0)
+    return <p className="text-sm text-muted-foreground">Noch keine Einträge.</p>;
   return (
     <ol className="flex flex-col gap-3 border-l pl-4">
       {entries.map((e) => (
         <li key={e.id} className="text-sm">
           <div>
             <strong>{ACTION_LABELS[e.action] ?? e.action}</strong>
-            <span className="text-neutral-600">
+            <span className="text-muted-foreground">
               {" "}
               · {formatDateTime(e.at)}
               {e.actorName ? ` · ${e.actorName}` : ""}
             </span>
           </div>
           {e.changedFields.length > 0 && (
-            <div className="text-neutral-600">
+            <div className="text-muted-foreground">
               Geändert: {e.changedFields.map((f) => FIELD_LABELS[f] ?? f).join(", ")}
             </div>
           )}
           {e.comment && (
-            <p className="mt-1 whitespace-pre-line rounded bg-neutral-50 px-2 py-1">{e.comment}</p>
+            <p className="mt-1 whitespace-pre-line rounded bg-muted px-2 py-1">{e.comment}</p>
           )}
         </li>
       ))}

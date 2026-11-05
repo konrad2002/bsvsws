@@ -25,7 +25,7 @@ export default async function NewsCategoryPage({
   if (!category) notFound();
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-2xl font-semibold">News: {category.name}</h1>
+      <h1>News: {category.name}</h1>
       <NewsList category={category.slug} page={parsePage(seite)} />
     </div>
   );

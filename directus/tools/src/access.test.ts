@@ -30,6 +30,7 @@ describe("access configuration", () => {
     // notification_settings: only the app writes it (Phase 7 settings page, audited).
     const studioWritable = new Set([
       "event_categories",
+      "homepage",
       "directus_files",
       ...STUDIO_CONTENT_COLLECTIONS,
     ]);

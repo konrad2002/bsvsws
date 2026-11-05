@@ -15,19 +15,19 @@ export default async function FederationClubsPage() {
 
   return (
     <div className="flex flex-col gap-8">
-      <h1 className="text-2xl font-semibold">Vereine verwalten</h1>
+      <h1>Vereine verwalten</h1>
       <Section title={`Vereine (${clubs.length})`}>
         <ul className="flex flex-col divide-y rounded border">
           {clubs.map((club) => (
             <li key={club.id} className="flex items-center justify-between gap-4 px-3 py-2">
-              <Link href={`/intern/verband/vereine/${club.id}`} className="hover:underline">
+              <Link href={`/intern/verband/vereine/${club.id}`} className="link">
                 {club.name}
               </Link>
               {!club.active && <Badge>inaktiv</Badge>}
             </li>
           ))}
           {clubs.length === 0 && (
-            <li className="px-3 py-2 text-sm text-neutral-600">Noch keine Vereine.</li>
+            <li className="px-3 py-2 text-sm text-muted-foreground">Noch keine Vereine.</li>
           )}
         </ul>
       </Section>

@@ -2,7 +2,7 @@ import type { ComponentProps, ReactNode } from "react";
 import { cn } from "../lib/utils";
 
 const control =
-  "w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm focus-visible:outline-2 focus-visible:outline-offset-1 aria-[invalid=true]:border-red-700 disabled:opacity-50";
+  "w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground focus-visible:outline-2 focus-visible:outline-offset-1 aria-[invalid=true]:border-destructive disabled:opacity-50";
 
 export function Input({ className, ...props }: ComponentProps<"input">) {
   return <input className={cn(control, className)} {...props} />;
@@ -41,9 +41,9 @@ export function Field({
     <div className={cn("flex flex-col gap-1", className)}>
       <Label htmlFor={htmlFor}>{label}</Label>
       {children}
-      {hint && !message && <p className="text-xs text-neutral-600">{hint}</p>}
+      {hint && !message && <p className="text-xs text-muted-foreground">{hint}</p>}
       {message && (
-        <p id={`${htmlFor}-error`} className="text-xs text-red-700">
+        <p id={`${htmlFor}-error`} className="text-xs text-destructive">
           {message}
         </p>
       )}
@@ -61,9 +61,9 @@ export function Alert({
       role={variant === "error" ? "alert" : "status"}
       className={cn(
         "rounded-md border px-3 py-2 text-sm",
-        variant === "error" && "border-red-300 bg-red-50 text-red-800",
-        variant === "success" && "border-green-300 bg-green-50 text-green-800",
-        variant === "info" && "border-neutral-300 bg-neutral-50",
+        variant === "error" && "border-destructive/40 bg-destructive/5 text-destructive",
+        variant === "success" && "border-success/40 bg-success/5 text-success",
+        variant === "info" && "border-border bg-background",
         className,
       )}
       {...props}
@@ -75,7 +75,7 @@ export function Badge({ className, ...props }: ComponentProps<"span">) {
   return (
     <span
       className={cn(
-        "inline-flex items-center rounded border border-neutral-300 px-1.5 py-0.5 text-xs",
+        "inline-flex items-center rounded border border-border px-1.5 py-0.5 text-xs",
         className,
       )}
       {...props}

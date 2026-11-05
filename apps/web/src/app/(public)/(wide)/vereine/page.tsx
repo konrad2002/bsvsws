@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 export default function ClubsPage() {
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-2xl font-semibold">Vereine</h1>
+      <h1>Vereine</h1>
       <Suspense fallback={<p>Vereine werden geladen …</p>}>
         <ClubList />
       </Suspense>
@@ -22,7 +22,7 @@ export default function ClubsPage() {
 
 async function ClubList() {
   const clubs = await listClubs();
-  if (clubs.length === 0) return <p className="text-sm text-neutral-600">Keine Vereine.</p>;
+  if (clubs.length === 0) return <p className="text-sm text-muted-foreground">Keine Vereine.</p>;
   return (
     <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {clubs.map((club) => (
@@ -36,13 +36,13 @@ async function ClubList() {
               loading="lazy"
             />
           ) : (
-            <span className="h-12 w-12 shrink-0 rounded bg-neutral-100" aria-hidden />
+            <span className="h-12 w-12 shrink-0 rounded bg-muted" aria-hidden />
           )}
           <div className="flex flex-col">
-            <Link href={`/vereine/${club.slug}`} className="font-medium hover:underline">
+            <Link href={`/vereine/${club.slug}`} className="font-medium link">
               {club.name}
             </Link>
-            <span className="text-xs text-neutral-600">
+            <span className="text-xs text-muted-foreground">
               {[club.city, club.sports.map((s) => EVENT_CALENDAR_LABELS[s]).join(", ")]
                 .filter(Boolean)
                 .join(" · ")}

@@ -28,7 +28,7 @@ export function YearView({
             aria-labelledby={`m-${key}`}
             className="flex flex-col gap-2 rounded border p-3"
           >
-            <h2 id={`m-${key}`} className="font-semibold">
+            <h2 id={`m-${key}`} className="text-base">
               <Link
                 href={calendarHref(params, { ansicht: "monat", monat: key })}
                 className="hover:underline"
@@ -37,15 +37,15 @@ export function YearView({
               </Link>
             </h2>
             {inMonth.length === 0 ? (
-              <p className="text-xs text-neutral-500">Keine Veranstaltungen</p>
+              <p className="text-xs text-muted-foreground">Keine Veranstaltungen</p>
             ) : (
               <ul className="flex flex-col gap-1">
                 {inMonth.map((e) => (
                   <li key={e.slug} className="text-sm">
-                    <span className="text-neutral-600">
+                    <span className="text-muted-foreground">
                       {formatDateRange(e.startDate, e.endDate)}
                     </span>{" "}
-                    <Link href={`/veranstaltungen/${e.slug}`} className="hover:underline">
+                    <Link href={`/veranstaltungen/${e.slug}`} className="link">
                       {e.title}
                     </Link>
                   </li>

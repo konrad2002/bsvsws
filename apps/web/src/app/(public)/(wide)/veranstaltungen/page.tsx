@@ -33,7 +33,7 @@ export const metadata: Metadata = {
 export default function EventsPage({ searchParams }: PageProps<"/veranstaltungen">) {
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-2xl font-semibold">Veranstaltungen</h1>
+      <h1>Veranstaltungen</h1>
       <Suspense fallback={<p>Veranstaltungen werden geladen …</p>}>
         <Calendar searchParams={searchParams} />
       </Suspense>
@@ -103,10 +103,10 @@ async function Calendar({ searchParams }: Pick<PageProps<"/veranstaltungen">, "s
     });
     content = (
       <>
-        <Link href={calendarHref(params, { zeitraum: undefined })} className="text-sm underline">
+        <Link href={calendarHref(params, { zeitraum: undefined })} className="text-sm link">
           ← Kommende Veranstaltungen
         </Link>
-        <h2 className="text-lg font-semibold">Vergangene Veranstaltungen (letzte 12 Monate)</h2>
+        <h2>Vergangene Veranstaltungen (letzte 12 Monate)</h2>
         <EventList events={[...events].reverse()} empty="Keine vergangenen Veranstaltungen." />
       </>
     );
@@ -115,7 +115,7 @@ async function Calendar({ searchParams }: Pick<PageProps<"/veranstaltungen">, "s
     content = (
       <>
         <EventList events={events} empty="Keine kommenden Veranstaltungen gefunden." />
-        <Link href={calendarHref(params, { zeitraum: "vergangen" })} className="text-sm underline">
+        <Link href={calendarHref(params, { zeitraum: "vergangen" })} className="text-sm link">
           Vergangene Veranstaltungen
         </Link>
       </>
@@ -130,7 +130,7 @@ async function Calendar({ searchParams }: Pick<PageProps<"/veranstaltungen">, "s
             key={v.key}
             href={calendarHref(params, { ansicht: v.key } as Partial<CalendarParams>)}
             aria-current={params.ansicht === v.key ? "page" : undefined}
-            className={`rounded border px-3 py-1 text-sm ${params.ansicht === v.key ? "bg-neutral-900 text-white" : "hover:bg-neutral-100"}`}
+            className={`rounded border px-3 py-1 text-sm ${params.ansicht === v.key ? "bg-primary text-primary-foreground" : "hover:bg-muted"}`}
           >
             {v.label}
           </Link>
@@ -159,20 +159,20 @@ function Pager({
     <div className="flex items-center gap-3">
       <Link
         href={prev}
-        className="rounded border px-2 py-1 text-sm hover:bg-neutral-100"
+        className="rounded border px-2 py-1 text-sm hover:bg-muted"
         aria-label="Zurück"
       >
         ←
       </Link>
-      <h2 className="min-w-40 text-center text-lg font-semibold">{title}</h2>
+      <h2 className="min-w-40 text-center">{title}</h2>
       <Link
         href={next}
-        className="rounded border px-2 py-1 text-sm hover:bg-neutral-100"
+        className="rounded border px-2 py-1 text-sm hover:bg-muted"
         aria-label="Weiter"
       >
         →
       </Link>
-      <Link href={current} className="text-sm underline">
+      <Link href={current} className="text-sm link">
         Heute
       </Link>
     </div>

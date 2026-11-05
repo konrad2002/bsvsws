@@ -24,14 +24,14 @@ export function EventFiles({ event, editable }: { event: EventDetail; editable: 
   return (
     <div className="flex flex-col gap-3">
       {event.files.length === 0 ? (
-        <p className="text-sm text-neutral-600">Keine Dateien.</p>
+        <p className="text-sm text-muted-foreground">Keine Dateien.</p>
       ) : (
         <ul className="flex flex-col divide-y rounded border">
           {event.files.map((f) => (
             <li key={f.id} className="flex items-center justify-between gap-3 px-3 py-2 text-sm">
-              <a href={`/api/events/${event.id}/files/${f.id}`} className="hover:underline">
+              <a href={`/api/events/${event.id}/files/${f.id}`} className="link">
                 {f.description}
-                <span className="ml-2 text-neutral-500">
+                <span className="ml-2 text-muted-foreground">
                   {f.filename} {formatFileSize(f.size)}
                 </span>
               </a>
@@ -111,7 +111,7 @@ function ImageSlot({
           className="h-32 w-auto max-w-full rounded border object-contain"
         />
       ) : (
-        <p className="text-sm text-neutral-600">Nicht hinterlegt.</p>
+        <p className="text-sm text-muted-foreground">Nicht hinterlegt.</p>
       )}
       {editable && (
         <form action={action} className="flex flex-wrap items-end gap-2">

@@ -77,19 +77,19 @@ export default async function EventPage({
   return (
     <div className="flex flex-col gap-8">
       <div className="flex flex-col gap-2">
-        <Link href="/intern/veranstaltungen" className="text-sm hover:underline">
+        <Link href="/intern/veranstaltungen" className="text-sm link">
           ← Alle Veranstaltungen
         </Link>
         <div className="flex flex-wrap items-center gap-3">
-          <h1 className="text-2xl font-semibold">{event.title}</h1>
+          <h1>{event.title}</h1>
           <EventStatusBadge status={event.status} deleted={event.deleted} />
         </div>
-        <p className="text-sm text-neutral-700">
+        <p className="text-sm text-muted-foreground">
           {formatDateRange(event.startDate, event.endDate)} · {event.club?.name ?? "Verband"}
           {event.submittedAt ? ` · eingereicht ${formatDateTime(event.submittedAt)}` : ""}
         </p>
         {event.status === "published" && event.slug && !event.deleted && (
-          <Link href={`/veranstaltungen/${event.slug}`} className="text-sm underline">
+          <Link href={`/veranstaltungen/${event.slug}`} className="text-sm link">
             Öffentliche Seite ansehen
           </Link>
         )}

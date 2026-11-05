@@ -65,6 +65,14 @@ internen Bereich (unter den festen Einträgen wie Veranstaltungen). Über _Sicht
 und an der Zielseite lässt sich steuern, wer den Eintrag sieht. Einträge mit nicht veröffentlichtem
 Ziel werden automatisch ausgeblendet. Änderungen sind sofort sichtbar.
 
+## Startseite (Banner)
+
+**Inhalte → Startseite**: Banner oben auf der Startseite – Zeile über dem Titel, Titel, Bild
+(breites Foto, wird von links ins Dunkelblau überblendet) und optional ein Button. Ohne
+Button-Text/-Ziel führt der Button automatisch zur nächsten Veranstaltung. Als Ziel sind interne
+Pfade (`/veranstaltungen`) oder `https://…`-Adressen erlaubt. „Banner anzeigen“ blendet ihn aus.
+Der Text unter dem Banner ist die Seite **startseite**.
+
 ## Weiterleitungen
 
 **Inhalte → Weiterleitungen** für alte Adressen (z. B. aus Joomla):

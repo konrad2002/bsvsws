@@ -12,9 +12,7 @@ export function Section({ title, children }: { title: string; children: React.Re
   const id = `section-${title.toLowerCase().replace(/[^a-z0-9äöüß]+/g, "-")}`;
   return (
     <section aria-labelledby={id} className="flex flex-col gap-3">
-      <h2 id={id} className="text-lg font-semibold">
-        {title}
-      </h2>
+      <h2 id={id}>{title}</h2>
       {children}
     </section>
   );

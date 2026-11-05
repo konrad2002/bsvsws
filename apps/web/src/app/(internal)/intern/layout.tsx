@@ -1,51 +1,55 @@
 import { Suspense } from "react";
+import { InternalNav } from "@/components/internal/internal-nav";
+import { SiteHeader } from "@/components/layout/site-header";
 import { logoutAction } from "@/lib/auth/actions";
 import { requireUser } from "@/lib/auth/current-user";
-import { InternalNav } from "@/components/internal/internal-nav";
 
 /**
- * Internal area layout: public header + additional sub-navigation (spec §9.3).
- * The session check here is a convenience; every page/data access must call
- * requireUser() itself and Fastify authorizes every sensitive request.
+ * Internal area layout: the site header in its dark variant (owner decision) plus
+ * the internal sub-navigation (spec §9.3). The session check here is a
+ * convenience; every page/data access calls requireUser() itself and Fastify
+ * authorizes every sensitive request.
  */
 export default function InternalLayout({ children }: { children: React.ReactNode }) {
   return (
-    <>
-      <header className="flex items-center justify-between gap-4 border-b px-4 py-3">
-        <span className="font-semibold">Bezirksschwimmverband Südwestsachsen</span>
-        <Suspense>
-          <UserBadge />
-        </Suspense>
-      </header>
+    <div className="flex flex-1 flex-col">
+      <SiteHeader
+        className="theme-dark-header"
+        actions={
+          <Suspense>
+            <UserBadge />
+          </Suspense>
+        }
+      />
       <div className="flex flex-1 flex-col md:flex-row">
         <nav
           aria-label="Interne Navigation"
-          className="border-b p-4 md:w-56 md:border-r md:border-b-0"
+          className="border-b bg-background p-6 md:w-60 md:border-r md:border-b-0"
         >
           <Suspense>
             <InternalNav />
           </Suspense>
         </nav>
-        <main className="flex-1 px-4 py-6">
+        <main className="page-padding flex-1 bg-page text-page-foreground">
           <Suspense fallback={<p>Wird geladen …</p>}>{children}</Suspense>
         </main>
       </div>
-    </>
+    </div>
   );
 }
 
 async function UserBadge() {
   const user = await requireUser();
   return (
-    <div className="flex items-center gap-3 text-sm">
-      <span>
+    <>
+      <span className="hidden sm:inline">
         {user.firstName} {user.lastName}
       </span>
       <form action={logoutAction}>
-        <button type="submit" className="underline">
+        <button type="submit" className="underline-offset-4 hover:underline">
           Abmelden
         </button>
       </form>
-    </div>
+    </>
   );
 }

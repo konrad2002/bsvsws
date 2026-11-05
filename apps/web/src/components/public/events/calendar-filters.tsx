@@ -67,7 +67,7 @@ export function CalendarFilterForm({
             verein: undefined,
             kategorie: undefined,
           })}
-          className="pb-2 text-sm underline"
+          className="pb-2 text-sm link"
         >
           Zurücksetzen
         </Link>

@@ -224,18 +224,15 @@ async function ensureCategories(
 async function applyBaseData() {
   // Directus creates a singleton's row lazily on the first update – concurrent
   // first updates create several rows (verified). Create the one row up front.
-  const settings = (await client.request(readSingleton("notification_settings" as never))) as {
-    id?: number;
-  } | null;
-  if (!settings?.id) {
-    log("Base data: notification_settings row");
-    if (!dryRun)
-      await client.request(
-        updateSingleton(
-          "notification_settings" as never,
-          { representative_joined_recipients: null } as never,
-        ),
-      );
+  for (const [singleton, initial] of [
+    ["notification_settings", { representative_joined_recipients: null }],
+    ["homepage", { hero_enabled: true }],
+  ] as const) {
+    const row = (await client.request(readSingleton(singleton as never))) as { id?: number } | null;
+    if (!row?.id) {
+      log(`Base data: ${singleton} row`);
+      if (!dryRun) await client.request(updateSingleton(singleton as never, initial as never));
+    }
   }
 
   await ensureCategories("event_categories", BASE_EVENT_CATEGORIES);

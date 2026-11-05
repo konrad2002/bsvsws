@@ -27,19 +27,19 @@ export function MembersTable({
   const run = (fn: () => Promise<ActionState>) => start(async () => setResult(await fn()));
 
   if (members.length === 0)
-    return <p className="text-sm text-neutral-600">Noch keine Mitglieder.</p>;
+    return <p className="text-sm text-muted-foreground">Noch keine Mitglieder.</p>;
 
   return (
     <div className="flex flex-col gap-3">
       {result.error && <Alert variant="error">{result.error}</Alert>}
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[36rem] text-left text-sm">
-          <thead className="border-b">
+        <table className="data-table min-w-[36rem] text-sm">
+          <thead>
             <tr>
-              <th className="py-2 pr-4 font-medium">Name</th>
-              <th className="py-2 pr-4 font-medium">E-Mail</th>
-              <th className="py-2 pr-4 font-medium">Rolle</th>
-              <th className="py-2 font-medium">
+              <th>Name</th>
+              <th>E-Mail</th>
+              <th>Rolle</th>
+              <th>
                 <span className="sr-only">Aktionen</span>
               </th>
             </tr>
@@ -50,15 +50,15 @@ export function MembersTable({
               const canChange = isFederation || !self;
               const name = [m.firstName, m.lastName].filter(Boolean).join(" ") || "–";
               return (
-                <tr key={m.membershipId} className="border-b last:border-0">
-                  <td className="py-2 pr-4">
-                    {name} {self && <span className="text-neutral-500">(du)</span>}
+                <tr key={m.membershipId}>
+                  <td>
+                    {name} {self && <span className="text-muted-foreground">(du)</span>}
                   </td>
-                  <td className="py-2 pr-4">{m.email}</td>
-                  <td className="py-2 pr-4">
+                  <td>{m.email}</td>
+                  <td>
                     <Badge>{MEMBERSHIP_ROLE_LABELS[m.role]}</Badge>
                   </td>
-                  <td className="py-2">
+                  <td>
                     {canChange && (
                       <div className="flex flex-wrap justify-end gap-2">
                         {m.role === "member" ? (

@@ -31,7 +31,7 @@ export function LogoUpload({
           className="h-24 w-24 rounded border object-contain"
         />
       ) : (
-        <p className="text-sm text-neutral-600">Noch kein Logo hinterlegt.</p>
+        <p className="text-sm text-muted-foreground">Noch kein Logo hinterlegt.</p>
       )}
       <form action={action} className="flex flex-wrap items-end gap-3">
         <Field label="Logo hochladen" htmlFor="logo" hint="PNG, JPEG oder WebP, max. 2 MB.">

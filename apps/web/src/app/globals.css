@@ -4,7 +4,12 @@
 /* Include class names used by shared UI components. */
 @source "../../../../packages/ui/src";
 
-body {
-  background: #fff;
-  color: #171717;
+/*
+ * App-level layout utilities. Colours, typography and base element styles live in
+ * packages/ui/src/styles/theme.css – change them there.
+ */
+
+/* Spacing of the content area (old site: 40px gutters, 12px on phones). */
+@utility page-padding {
+  @apply px-3 py-8 sm:px-10;
 }

@@ -7,6 +7,7 @@ import {
   isCrawlable,
   parseArticle,
   parseEvent,
+  parseHomeBanner,
   parsePage,
   rewriteHtml,
   sitePath,
@@ -112,5 +113,12 @@ describe("Joomla parsers (saved pages of bsv-sws.de)", () => {
     expect(out).toBe(
       '<p><img src="/assets/abc"><a href="/neu/verband/satzung">S</a><a href="https://x.de">X</a></p>',
     );
+  });
+
+  it("finds the home banner photo", () => {
+    expect(parseHomeBanner(fixture("home"), BASE)).toEqual({
+      imagePath: "/images/bilder/Plauener_Herbst_Mehrkampf-285-scaled.jpg",
+    });
+    expect(parseHomeBanner(fixture("page"), BASE)).toBeNull();
   });
 });

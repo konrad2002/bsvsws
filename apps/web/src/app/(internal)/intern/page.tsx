@@ -28,8 +28,8 @@ export default async function InternalHomePage() {
   return (
     <div className="flex flex-col gap-8">
       <div className="flex flex-col gap-1">
-        <h1 className="text-2xl font-semibold">Hallo {user.firstName ?? user.email}</h1>
-        <p className="text-sm text-neutral-700">
+        <h1>Hallo {user.firstName ?? user.email}</h1>
+        <p className="text-sm text-muted-foreground">
           {USER_LEVEL_LABELS[user.level]}
           {user.membership
             ? ` · ${user.membership.club.name} (${MEMBERSHIP_ROLE_LABELS[user.membership.role]})`
@@ -79,13 +79,13 @@ function Task({
     <li>
       <Link
         href={href}
-        className="flex items-center justify-between gap-3 rounded border px-3 py-2 hover:bg-neutral-50"
+        className="flex items-center justify-between gap-3 rounded border px-3 py-2 hover:bg-muted"
       >
         <span className="text-sm">
           {label}
-          {hint && <span className="block text-xs text-neutral-600">{hint}</span>}
+          {hint && <span className="block text-xs text-muted-foreground">{hint}</span>}
         </span>
-        <Badge className={count > 0 ? "border-neutral-900 font-semibold" : ""}>{count}</Badge>
+        <Badge className={count > 0 ? "border-primary font-semibold" : ""}>{count}</Badge>
       </Link>
     </li>
   );
@@ -139,7 +139,7 @@ function ContentAdministration() {
   const studio = env.directusPublicUrl.replace(/\/$/, "");
   return (
     <Section title="Inhalte verwalten">
-      <p className="text-sm text-neutral-700">
+      <p className="text-sm text-muted-foreground">
         News, Seiten, Menüs und Kategorien bearbeitest du in Directus (öffnet in neuem Tab).
       </p>
       <ul className="flex flex-wrap gap-2">
@@ -149,7 +149,7 @@ function ContentAdministration() {
               href={`${studio}/admin/content/${collection}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-block rounded border px-3 py-1.5 text-sm hover:bg-neutral-50"
+              className="inline-block rounded border px-3 py-1.5 text-sm hover:bg-muted"
             >
               {label} ↗
             </a>

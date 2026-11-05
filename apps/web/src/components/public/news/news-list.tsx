@@ -21,11 +21,7 @@ export async function NewsList({ category, page }: { category?: string; page: nu
     <div className="flex flex-col gap-6">
       {categories.length > 1 && (
         <nav aria-label="Kategorien" className="flex flex-wrap gap-x-4 gap-y-1 text-sm">
-          <Link
-            href="/news"
-            aria-current={!category ? "page" : undefined}
-            className={!category ? "font-semibold underline" : "hover:underline"}
-          >
+          <Link href="/news" aria-current={!category ? "page" : undefined} className="link">
             Alle
           </Link>
           {categories.map((c) => (
@@ -33,7 +29,7 @@ export async function NewsList({ category, page }: { category?: string; page: nu
               key={c.slug}
               href={`/news/kategorie/${c.slug}`}
               aria-current={category === c.slug ? "page" : undefined}
-              className={category === c.slug ? "font-semibold underline" : "hover:underline"}
+              className="link"
             >
               {c.name}
             </Link>
@@ -41,7 +37,7 @@ export async function NewsList({ category, page }: { category?: string; page: nu
         </nav>
       )}
       {articles.items.length === 0 ? (
-        <p className="text-sm text-neutral-600">Keine Artikel vorhanden.</p>
+        <p className="text-sm text-muted-foreground">Keine Artikel vorhanden.</p>
       ) : (
         <div className="flex flex-col gap-8">
           {articles.items.map((a) => (

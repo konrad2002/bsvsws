@@ -53,6 +53,8 @@ export const publicContentRoutes: FastifyPluginAsync<{
 
   app.get("/public/article-categories", limit(120), async () => content.articleCategories());
 
+  app.get("/public/home", limit(120), async () => content.home());
+
   app.get("/public/clubs", limit(120), async () => content.clubs());
 
   app.get("/public/clubs/:slug", limit(120), async (req) =>

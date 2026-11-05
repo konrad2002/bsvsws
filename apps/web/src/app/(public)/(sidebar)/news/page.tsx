@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 export default function NewsPage({ searchParams }: PageProps<"/news">) {
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-2xl font-semibold">News</h1>
+      <h1>News</h1>
       <Suspense fallback={<p>News werden geladen …</p>}>
         <Content searchParams={searchParams} />
       </Suspense>

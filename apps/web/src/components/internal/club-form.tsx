@@ -50,7 +50,7 @@ export function ClubForm({ mode, club }: { mode: Mode; club?: Club }) {
           </label>
         </div>
       ) : (
-        <p className="text-sm text-neutral-600">
+        <p className="text-sm text-muted-foreground">
           Vereinsname: <strong>{club?.name}</strong> – Name und URL ändert der Verband.
         </p>
       )}

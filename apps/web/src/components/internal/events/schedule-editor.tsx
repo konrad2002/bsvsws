@@ -62,7 +62,9 @@ export function ScheduleEditor({
   return (
     <div className="flex flex-col gap-3">
       <input type="hidden" name="scheduleJson" value={serialised} />
-      {rows.length === 0 && <p className="text-sm text-neutral-600">Noch kein Ablauf erfasst.</p>}
+      {rows.length === 0 && (
+        <p className="text-sm text-muted-foreground">Noch kein Ablauf erfasst.</p>
+      )}
       {rows.map((row, i) => (
         <div
           key={row.key}

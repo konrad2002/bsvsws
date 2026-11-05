@@ -7,33 +7,31 @@ import { EventStatusBadge } from "./event-status";
 
 export function EventTable({ events, showClub }: { events: EventSummary[]; showClub: boolean }) {
   if (events.length === 0)
-    return <p className="text-sm text-neutral-600">Keine Veranstaltungen.</p>;
+    return <p className="text-sm text-muted-foreground">Keine Veranstaltungen.</p>;
   return (
     <div className="overflow-x-auto">
-      <table className="w-full min-w-[40rem] text-left text-sm">
-        <thead className="border-b">
+      <table className="data-table min-w-[40rem] text-sm">
+        <thead>
           <tr>
-            <th className="py-2 pr-4 font-medium">Datum</th>
-            <th className="py-2 pr-4 font-medium">Titel</th>
-            {showClub && <th className="py-2 pr-4 font-medium">Verein</th>}
-            <th className="py-2 pr-4 font-medium">Kalender</th>
-            <th className="py-2 font-medium">Status</th>
+            <th>Datum</th>
+            <th>Titel</th>
+            {showClub && <th>Verein</th>}
+            <th>Kalender</th>
+            <th>Status</th>
           </tr>
         </thead>
         <tbody>
           {events.map((e) => (
-            <tr key={e.id} className="border-b last:border-0">
-              <td className="whitespace-nowrap py-2 pr-4">
-                {formatDateRange(e.startDate, e.endDate)}
-              </td>
-              <td className="py-2 pr-4">
-                <Link href={`/intern/veranstaltungen/${e.id}`} className="hover:underline">
+            <tr key={e.id}>
+              <td className="whitespace-nowrap">{formatDateRange(e.startDate, e.endDate)}</td>
+              <td>
+                <Link href={`/intern/veranstaltungen/${e.id}`} className="link">
                   {e.title}
                 </Link>
               </td>
-              {showClub && <td className="py-2 pr-4">{e.club?.name ?? "Verband"}</td>}
-              <td className="py-2 pr-4">{EVENT_CALENDAR_LABELS[e.calendar]}</td>
-              <td className="py-2">
+              {showClub && <td>{e.club?.name ?? "Verband"}</td>}
+              <td>{EVENT_CALENDAR_LABELS[e.calendar]}</td>
+              <td>
                 <div className="flex flex-wrap gap-1">
                   <EventStatusBadge status={e.status} deleted={e.deleted} />
                   {e.hasPendingRemoval && <Badge>Entfernung beantragt</Badge>}

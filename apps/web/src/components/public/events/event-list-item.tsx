@@ -14,18 +14,18 @@ export function EventListItem({ event }: { event: PublicEventSummary }) {
     <li className="flex flex-col gap-1 py-3 sm:flex-row sm:gap-6">
       <div className="shrink-0 text-sm font-medium sm:w-48">
         {formatDateRange(event.startDate, event.endDate)}
-        {time && <div className="font-normal text-neutral-600">{time}</div>}
+        {time && <div className="font-normal text-muted-foreground">{time}</div>}
       </div>
       <div className="flex flex-col gap-0.5">
-        <Link href={`/veranstaltungen/${event.slug}`} className="font-semibold hover:underline">
+        <Link href={`/veranstaltungen/${event.slug}`} className="font-semibold link">
           {event.title}
         </Link>
-        <span className="text-sm text-neutral-700">
+        <span className="text-sm text-muted-foreground">
           {[event.venue, event.city].filter(Boolean).join(", ")}
           {event.venue || event.city ? " · " : ""}
           {event.organizer}
         </span>
-        <span className="text-xs text-neutral-600">
+        <span className="text-xs text-muted-foreground">
           {[EVENT_CALENDAR_LABELS[event.calendar], ...event.categories.map((c) => c.name)].join(
             " · ",
           )}
@@ -36,7 +36,7 @@ export function EventListItem({ event }: { event: PublicEventSummary }) {
 }
 
 export function EventList({ events, empty }: { events: PublicEventSummary[]; empty: string }) {
-  if (events.length === 0) return <p className="text-sm text-neutral-600">{empty}</p>;
+  if (events.length === 0) return <p className="text-sm text-muted-foreground">{empty}</p>;
   return (
     <ul className="flex flex-col divide-y">
       {events.map((e) => (

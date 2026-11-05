@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  buildHero,
   buildNavigation,
   buildPageIndex,
   fileAccess,
@@ -177,5 +178,33 @@ describe("fileAccess (spec §8.5: same visibility as the page)", () => {
   });
   it("unreferenced, non-public files are never served (copying the URL does not help)", () => {
     expect(fileAccess({ ...base, references: [], level: "administrator" })).toBe("not_found");
+  });
+
+  it("builds the home banner: custom button only with a safe URL, otherwise the next event", () => {
+    const row = {
+      hero_enabled: true,
+      hero_kicker: "Herzlich Willkommen beim",
+      hero_title: "",
+      hero_image: "img",
+      hero_button_label: "Zur Anmeldung",
+      hero_button_url: "javascript:alert(1)",
+    };
+    const next = { title: "BM 2027", slug: "2027-04-17-bm-2027" };
+    expect(buildHero(row, next)).toEqual({
+      kicker: "Herzlich Willkommen beim",
+      title: "Bezirksschwimmverband Südwestsachsen e.V.",
+      imageId: "img",
+      button: { label: "BM 2027", href: "/veranstaltungen/2027-04-17-bm-2027", external: false },
+    });
+    expect(buildHero({ ...row, hero_button_url: "/news" }, next)?.button).toEqual({
+      label: "Zur Anmeldung",
+      href: "/news",
+      external: false,
+    });
+    expect(buildHero({ ...row, hero_button_url: "//evil.example" }, null)?.button).toBeNull();
+    expect(buildHero({ ...row, hero_button_url: "https://dsv.de" }, null)?.button?.external).toBe(
+      true,
+    );
+    expect(buildHero({ ...row, hero_enabled: false }, next)).toBeNull();
   });
 });

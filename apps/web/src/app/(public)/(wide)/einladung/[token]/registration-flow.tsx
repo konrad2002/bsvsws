@@ -42,7 +42,7 @@ function RegisterStep({
 
   return (
     <form action={action} className="flex max-w-md flex-col gap-4">
-      <h2 className="text-lg font-semibold">Konto anlegen</h2>
+      <h2>Konto anlegen</h2>
       <Field label="E-Mail-Adresse" htmlFor="email" hint="Festgelegt durch die Einladung.">
         <Input id="email" value={email} readOnly disabled />
       </Field>
@@ -99,7 +99,7 @@ function VerifyStep({
 
   return (
     <div className="flex max-w-md flex-col gap-4">
-      <h2 className="text-lg font-semibold">E-Mail-Adresse bestätigen</h2>
+      <h2>E-Mail-Adresse bestätigen</h2>
       <p className="text-sm">
         Wir haben einen 6-stelligen Code an <strong>{email}</strong> gesendet. Der Code ist 15
         Minuten gültig.
