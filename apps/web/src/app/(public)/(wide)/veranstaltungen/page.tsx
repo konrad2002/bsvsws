@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { connection } from "next/server";
 import { Suspense } from "react";
 import { CalendarFilterForm } from "@/components/public/events/calendar-filters";
 import {
@@ -49,6 +50,7 @@ const VIEWS: { key: CalendarView; label: string }[] = [
 
 async function Calendar({ searchParams }: Pick<PageProps<"/veranstaltungen">, "searchParams">) {
   const params = parseCalendarParams(await searchParams);
+  await connection(); // "today" must be computed per request, not at build time
   const today = todayInBerlin();
   const filter = {
     calendar: calendarFromSlug(params.kalender),

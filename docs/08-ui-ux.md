@@ -71,6 +71,11 @@ in `components/layout/` (header, navigation, footer, sidebar).
   messages as `Alert variant="success"`.
 - Destructive actions ask for confirmation; workflow actions show only what the API allows
   (`allowedActions`).
+- Page loads: links use client-side navigation (`next/link`). While one is pending, a thin
+  `bg-accent` bar runs along the top of the window (`NavigationProgress` in the root layout,
+  styles `.nav-progress` in `globals.css`). It appears only after 150 ms (no flicker on fast
+  connections) and also covers back/forward. Native navigations (downloads, GET filter forms,
+  external links) keep the browser's own indicator.
 - Navigation: desktop dropdowns open on hover **and** keyboard focus (▾ marker is
   `aria-hidden`); below `lg` a burger button opens a native `<details>` menu – both work without
   JavaScript. Filters are GET forms.

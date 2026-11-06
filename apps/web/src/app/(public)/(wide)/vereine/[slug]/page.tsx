@@ -2,6 +2,7 @@ import { EVENT_CALENDAR_LABELS } from "@bsv-sws/shared";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { connection } from "next/server";
 import { EventList } from "@/components/public/events/event-list-item";
 import { addDays, todayInBerlin } from "@/lib/calendar";
 import { getClub } from "@/lib/data/public-content";
@@ -28,6 +29,7 @@ export default async function ClubPage({ params }: Pick<PageProps<"/vereine/[slu
   const { slug } = await params;
   const club = validSlug(slug) ? await getClub(slug) : null;
   if (!club) notFound();
+  await connection(); // "today" must be computed per request, not at build time
   const today = todayInBerlin();
   const events = await listPublicEvents({ from: today, to: addDays(today, 365), club: club.slug });
   const address = [club.street, [club.postalCode, club.city].filter(Boolean).join(" ")]
