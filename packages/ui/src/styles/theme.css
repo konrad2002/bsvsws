@@ -1,8 +1,245 @@
 /*
- * Shared design tokens (imported by apps/web after `@import "tailwindcss"`).
- * Tokens follow the existing bsv-sws.de identity and are decided by the project
- * owner – do not invent a new color/typography system (spec §9.5).
+ * BSV-SWS design tokens and base styles (identity of bsv-sws.de, spec §9.5).
+ * Imported by apps/web after `@import "tailwindcss"`.
+ *
+ * HOW TO ADJUST THE LOOK – change values here, never in components:
+ *   1. Brand palette   – the federation colours.
+ *   2. Semantic tokens – what each colour is used for. Components only use these,
+ *                        as Tailwind classes (bg-primary, text-muted-foreground, …).
+ *   3. Scopes          – areas that override tokens (e.g. the dark internal header).
+ *   4. Base styles     – headings, links, tables, focus: one rule for all pages.
  */
-@theme {
-  /* Placeholder – replace with values derived from bsv-sws.de. */
+
+:root {
+  /* ---- 1. Brand palette ------------------------------------------------- */
+  --bsv-1: #027db5; /* primary blue */
+  --bsv-2: #04aadb; /* light blue */
+  --bsv-dark: #0d2046; /* navy */
+  --bsv-dark-2: #0d2c68; /* navy, lighter end of gradients */
+
+  /* ---- 2. Semantic tokens ----------------------------------------------- */
+  --background: #fff; /* header, sidebar, cards */
+  --foreground: #000;
+  --page: #f8f8f8; /* content area */
+  --page-foreground: #555;
+  --card: #fff;
+  --card-foreground: var(--page-foreground);
+
+  --primary: var(--bsv-1); /* buttons, active states */
+  --primary-hover: var(--bsv-2);
+  --primary-foreground: #fff;
+  --accent: var(--bsv-2); /* highlights, underlines, dropdowns */
+  --accent-foreground: #fff;
+  --muted: #f2f2f2; /* subtle backgrounds (zebra rows, inactive days) */
+  --muted-foreground: #666; /* secondary text */
+  --border: #ddd;
+  --input: #bbb;
+  --ring: var(--bsv-2);
+  --destructive: #b3261e;
+  --destructive-foreground: #fff;
+  --success: #1e7a3c;
+
+  --highlight: var(--bsv-1); /* federation (BSV-SWS) events in lists/calendars */
+  --highlight-foreground: #fff;
+
+  /* Event file icons by format (colours of the SwimResults file list). */
+  --file-pdf: #aa0a00;
+  --file-dsv: #0176bb;
+  --file-lenex: #5dc1f3;
+  --file-zip: #edc213;
+  --file-other: var(--bsv-dark-2);
+  --file-icon-foreground: #fff;
+
+  --link: var(--bsv-1);
+  --link-hover: var(--bsv-2);
+  --heading-1: var(--bsv-1);
+  --heading-2: var(--bsv-2);
+  --title-align: left; /* page titles (h1); the public layout centres them */
+
+  --table-head: var(--bsv-1);
+  --table-head-foreground: #fff;
+  --table-stripe: var(--muted);
+
+  --header: #fff; /* header gradient: --header → --header-2 */
+  --header-2: #fff;
+  --header-foreground: #666;
+  --header-accent: var(--bsv-2); /* hover underline, dropdown background */
+
+  --footer: var(--bsv-dark-2);
+  --footer-2: var(--bsv-dark);
+  --footer-foreground: #ccc;
+
+  --hero: var(--bsv-dark);
+  --hero-foreground: #fff;
+  --hero-accent: var(--bsv-2);
+
+  --radius: 4px;
+  --font-family-base: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+/* ---- 3. Scopes ------------------------------------------------------------ */
+
+/* Public website: centred page titles like bsv-sws.de. */
+.theme-public {
+  --title-align: center;
+}
+
+/* Internal area header (owner decision): the old site's dark variant. */
+.theme-dark-header {
+  --header: var(--bsv-dark-2);
+  --header-2: var(--bsv-dark);
+  --header-foreground: #fff;
+}
+
+/* Tokens → Tailwind utilities (bg-primary, text-muted-foreground, border-border, …). */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-page: var(--page);
+  --color-page-foreground: var(--page-foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-success: var(--success);
+  --color-heading-1: var(--heading-1);
+  --color-heading-2: var(--heading-2);
+  --color-highlight: var(--highlight);
+  --color-highlight-foreground: var(--highlight-foreground);
+  --color-file-pdf: var(--file-pdf);
+  --color-file-dsv: var(--file-dsv);
+  --color-file-lenex: var(--file-lenex);
+  --color-file-zip: var(--file-zip);
+  --color-file-other: var(--file-other);
+  --color-file-icon-foreground: var(--file-icon-foreground);
+  --color-link: var(--link);
+  --color-link-hover: var(--link-hover);
+  --color-header: var(--header);
+  --color-header-2: var(--header-2);
+  --color-header-foreground: var(--header-foreground);
+  --color-header-accent: var(--header-accent);
+  --color-footer: var(--footer);
+  --color-footer-2: var(--footer-2);
+  --color-footer-foreground: var(--footer-foreground);
+  --color-hero: var(--hero);
+  --color-hero-foreground: var(--hero-foreground);
+  --color-hero-accent: var(--hero-accent);
+
+  --radius-sm: calc(var(--radius) - 2px);
+  --radius-md: var(--radius);
+  --radius-lg: calc(var(--radius) + 2px);
+  --font-sans: var(--font-family-base);
+}
+
+/* ---- 4. Base styles ------------------------------------------------------- */
+@layer base {
+  * {
+    border-color: var(--border);
+  }
+
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-family-base);
+  }
+
+  :focus-visible {
+    outline-color: var(--ring);
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-weight: 700;
+    line-height: 1.2;
+    overflow-wrap: break-word;
+  }
+
+  h1 {
+    color: var(--heading-1);
+    font-size: clamp(1.75rem, 1.25rem + 2vw, 2.5rem);
+    text-align: var(--title-align);
+  }
+
+  h2 {
+    color: var(--heading-2);
+    font-size: 1.5rem;
+  }
+
+  h3 {
+    font-size: 1.15rem;
+  }
+
+  /* Linked headings keep the heading colour (news titles). */
+  :is(h1, h2, h3) a {
+    color: inherit;
+  }
+
+  /* Plain links without classes (CMS content, simple text links). */
+  a:not([class]) {
+    color: var(--link);
+  }
+  a:not([class]):hover {
+    color: var(--link-hover);
+    text-decoration: underline dashed;
+    text-underline-offset: 3px;
+  }
+}
+
+/* Brand text link for component links: <Link className="link">. The current
+   page/filter (aria-current) is shown in bold. */
+@utility link {
+  color: var(--link);
+  &[aria-current="page"] {
+    font-weight: 700;
+  }
+  &:hover {
+    color: var(--link-hover);
+    text-decoration: underline dashed;
+    text-underline-offset: 3px;
+  }
+}
+
+/* Tables (CMS content and data tables): blue head, zebra rows – like bsv-sws.de. */
+@layer components {
+  /* White box on the grey content area (news teasers, event boxes). */
+  .card {
+    background-color: var(--card);
+    color: var(--card-foreground);
+    padding: 1.25rem;
+  }
+
+  .data-table,
+  .rich-content table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+
+    th,
+    td {
+      padding: 0.5rem;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      background-color: var(--table-head);
+      color: var(--table-head-foreground);
+      font-weight: 700;
+    }
+
+    tbody tr:nth-child(even) {
+      background-color: var(--table-stripe);
+    }
+  }
 }

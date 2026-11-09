@@ -1,0 +1,32 @@
+{
+  "name": "@bsv-sws/directus-tools",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Reproducible Directus setup: schema snapshot/apply, roles/policies/permissions as code, local seed",
+  "type": "module",
+  "scripts": {
+    "snapshot": "tsx --env-file-if-exists=../../.env src/snapshot.ts",
+    "apply": "tsx --env-file-if-exists=../../.env src/apply.ts",
+    "seed:dev": "tsx --env-file-if-exists=../../.env src/seed-dev.ts",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "migrate:joomla": "tsx --env-file-if-exists=../../.env src/migrate-joomla.ts"
+  },
+  "dependencies": {
+    "@bsv-sws/directus": "workspace:*",
+    "@bsv-sws/shared": "workspace:*",
+    "@directus/sdk": "^27.1.0",
+    "cheerio": "^1.2.0",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9",
+    "@types/node": "^24.19.2",
+    "eslint": "^9",
+    "tsx": "^4.23.15",
+    "typescript": "~6.0.3",
+    "typescript-eslint": "^8.72.1",
+    "vitest": "^5.1.0"
+  }
+}

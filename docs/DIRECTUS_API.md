@@ -12,7 +12,8 @@ All credentials are in the git-ignored root `.env` file (template: `.env.example
 | `DIRECTUS_PUBLIC_URL`                              | Base URL, locally `http://localhost:8055`                             |
 | `DIRECTUS_ADMIN_TOKEN`                             | Static token of the bootstrap admin user. **Local development only.** |
 | `DIRECTUS_ADMIN_EMAIL` / `DIRECTUS_ADMIN_PASSWORD` | Studio login for the project owner                                    |
-| `DIRECTUS_SERVICE_TOKEN`                           | Restricted Fastify service account (created in Phase 1)               |
+| `DIRECTUS_SERVICE_TOKEN`                           | Restricted Fastify service account (set by `pnpm directus:apply`)     |
+| `DEV_SEED_PASSWORD`                                | Password of the local test accounts (`pnpm directus:seed`)            |
 
 `ADMIN_TOKEN` is only applied when Directus bootstraps an **empty** database. If you change it
 later, update the token on the admin user in Studio (User → Token) or reset the volume with
@@ -26,13 +27,19 @@ Never use or request production/test tokens for agent work. Test and production 
 ```bash
 set -a; . ./.env; set +a
 curl -s -H "Authorization: Bearer $DIRECTUS_ADMIN_TOKEN" "$DIRECTUS_PUBLIC_URL/collections"
-curl -s -H "Authorization: Bearer $DIRECTUS_ADMIN_TOKEN" "$DIRECTUS_PUBLIC_URL/schema/snapshot" > directus/snapshots/snapshot.json
+pnpm directus:snapshot   # export schema to directus/snapshots/schema.json
+pnpm directus:apply      # re-apply versioned settings/schema/access config
 ```
+
+To check what a club user can do, log in as a seeded test account
+(`POST /auth/login` with `DEV_SEED_PASSWORD`) and call Fastify (`http://localhost:4000/me`) with
+the returned access token. Club users have no Directus permissions by design.
 
 Never print token values into logs, docs or commits.
 
 ## Rules
 
-- Any schema, role, policy or permission change made via the API must be captured in
-  `directus/snapshots/` and documented — the local instance is disposable.
+- Any schema change made via the API must be captured with `pnpm directus:snapshot`; role,
+  policy and permission changes belong in `directus/tools/src/access.ts` (not only in the
+  instance). Document both — the local instance is disposable.
 - Application code must not use the admin token; Fastify uses `DIRECTUS_SERVICE_TOKEN`.

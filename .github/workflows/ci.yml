@@ -7,7 +7,8 @@ on:
 
 concurrency:
   group: ci-${{ github.ref }}
-  cancel-in-progress: true
+  # Never cancel a running deployment; only superseded pull-request runs.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   checks:
@@ -27,23 +28,189 @@ jobs:
       - run: pnpm test
       - run: pnpm build
 
-  images:
-    name: Build Docker images
+  integration:
+    name: Integration tests (real Directus)
     runs-on: ubuntu-latest
     needs: checks
+    # Throwaway CI credentials – not secrets, the containers only live for this job.
+    env:
+      DIRECTUS_URL: http://localhost:8055
+      DIRECTUS_ADMIN_TOKEN: ci-admin-token-0123456789abcdef0123456789
+      DIRECTUS_SERVICE_TOKEN: ci-service-token-0123456789abcdef0123456789
+      APP_SECRET: ci-app-secret-0123456789abcdef0123456789abc
+      DEV_SEED_PASSWORD: ci-seed-password
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: directus
+          POSTGRES_USER: directus
+          POSTGRES_PASSWORD: directus
+        options: >-
+          --health-cmd "pg_isready -U directus" --health-interval 5s --health-timeout 5s --health-retries 20
+      directus:
+        image: directus/directus:12.6.0
+        ports:
+          - 8055:8055
+        env:
+          SECRET: ci-directus-secret
+          PUBLIC_URL: http://localhost:8055
+          DB_CLIENT: pg
+          DB_HOST: postgres
+          DB_PORT: 5432
+          DB_DATABASE: directus
+          DB_USER: directus
+          DB_PASSWORD: directus
+          ADMIN_EMAIL: admin@example.com
+          ADMIN_PASSWORD: ci-admin-password
+          ADMIN_TOKEN: ci-admin-token-0123456789abcdef0123456789
+        options: >-
+          --health-cmd "wget -qO- http://127.0.0.1:8055/server/ping || exit 1"
+          --health-interval 10s --health-timeout 5s --health-retries 30 --health-start-period 30s
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm turbo run build --filter=@bsv-sws/api^...
+      # Unlicensed instance: also proves the setup works without the Directus licence.
+      - run: pnpm directus:apply
+      - run: pnpm directus:seed
+      - run: pnpm --filter @bsv-sws/api test:integration
+
+  images:
+    name: Docker image ${{ matrix.image }}
+    runs-on: ubuntu-latest
+    needs: checks
+    # Pushes to develop/master publish to GHCR (private); pull requests only build.
+    permissions:
+      contents: read
+      packages: write
     strategy:
       matrix:
-        image: [web, api, directus]
+        image: [web, api, directus, tools]
+    env:
+      PUBLISH: ${{ github.event_name == 'push' && (github.ref_name == 'develop' || github.ref_name == 'master') }}
     steps:
       - uses: actions/checkout@v5
       - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        if: env.PUBLISH == 'true'
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository_owner }}/bsv-sws/${{ matrix.image }}
+          # <commit sha> is what deploys use; the branch tag only marks the latest build.
+          tags: |
+            type=sha,format=long,prefix=
+            type=ref,event=branch
       - uses: docker/build-push-action@v6
         with:
           context: .
           file: infrastructure/docker/${{ matrix.image }}.Dockerfile
-          push: false
-          tags: bsv-sws/${{ matrix.image }}:ci
+          push: ${{ env.PUBLISH == 'true' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha,scope=${{ matrix.image }}
           cache-to: type=gha,mode=max,scope=${{ matrix.image }}
-# Publishing images and deploying (develop → test, master → production) is added
-# in Phase 8 once the VPS, registry and secrets are defined (docs/09-infrastructure.md).
+
+  deploy:
+    name: Deploy to ${{ github.ref_name == 'master' && 'production' || 'test' }}
+    runs-on: ubuntu-latest
+    needs: [checks, integration, images]
+    # develop → test, master → production (spec §14.3). Production deploys only once the
+    # repository variable DEPLOY_PRODUCTION is "true" (production not in use yet).
+    if: >-
+      github.event_name == 'push' &&
+      (github.ref_name == 'develop' || (github.ref_name == 'master' && vars.DEPLOY_PRODUCTION == 'true'))
+    # Each GitHub Environment has its own secrets (SSH access) and variables (DEPLOY_DIR,
+    # WEB_PUBLIC_URL); the application secrets live only in <DEPLOY_DIR>/.env on the server.
+    environment:
+      name: ${{ github.ref_name == 'master' && 'production' || 'test' }}
+      url: ${{ vars.WEB_PUBLIC_URL }}
+    concurrency:
+      group: deploy-${{ github.ref_name }}
+      cancel-in-progress: false
+    permissions:
+      contents: read
+      packages: read
+    steps:
+      - uses: actions/checkout@v5
+      - name: Check environment configuration
+        env:
+          DEPLOY_DIR: ${{ vars.DEPLOY_DIR }}
+          HOST: ${{ secrets.VPS_HOST }}
+        # The directory name is the stack name (bsv-sws-<name>): test → dev|test,
+        # production → production|prod. Prevents deploying into the other environment.
+        run: |
+          test -n "$HOST" || { echo "::error::Secret VPS_HOST missing in this environment"; exit 1; }
+          case "$(basename "$DEPLOY_DIR")" in
+            ${{ github.ref_name == 'master' && 'production|prod' || 'dev|test' }}) ;;
+            *) echo "::error::DEPLOY_DIR '$DEPLOY_DIR' does not match this environment"; exit 1 ;;
+          esac
+      - name: Configure SSH
+        env:
+          KEY: ${{ secrets.VPS_SSH_KEY }}
+          KNOWN_HOSTS: ${{ secrets.VPS_KNOWN_HOSTS }}
+          HOST: ${{ secrets.VPS_HOST }}
+          USER_NAME: ${{ secrets.VPS_USER }}
+          PORT: ${{ vars.VPS_PORT || '22' }}
+        # Host keys are never accepted blindly: VPS_KNOWN_HOSTS = output of
+        # `ssh-keyscan [-p <port>] <VPS_HOST>` (docs/09-infrastructure.md).
+        run: |
+          for v in KEY KNOWN_HOSTS HOST USER_NAME; do
+            [ -n "${!v}" ] || { echo "::error::Secret/variable for $v missing in this GitHub Environment"; exit 1; }
+          done
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$KEY" > ~/.ssh/id_deploy && chmod 600 ~/.ssh/id_deploy
+          printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts
+          cat > ~/.ssh/config <<EOF
+          Host deploy-target
+            HostName $HOST
+            User $USER_NAME
+            Port $PORT
+            IdentityFile ~/.ssh/id_deploy
+            IdentitiesOnly yes
+            StrictHostKeyChecking yes
+          EOF
+          ssh deploy-target true || { echo "::error::SSH to the deploy host failed – check VPS_HOST/VPS_USER/VPS_PORT, VPS_KNOWN_HOSTS (ssh-keyscan) and the deploy key"; exit 1; }
+      - name: Copy deployment files
+        env:
+          DEPLOY_DIR: ${{ vars.DEPLOY_DIR }}
+        run: |
+          scp infrastructure/compose/compose.yml infrastructure/compose/compose.deploy.yml \
+            infrastructure/compose/compose.proxy.yml \
+            infrastructure/scripts/deploy.sh infrastructure/scripts/tools.sh "deploy-target:$DEPLOY_DIR/"
+      - name: Deploy
+        env:
+          DEPLOY_DIR: ${{ vars.DEPLOY_DIR }}
+          GHCR_USER: ${{ github.actor }}
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        # The short-lived job token is only used for this pull (per-environment Docker
+        # config) and removed again, whatever the outcome.
+        run: |
+          # Arguments are expanded here on purpose (paths/sha), then run remotely.
+          # shellcheck disable=SC2029
+          remote() { ssh deploy-target "$@"; }
+          printf '%s' "$GHCR_TOKEN" | remote "DOCKER_CONFIG='$DEPLOY_DIR/.docker' docker login ghcr.io -u '$GHCR_USER' --password-stdin"
+          set +e
+          remote "DOCKER_CONFIG='$DEPLOY_DIR/.docker' bash '$DEPLOY_DIR/deploy.sh' '$DEPLOY_DIR' '$GITHUB_SHA'"
+          rc=$?
+          remote "DOCKER_CONFIG='$DEPLOY_DIR/.docker' docker logout ghcr.io >/dev/null"
+          exit $rc
+      - name: Smoke test
+        env:
+          URL: ${{ vars.WEB_PUBLIC_URL }}
+        run: |
+          for _ in $(seq 1 20); do
+            curl -fsS "$URL/api/health" && curl -fsS -o /dev/null "$URL/" && exit 0
+            sleep 6
+          done
+          echo "::error::$URL is not healthy after deployment"; exit 1

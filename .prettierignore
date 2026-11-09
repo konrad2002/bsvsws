@@ -6,3 +6,5 @@ directus/snapshots
 docs/PROJECT_SPECIFICATION.md
 .env
 apps/web/next-env.d.ts
+directus/tools/src/joomla/fixtures/
+apps/api/src/modules/swimresults/fixtures/

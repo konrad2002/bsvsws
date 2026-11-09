@@ -1,0 +1,81 @@
+# nginx (running as a Docker container) for the TEST/DEV environment (develop branch):
+#   https://bsv.konrad2002.de      → web       container alias bsv-dev-web:3000
+#   https://bsv-cms.konrad2002.de  → Directus  container alias bsv-dev-cms:8055
+# The aliases exist on the nginx network once the stack's .env sets
+#   PROXY_NETWORK=<network of the nginx container>   PROXY_ALIAS=bsv-dev
+# (infrastructure/compose/compose.proxy.yml, docs/09-infrastructure.md).
+#
+# IMPORTANT – differs from the usual template: X-Forwarded-For is SET to $remote_addr
+# instead of $proxy_add_x_forwarded_for. The app rate-limits by the first XFF entry
+# (spec §11.3); appending would let clients spoof it.
+
+# --- Website (Next.js) ----------------------------------------------------------
+server {
+
+  listen 443 ssl;
+
+  ssl_certificate     /etc/nginx/certs/konrad2002.de.pem;
+  ssl_certificate_key /etc/nginx/certs/konrad2002.de.key;
+  ssl_protocols       TLSv1.2 TLSv1.3;
+  ssl_ciphers         HIGH:!aNULL:!MD5;
+
+  server_name bsv.konrad2002.de;
+
+  add_header Strict-Transport-Security "max-age=31536000" always;
+  # Test environment: keep search engines out.
+  add_header X-Robots-Tag "noindex, nofollow" always;
+
+  location / {
+    resolver 127.0.0.11;
+    # Event files up to 20 MB are uploaded through the app.
+    client_max_body_size 25M;
+    proxy_http_version 1.1;
+    # $http_host keeps a non-default port: Next.js compares X-Forwarded-Host with the
+    # browser's Origin for Server Actions (CSRF protection).
+    proxy_set_header Host $http_host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-Proto "https";
+    proxy_set_header X-Forwarded-Host $http_host;
+    proxy_set_header X-Forwarded-Server $host;
+    proxy_set_header X-Forwarded-For $remote_addr;
+    # Streaming responses (React Server Components / Suspense) must not be buffered.
+    proxy_buffering off;
+    proxy_read_timeout 60s;
+
+    set $upstream bsv-dev-web:3000;
+    proxy_pass http://$upstream;
+  }
+}
+
+# --- Directus Studio ---------------------------------------------------------------
+server {
+
+  listen 443 ssl;
+
+  ssl_certificate     /etc/nginx/certs/konrad2002.de.pem;
+  ssl_certificate_key /etc/nginx/certs/konrad2002.de.key;
+  ssl_protocols       TLSv1.2 TLSv1.3;
+  ssl_ciphers         HIGH:!aNULL:!MD5;
+
+  server_name bsv-cms.konrad2002.de;
+
+  add_header Strict-Transport-Security "max-age=31536000" always;
+  add_header X-Robots-Tag "noindex, nofollow" always;
+
+  location / {
+    resolver 127.0.0.11;
+    # Editor uploads (images, PDFs) in Studio.
+    client_max_body_size 50M;
+    proxy_http_version 1.1;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-Proto "https";
+    proxy_set_header X-Forwarded-Host $host;
+    proxy_set_header X-Forwarded-Server $host;
+    proxy_set_header X-Forwarded-For $remote_addr;
+    proxy_read_timeout 120s;
+
+    set $upstream bsv-dev-cms:8055;
+    proxy_pass http://$upstream;
+  }
+}

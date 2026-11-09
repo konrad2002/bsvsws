@@ -1,0 +1,450 @@
+<!--?php
+
+defined('_JEXEC') or die;
+
+/* The following line loads the MooTools JavaScript Library */
+JHtml::_('behavior.framework', true);
+
+/* The following line gets the application object for things like displaying the site name */
+$app = JFactory::getApplication();
+?-->
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta charset="utf-8">
+	<meta name="generator" content="Joomla! - Open Source Content Management">
+	<title>News</title>
+	<link href="/news?format=feed&amp;type=rss" rel="alternate" type="application/rss+xml" title="News">
+	<link href="/news?format=feed&amp;type=atom" rel="alternate" type="application/atom+xml" title="News">
+	<link href="/favicon.ico" rel="icon" type="image/vnd.microsoft.icon">
+<link href="/media/mod_articles_news/css/template-vert.min.css?1a248c" rel="stylesheet">
+	<link href="/media/plg_system_webauthn/css/button.min.css?1a248c" rel="stylesheet">
+	<link href="/media/vendor/joomla-custom-elements/css/joomla-alert.min.css?0.4.1" rel="stylesheet">
+<script src="/media/mod_menu/js/menu.min.js?1a248c" type="module"></script>
+	<script type="application/json" class="joomla-script-options new">{"joomla.jtext":{"PLG_SYSTEM_WEBAUTHN_ERR_CANNOT_FIND_USERNAME":"Das Feld für den Benutzernamen wurde im Login-Modul nicht gefunden. Die passwortlose Authentifizierung funktioniert auf dieser Website nicht, bitte ein anderes Login-Modul verwenden.","PLG_SYSTEM_WEBAUTHN_ERR_EMPTY_USERNAME":"Bitte nur den Benutzernamen (aber NICHT das Passwort) eingeben, bevor die Anmeldeschaltfläche für Passkeys ausgewählt wird.","PLG_SYSTEM_WEBAUTHN_ERR_INVALID_USERNAME":"Der angegebene Benutzername entspricht nicht einem Benutzerkonto, das eine passwortlose Anmeldung auf dieser Website ermöglicht hat.","JSHOWPASSWORD":"Passwort anzeigen","JHIDEPASSWORD":"Passwort ausblenden","ERROR":"Fehler","MESSAGE":"Nachricht","NOTICE":"Hinweis","WARNING":"Warnung","SUCCESS":"Success","JCLOSE":"Schließen","JOK":"OK","JOPEN":"Öffnen"},"system.paths":{"root":"","rootFull":"https:\/\/bsv-sws.de\/","base":"","baseFull":"https:\/\/bsv-sws.de\/"},"csrf.token":"fd1d865929733c6a3a91eb836053eb23","system.keepalive":{"interval":3600000,"uri":"\/component\/ajax\/?format=json"}}</script>
+	<script src="/media/system/js/core.min.js?a3d8f8"></script>
+	<script src="/media/system/js/keepalive.min.js?08e025" type="module"></script>
+	<script src="/media/system/js/fields/passwordview.min.js?61f142" defer></script>
+	<script src="/media/system/js/messages.min.js?9a4811" type="module"></script>
+	<script src="/media/plg_system_webauthn/js/login.min.js?1a248c" defer></script>
+ 
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="stylesheet" href="/templates/bsv/css/styles.css?v1.0.1" type="text/css" />
+<!--        <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">-->
+        <link rel="stylesheet" href="/media/system/css/joomla-fontawesome.min.css">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <!--FAV-->
+            <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+            <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+            <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+            <link rel="manifest" href="/site.webmanifest">
+            <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#027db5">
+            <meta name="msapplication-TileColor" content="#ffffff">
+            <meta name="msapplication-TileImage" content="/mstile-144x144.png">
+            <meta name="theme-color" content="#ffffff">
+
+        <!--FAV-->
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="mobile-web-app-capable" content="yes">
+        
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+        <script src="/templates/bsv/js/script.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@8"></script>
+            </head>
+    <body onload="onload();" ontouchstart="">
+        <div id="wrap">
+            <header>
+                
+<div id="mod-custom118" class="mod-custom custom">
+    <a href="/" class="header-main-title">
+  <img class="header-main-title-logo" src="/templates/bsv/images/logo_bsv.svg">
+  <span class="header-main-title-subtitle">Südwestsachsen</span>
+</a></div>
+<ul class="mod-menu mod-list nav ">
+<li class="nav-item item-101 default"><a href="/" >Startseite</a></li><li class="nav-item item-102"><a href="/veranstaltungen" >Veranstaltungen</a></li><li class="nav-item item-116 current active"><a href="/news" aria-current="page">News</a></li><li class="nav-item item-108 deeper parent"><a href="/sportarten" >Sportarten</a><ul class="mod-menu__sub list-unstyled small"><li class="nav-item item-109"><a href="/sportarten/schwimmen" >Schwimmen</a></li><li class="nav-item item-110"><a href="/sportarten/wasserball" >Wasserball</a></li><li class="nav-item item-111"><a href="/sportarten/synchronschwimmen" >Synchronschwimmen</a></li><li class="nav-item item-112"><a href="/sportarten/masters" >Masters</a></li></ul></li><li class="nav-item item-103 deeper parent"><a href="/verband" >Verband</a><ul class="mod-menu__sub list-unstyled small"><li class="nav-item item-104"><a href="/verband/vorstand" >Vorstand &amp; Fachwarte</a></li><li class="nav-item item-105"><a href="/verband/schwimmjugend" >Schwimmjugend</a></li><li class="nav-item item-106"><a href="/verband/kampfrichter" >Kampfrichterwesen</a></li><li class="nav-item item-113"><a href="/verband/schiedsrichter" >Schiedsrichter</a></li><li class="nav-item item-141"><a href="/verband/wettkampfbestimmungen" >Wettkampfbestimmungen</a></li><li class="nav-item item-114"><a href="/verband/satzung" >Satzung</a></li><li class="nav-item item-115"><a href="/verband/historie" >Historie</a></li></ul></li><li class="nav-item item-107"><a href="/team-westsachsen" >Team Westsachsen</a></li></ul>
+
+                <button class="nav-mobile-button btn" onclick="toggleMenu()">
+                    <span id="mobile_icon_show" class="icon-menu"></span>
+                    <span id="mobile_icon_hide" class="icon-times" style="display: none"></span>
+                </button>
+            </header>
+
+            <div class="mobile-menu" id="mobile_menu">
+                <ul class="mod-menu mod-list nav ">
+<li class="nav-item item-101 default"><a href="/" >Startseite</a></li><li class="nav-item item-102"><a href="/veranstaltungen" >Veranstaltungen</a></li><li class="nav-item item-116 current active"><a href="/news" aria-current="page">News</a></li><li class="nav-item item-108 deeper parent"><a href="/sportarten" >Sportarten</a><ul class="mod-menu__sub list-unstyled small"><li class="nav-item item-109"><a href="/sportarten/schwimmen" >Schwimmen</a></li><li class="nav-item item-110"><a href="/sportarten/wasserball" >Wasserball</a></li><li class="nav-item item-111"><a href="/sportarten/synchronschwimmen" >Synchronschwimmen</a></li><li class="nav-item item-112"><a href="/sportarten/masters" >Masters</a></li></ul></li><li class="nav-item item-103 deeper parent"><a href="/verband" >Verband</a><ul class="mod-menu__sub list-unstyled small"><li class="nav-item item-104"><a href="/verband/vorstand" >Vorstand &amp; Fachwarte</a></li><li class="nav-item item-105"><a href="/verband/schwimmjugend" >Schwimmjugend</a></li><li class="nav-item item-106"><a href="/verband/kampfrichter" >Kampfrichterwesen</a></li><li class="nav-item item-113"><a href="/verband/schiedsrichter" >Schiedsrichter</a></li><li class="nav-item item-141"><a href="/verband/wettkampfbestimmungen" >Wettkampfbestimmungen</a></li><li class="nav-item item-114"><a href="/verband/satzung" >Satzung</a></li><li class="nav-item item-115"><a href="/verband/historie" >Historie</a></li></ul></li><li class="nav-item item-107"><a href="/team-westsachsen" >Team Westsachsen</a></li></ul>
+
+            </div>
+
+            <div class="main">
+                <div class="slideshow">
+                    
+                </div>
+                <div class="page">
+                    <div class="sidebar-left">
+                        
+                    </div>
+                    <div class="content">
+                        
+                        <div id="system-message-container" aria-live="polite"></div>
+
+                        <div class="com-content-category-blog blog">
+            <div class="page-header">
+            <h1> News </h1>
+        </div>
+    
+        
+    
+    
+    
+    
+                            <div class="com-content-category-blog__items blog-items ">
+                    <div class="com-content-category-blog__item blog-item">
+                    
+
+<div class="item-content">
+    
+        <div class="page-header">
+                    <h2>
+                                    <a href="/news/bericht-esbjerg-2025">
+                        Wettkampffahrt zum 26. Danish International Swim Cup nach Esbjerg                    </a>
+                            </h2>
+        
+        
+        
+            </div>
+
+    
+        
+            <dl class="article-info text-muted">
+
+            <dt class="article-info-term">
+                            <span class="visually-hidden">                        Details                            </span>                    </dt>
+
+        
+        
+        
+        
+                    <dd class="published">
+    <span class="icon-calendar icon-fw" aria-hidden="true"></span>
+    <time datetime="2025-06-01T13:24:26+00:00">
+        Veröffentlicht: 01. Juni 2025    </time>
+</dd>
+        
+    
+            
+        
+            </dl>
+        
+    
+        
+    <p>Es ist ein fester Bestandteil der Wettkampfplanung vieler Vereine des Bezirks: Jedes Jahr schließen sich die teilnehmenden Vereine unter dem Namen „Team Westsachsen“ als Startgemeinschaft zusammen, um ins dänische Esbjerg zum Danish International Swim Cup (DISC) zu reisen.</p>
+
+    
+    
+        
+<p class="readmore">
+            <a class="btn btn-secondary" href="/news/bericht-esbjerg-2025" aria-label="Weiterlesen: Wettkampffahrt zum 26. Danish International Swim Cup nach Esbjerg">
+            <span class="icon-chevron-right" aria-hidden="true"></span>            Weiterlesen: Wettkampffahrt zum 26. Danish International Swim Cup nach Esbjerg        </a>
+    </p>
+
+    
+    
+        </div>
+            </div>
+                    <div class="com-content-category-blog__item blog-item">
+                    
+
+<div class="item-content">
+    
+        <div class="page-header">
+                    <h2>
+                                    <a href="/news/sichtungstraining-am-landesstuetzpunkt-schwimmen-chemnitz">
+                        Sichtungstraining am Landesstützpunkt Schwimmen Chemnitz                    </a>
+                            </h2>
+        
+        
+        
+            </div>
+
+    
+        
+            <dl class="article-info text-muted">
+
+            <dt class="article-info-term">
+                            <span class="visually-hidden">                        Details                            </span>                    </dt>
+
+        
+        
+        
+        
+                    <dd class="published">
+    <span class="icon-calendar icon-fw" aria-hidden="true"></span>
+    <time datetime="2024-06-13T17:57:18+00:00">
+        Veröffentlicht: 13. Juni 2024    </time>
+</dd>
+        
+    
+            
+        
+            </dl>
+        
+    
+        
+    <p>Auch in dieser Saison gibt es am Landesstützpunkt Chemnitz wieder ein Trainingsangebot für Sportlerinnen der Klasse 4, die das Schwimmen lieben und sich technisch verbessern möchten.</p>
+
+    
+    
+        
+<p class="readmore">
+            <a class="btn btn-secondary" href="/news/sichtungstraining-am-landesstuetzpunkt-schwimmen-chemnitz" aria-label="Weiterlesen: Sichtungstraining am Landesstützpunkt Schwimmen Chemnitz">
+            <span class="icon-chevron-right" aria-hidden="true"></span>            Weiterlesen: Sichtungstraining am Landesstützpunkt Schwimmen Chemnitz        </a>
+    </p>
+
+    
+    
+        </div>
+            </div>
+                    <div class="com-content-category-blog__item blog-item">
+                    
+
+<div class="item-content">
+    
+        <div class="page-header">
+                    <h2>
+                                    <a href="/news/ankuendigung-bezirksmeisterschaften-2024">
+                        Ankündigung Bezirksmeisterschaften 2024                    </a>
+                            </h2>
+        
+        
+        
+            </div>
+
+    
+        
+            <dl class="article-info text-muted">
+
+            <dt class="article-info-term">
+                            <span class="visually-hidden">                        Details                            </span>                    </dt>
+
+        
+        
+        
+        
+                    <dd class="published">
+    <span class="icon-calendar icon-fw" aria-hidden="true"></span>
+    <time datetime="2024-03-15T16:15:28+00:00">
+        Veröffentlicht: 15. März 2024    </time>
+</dd>
+        
+    
+            
+        
+            </dl>
+        
+    
+        
+    <p><strong>UPDATE: Die Infositzung wird nicht stattfinden!<br></strong>Am 13. und 14. April 2024 finden die jährlichen Bezirksjahrgangs- und Bezirksmeisterschaften 2024 des Bezirksschwimmverbandes Südwestsachen e.V. in der "Glück-Auf" Schwimmhalle in Zwickau statt. Genauere Informationen zu Veranstaltung gibt es <a href="/kalender/eventdetail/4/-/bezirksmeisterschaften-2024">hier</a>.</p>
+
+    
+    
+        
+<p class="readmore">
+            <a class="btn btn-secondary" href="/news/ankuendigung-bezirksmeisterschaften-2024" aria-label="Weiterlesen: Ankündigung Bezirksmeisterschaften 2024">
+            <span class="icon-chevron-right" aria-hidden="true"></span>            Weiterlesen: Ankündigung Bezirksmeisterschaften 2024        </a>
+    </p>
+
+    
+    
+        </div>
+            </div>
+                    <div class="com-content-category-blog__item blog-item">
+                    
+
+<div class="item-content">
+    
+        <div class="page-header">
+                    <h2>
+                                    <a href="/news/neue-webseite">
+                        Neue Webseite                    </a>
+                            </h2>
+        
+        
+        
+            </div>
+
+    
+        
+            <dl class="article-info text-muted">
+
+            <dt class="article-info-term">
+                            <span class="visually-hidden">                        Details                            </span>                    </dt>
+
+        
+        
+        
+        
+                    <dd class="published">
+    <span class="icon-calendar icon-fw" aria-hidden="true"></span>
+    <time datetime="2024-03-12T20:38:19+00:00">
+        Veröffentlicht: 12. März 2024    </time>
+</dd>
+        
+    
+            
+        
+            </dl>
+        
+    
+        
+    <p>Seit dem 16. März 2024 ist die neue Webseite des Bezirksschwimmverbandes online. </p>
+    
+    
+    
+        </div>
+            </div>
+                </div>
+    
+    
+                </div>
+
+                        
+                    </div>
+                    <div class="sidebar-right">
+                        <div class="moduletable ">
+            <h1 >Neuigkeiten</h1>        <ul class="mod-articlesnews-vertical newsflash-vert mod-list">
+                    <li class="newsflash-item" itemscope itemtype="https://schema.org/Article">
+                    <h2 class="newsflash-title">
+            <a href="/news/bericht-esbjerg-2025">
+            Wettkampffahrt zum 26. Danish International Swim Cup nach Esbjerg        </a>
+        </h2>
+
+
+    
+
+    <p>Es ist ein fester Bestandteil der Wettkampfplanung vieler Vereine des Bezirks: Jedes Jahr schließen sich die teilnehmenden Vereine unter dem Namen „Team Westsachsen“ als Startgemeinschaft zusammen, um ins dänische Esbjerg zum Danish International Swim Cup (DISC) zu reisen.</p>
+
+
+
+                            <span class="article-separator">&#160;</span>
+                    </li>
+                    <li class="newsflash-item" itemscope itemtype="https://schema.org/Article">
+                    <h2 class="newsflash-title">
+            <a href="/news/sichtungstraining-am-landesstuetzpunkt-schwimmen-chemnitz">
+            Sichtungstraining am Landesstützpunkt Schwimmen Chemnitz        </a>
+        </h2>
+
+
+    
+
+    <p>Auch in dieser Saison gibt es am Landesstützpunkt Chemnitz wieder ein Trainingsangebot für Sportlerinnen der Klasse 4, die das Schwimmen lieben und sich technisch verbessern möchten.</p>
+
+
+
+                            <span class="article-separator">&#160;</span>
+                    </li>
+                    <li class="newsflash-item" itemscope itemtype="https://schema.org/Article">
+                    <h2 class="newsflash-title">
+            <a href="/news/ankuendigung-bezirksmeisterschaften-2024">
+            Ankündigung Bezirksmeisterschaften 2024        </a>
+        </h2>
+
+
+    
+
+    <p><strong>UPDATE: Die Infositzung wird nicht stattfinden!<br></strong>Am 13. und 14. April 2024 finden die jährlichen Bezirksjahrgangs- und Bezirksmeisterschaften 2024 des Bezirksschwimmverbandes Südwestsachen e.V. in der "Glück-Auf" Schwimmhalle in Zwickau statt. Genauere Informationen zu Veranstaltung gibt es <a href="/kalender/eventdetail/4/-/bezirksmeisterschaften-2024">hier</a>.</p>
+
+
+
+                            <span class="article-separator">&#160;</span>
+                    </li>
+    </ul>
+</div>
+<div class="moduletable ">
+            <h1 >Interner Bereich</h1>        <form id="login-form-16" class="mod-login" action="/news" method="post">
+
+    
+    <div class="mod-login__userdata userdata">
+        <div class="mod-login__username form-group">
+                            <div class="input-group">
+                    <input id="modlgn-username-16" type="text" name="username" class="form-control" autocomplete="username" placeholder="Benutzername">
+                    <label for="modlgn-username-16" class="visually-hidden">Benutzername</label>
+                    <span class="input-group-text" title="Benutzername">
+                        <span class="icon-user icon-fw" aria-hidden="true"></span>
+                    </span>
+                </div>
+                    </div>
+
+        <div class="mod-login__password form-group">
+                            <div class="input-group">
+                    <input id="modlgn-passwd-16" type="password" name="password" autocomplete="current-password" class="form-control" placeholder="Passwort">
+                    <label for="modlgn-passwd-16" class="visually-hidden">Passwort</label>
+                    <button type="button" class="btn btn-secondary input-password-toggle">
+                        <span class="icon-eye icon-fw" aria-hidden="true"></span>
+                        <span class="visually-hidden">Passwort anzeigen</span>
+                    </button>
+                </div>
+                    </div>
+
+                    <div class="mod-login__remember form-group">
+                <div id="form-login-remember-16" class="form-check">
+                    <input type="checkbox" name="remember" class="form-check-input" value="yes" id="form-login-input-remember-16">
+                    <label class="form-check-label" for="form-login-input-remember-16">
+                        Angemeldet bleiben                    </label>
+                </div>
+            </div>
+        
+                    <div class="mod-login__submit form-group">
+                <button type="button"
+                        class="btn btn-secondary w-100 plg_system_webauthn_login_button"
+                                                    data-webauthn-form="login-form-16"
+                                                                        title="Passkey verwenden"
+                        id="plg_system_webauthn-4oatCUAWfAjZ-6p2VVQeW"
+                        >
+                                            <svg aria-hidden="true" id="Passkey" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g id="icon-passkey"><circle id="icon-passkey-head" cx="10.5" cy="6" r="4.5"/><path id="icon-passkey-key" d="M22.5,10.5a3.5,3.5,0,1,0-5,3.15V19L19,20.5,21.5,18,20,16.5,21.5,15l-1.24-1.24A3.5,3.5,0,0,0,22.5,10.5Zm-3.5,0a1,1,0,1,1,1-1A1,1,0,0,1,19,10.5Z"/><path id="icon-passkey-body" d="M14.44,12.52A6,6,0,0,0,12,12H9a6,6,0,0,0-6,6v2H16V14.49A5.16,5.16,0,0,1,14.44,12.52Z"/></g></svg>
+                                        Passkey verwenden                </button>
+            </div>
+        
+        <div class="mod-login__submit form-group">
+            <button type="submit" name="Submit" class="btn btn-primary w-100">Anmelden</button>
+        </div>
+
+                    <ul class="mod-login__options list-unstyled">
+                <li>
+                    <a href="/component/users/reset?Itemid=101">
+                    Passwort vergessen?</a>
+                </li>
+                <li>
+                    <a href="/component/users/remind?Itemid=101">
+                    Benutzername vergessen?</a>
+                </li>
+                                <li>
+                    <a href="/component/users/registration?Itemid=101">
+                    Registrieren <span class="icon-register" aria-hidden="true"></span></a>
+                </li>
+                            </ul>
+        <input type="hidden" name="option" value="com_users">
+        <input type="hidden" name="task" value="user.login">
+        <input type="hidden" name="return" value="aHR0cHM6Ly9ic3Ytc3dzLmRlL25ld3M=">
+        <input type="hidden" name="fd1d865929733c6a3a91eb836053eb23" value="1">    </div>
+    </form>
+</div>
+
+                    </div>
+                </div>
+            </div>
+            <footer>
+                <ul class="mod-menu mod-list nav ">
+<li class="nav-item item-143"><a href="/impressum" >Impressum</a></li><li class="nav-item item-144"><a href="/datenschutz" >Datenschutz</a></li><li class="nav-item item-145"><a href="/links" >Links</a></li><li class="nav-item item-146"><a href="/login" >Login</a></li></ul>
+<div class="mod-footer">
+    <div class="footer1">Copyright &#169; 2026 Bezirksschwimmverband Südwestsachsen e.V.. Alle Rechte vorbehalten.</div>
+    <div class="footer2"><a href='https://www.joomla.org' target='_blank' rel='noopener noreferrer'>Joomla!</a> ist freie, unter der <a href='https://www.gnu.org/licenses/gpl-2.0.html' target='_blank' rel='noopener noreferrer'>GNU/GPL-Lizenz</a> veröffentlichte Software.</div>
+</div>
+
+<div id="mod-custom130" class="mod-custom custom">
+    <center></center><center></center><center></center><center>Made with ❤️ by <a href="https://logilutions.de">Logilutions</a> &amp; <a href="https://weiss-konrad.de">Konrad Weiß</a></center><center></center></div>
+
+            </footer>
+        </div>
+    </body>
+</html>

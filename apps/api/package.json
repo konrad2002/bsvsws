@@ -10,18 +10,26 @@
     "start": "node dist/server.js",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "test:integration": "INTEGRATION=1 node --env-file-if-exists=../../.env ./node_modules/vitest/vitest.mjs run --no-file-parallelism test/integration"
   },
   "dependencies": {
     "@bsv-sws/directus": "workspace:*",
     "@bsv-sws/shared": "workspace:*",
     "@bsv-sws/validation": "workspace:*",
+    "@directus/sdk": "^27.1.0",
+    "@fastify/multipart": "^10.1.7",
+    "@fastify/rate-limit": "^11.2.2",
     "fastify": "^5.12.8",
+    "nodemailer": "^10.3.1",
+    "sanitize-html": "^2.18.1",
     "zod": "^4.6.7"
   },
   "devDependencies": {
     "@eslint/js": "^9",
     "@types/node": "^24.19.2",
+    "@types/nodemailer": "^8.0.2",
+    "@types/sanitize-html": "^2.16.2",
     "eslint": "^9",
     "tsx": "^4.23.15",
     "typescript": "~6.0.3",

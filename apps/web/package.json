@@ -7,13 +7,16 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "typecheck": "next typegen && tsc --noEmit"
+    "typecheck": "next typegen && tsc --noEmit",
+    "test": "vitest run --dir src",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@bsv-sws/directus": "workspace:*",
     "@bsv-sws/shared": "workspace:*",
     "@bsv-sws/ui": "workspace:*",
     "@bsv-sws/validation": "workspace:*",
+    "@directus/sdk": "^27.1.0",
     "next": "16.4.4",
     "react": "19.3.0",
     "react-dom": "19.3.0",
@@ -21,6 +24,7 @@
     "zod": "^4.6.7"
   },
   "devDependencies": {
+    "@playwright/test": "^1.64.1",
     "@tailwindcss/turbopack": "^4",
     "@types/node": "^24.19.2",
     "@types/react": "^19",
@@ -29,6 +33,7 @@
     "eslint-config-next": "16.4.4",
     "sass": "^1.107.1",
     "tailwindcss": "^4",
-    "typescript": "~6.0.3"
+    "typescript": "~6.0.3",
+    "vitest": "^5.1.0"
   }
 }

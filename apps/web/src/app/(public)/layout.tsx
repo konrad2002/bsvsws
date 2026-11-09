@@ -1,11 +1,16 @@
-/** Public website layout (header navigation per spec §9.1). Placeholder until design is supplied. */
+import { SiteFooter } from "@/components/layout/site-footer";
+import { SiteHeader } from "@/components/layout/site-header";
+
+/**
+ * Public website layout (bsv-sws.de identity): white header, grey content area,
+ * navy footer. Sub-layouts: (sidebar) = content + news sidebar, (wide) = full width.
+ */
 export default function PublicLayout({ children }: { children: React.ReactNode }) {
   return (
-    <>
-      <header className="border-b px-4 py-3">
-        <span className="font-semibold">Bezirksschwimmverband Südwestsachsen</span>
-      </header>
-      <main className="flex-1 px-4 py-6">{children}</main>
-    </>
+    <div className="theme-public flex flex-1 flex-col">
+      <SiteHeader />
+      <main className="flex-1 bg-page text-page-foreground">{children}</main>
+      <SiteFooter />
+    </div>
   );
 }

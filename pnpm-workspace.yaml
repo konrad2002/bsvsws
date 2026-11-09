@@ -1,6 +1,7 @@
 packages:
   - apps/*
   - packages/*
+  - directus/tools
 
 allowBuilds:
   sharp: true
@@ -12,3 +13,4 @@ minimumReleaseAgeExclude:
   - "@vitest/mocker@5.1.0"
   - "@vitest/spy@5.1.0"
   - vitest@5.1.0
+  - "@fastify/rate-limit@11.2.2"

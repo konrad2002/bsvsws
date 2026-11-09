@@ -1,0 +1,70 @@
+# Deployment overlay for the test and production VPS stacks (spec §14.2):
+#   docker compose -p bsv-sws-<env> --env-file <env>/.env \
+#     -f compose.yml -f compose.deploy.yml --profile app up -d
+# Same services as compose.yml; this file only swaps local builds for the images
+# published by GitHub Actions, drops development mounts and adds the tools job.
+# Requires Docker Compose ≥ 2.24 (`!override`/`!reset`).
+
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "5"
+
+services:
+  postgres:
+    logging: *logging
+
+  directus:
+    build: !reset null
+    image: ${IMAGE_REGISTRY:?set IMAGE_REGISTRY}/directus:${IMAGE_TAG:?set IMAGE_TAG}
+    logging: *logging
+    # nginx on the host proxies the Studio subdomain to this port
+    # (nginx in Docker: compose.proxy.yml replaces the ports with a shared network).
+    ports: !override
+      - "127.0.0.1:${DIRECTUS_PORT:-8055}:8055"
+    environment:
+      EXTENSIONS_AUTO_RELOAD: "false"
+      # Behind nginx: trust X-Forwarded-* from the local proxy only.
+      IP_TRUST_PROXY: "loopback,uniquelocal"
+      # Studio and its cookies live on their own subdomain over HTTPS.
+      REFRESH_TOKEN_COOKIE_SECURE: "true"
+      SESSION_COOKIE_SECURE: "true"
+    # Uploads only – extensions come from the image, not from a source checkout.
+    volumes: !override
+      - directus-uploads:/directus/uploads
+
+  api:
+    build: !reset null
+    image: ${IMAGE_REGISTRY}/api:${IMAGE_TAG}
+    logging: *logging
+    # Only reachable inside the Compose network (web → api).
+    ports: !reset []
+    environment:
+      # Fail at `compose up` with a clear message instead of a crashing container.
+      APP_SECRET: ${APP_SECRET:?set APP_SECRET in .env (openssl rand -hex 32)}
+      DIRECTUS_SERVICE_TOKEN: ${DIRECTUS_SERVICE_TOKEN:?set DIRECTUS_SERVICE_TOKEN in .env (openssl rand -hex 32)}
+
+  web:
+    build: !reset null
+    image: ${IMAGE_REGISTRY}/web:${IMAGE_TAG}
+    logging: *logging
+    ports: !override
+      - "127.0.0.1:${WEB_PORT:-3000}:3000"
+    environment:
+      SESSION_COOKIE_SECURE: "true"
+
+  # One-off jobs: `docker compose … run --rm tools apply` (run by deploy.sh) and
+  # `… run --rm tools migrate:joomla [-- --apply]` (docs/migration.md).
+  tools:
+    profiles: ["tools"]
+    image: ${IMAGE_REGISTRY}/tools:${IMAGE_TAG}
+    depends_on:
+      directus:
+        condition: service_healthy
+    environment:
+      DIRECTUS_URL: http://directus:8055
+      DIRECTUS_SETUP_TOKEN: ${DIRECTUS_SETUP_TOKEN:?set DIRECTUS_SETUP_TOKEN}
+      DIRECTUS_SERVICE_TOKEN: ${DIRECTUS_SERVICE_TOKEN:?set DIRECTUS_SERVICE_TOKEN in .env (openssl rand -hex 32)}
+      JOOMLA_URL: ${JOOMLA_URL:-https://bsv-sws.de}
+    logging: *logging
